@@ -1,0 +1,13 @@
+*~
+*#
+.apache-installed
+.py-packages
+.psutil-installed
+raw
+library
+compressed
+trashcan
+fdk-aac
+ffmpeg
+lame
+x264
