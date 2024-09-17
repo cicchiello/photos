@@ -3,15 +3,14 @@
   <head>
     <?php
        // Uncomment to see php errors
-       ini_set('display_errors', 1);
-       ini_set('display_startup_errors', 1);
-       error_reporting(E_ALL);
+       //ini_set('display_errors', 1);
+       //ini_set('display_startup_errors', 1);
+       //error_reporting(E_ALL);
     
        include('photos_utils.php');
 
        echo renderLookAndFeel();
-       
-       ?>
+      ?>
 
     <link href="./table.css" media="all" rel="stylesheet">
     <link href="./thumbs.css" media="all" rel="stylesheet">
@@ -25,12 +24,16 @@
       post("./email_action.php", {"id":id,"email":email});
     }
 
-    async function onEditPassword(fname,lname) {
-      open("./password_action.php?fname="+fname+"&lname="+lname, "_self");
+    async function onEditPassword(id) {
+      post("./password_action.php", {"id":id});
     }
 
     async function forceLogin() {
       open("./login.php", "_self");
+    }
+
+    async function cancelEdit() {
+      open("./index.php", "_self");
     }
 
     async function onEditName(id,fname,lname) {
@@ -118,7 +121,7 @@
 	      <div class="thumbs">
 	        <span class="columns-1-wide">
 		  <?php
-		    $cmd = '<img onclick="onEditPassword('."'".$fname."','".$lname."'";
+		    $cmd = '<img onclick="onEditPassword('."'".$id."'";
 		    $cmd .= ')" src="img/edit2.png" class="Btn" title="Edit">';
 		    echo $cmd;
 		    ?>
@@ -127,9 +130,9 @@
 	    </td>
 	  </tr>
         </table>
-	  <br>
-	  <img onclick="forceLogin()" src="img/ok.png" width="48" height="48"
-	       title="Done" class="popupBtn" align="right">
+	<br>
+	<img onclick="cancelEdit()" src="img/cancel.png" width="48" height="48"
+	     title="Cancel" class="popupBtn" align="left"/>
       </div>
     </div>
   </body>
