@@ -1,19 +1,19 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
-import sys
+import os
 import calendar
 import time
 import datetime
-import argparse
 import hashlib
 import json
 import requests
-from os.path import exists
+import subprocess
 
+from os.path import exists
 from requests.auth import HTTPBasicAuth
-from argparse import RawTextHelpFormatter
 
 from lucenize import Lucenize
+from tagset import Tagset
 
 
 def nowstr():
@@ -29,19 +29,42 @@ def md5(fname):
 
 
 class Uploader():
-    def __init__(self, db, path, user_keywords, creds):
+    def __init__(self, db, path, creds):
         self._doc_url = "%s/%s" % (db, md5(path))
         self._creds = creds
+        self._tagset = Tagset()
+        self._tagset.append_metadata_tags(path)
         self._doc = {}
         self._doc['paths'] = [path]
-        self._doc['content_type'] = "image/%s" % path.split(".")[-1]
-        self._doc['metadata_keywords'] = Lucenize().keywords(path)
+        self._doc['image_type'] = "image/%s" % path.split(".")[-1]
         self._doc['upload_timestamp'] = calendar.timegm(time.gmtime())
-        self._doc['user_keywords'] = user_keywords
+
+
+    def recognize(self):
+        _original_path = self._doc['paths'][0]
+        _path = _original_path
+        _cnt = 0
+        while len(open(_path, 'rb').read()) > 4000000:
+            # have to scale the image down to size
+            # > ffmpeg -i <given-file> -vf scale="iw/2:ih/2" <halved-file>
+            _newpath = "/tmp/%s_%s" % (_cnt, os.path.basename(_original_path))
+            _cnt += 1
+            if exists(_newpath):
+                os.remove(_newpath)
+            subprocess.call(["ffmpeg", "-i", _path, "-vf", "scale=iw/2:ih/2", _newpath])
+            if exists(_path) and (_path != _original_path):
+                os.remove(_path)
+            _path = _newpath
+        self._tagset.recognize(_path)
+        if exists(_path) and (_path != _original_path):
+            os.remove(_path)
 
         
     def createEntry(self):
         _headers = {"Content-Type": "application/json"}
+        self._doc['tags'] = self._tagset.get_tag_arr()
+        _attachmentData = open(self._doc['paths'][0], 'rb').read()
+        self._doc['size'] = len(_attachmentData)
         _r = requests.put(self._doc_url, json=self._doc, headers=_headers)
         
         if b'conflict' in _r.content:
@@ -49,21 +72,22 @@ class Uploader():
             exit()
 
         _rev = json.loads(_r.content)["rev"]
+        self._doc['_rev'] = _rev
         _attachmentUrl = "%s/image?rev=%s" % (self._doc_url, _rev)
         _attachmentHeaders = {"Content-Type": "image/%s" % self._doc['paths'][0].split(".")[-1]}
-        _attachmentData = open(self._doc['paths'][0], 'rb').read()
         return requests.put(_attachmentUrl, data=_attachmentData, headers=_attachmentHeaders)
     
-    
+
     def updateEntry(self):
         _doc = self.downloadDoc(self._doc_url)
-        _doc['paths'] = list(set(_doc['paths']).union(self._doc['paths']))
-        _doc['metadata_keywords'] = list(set(_doc['metadata_keywords']).union(Lucenize().keywords(self._doc['paths'][0])))
-        _doc['user_keywords'] = list(set(_doc['user_keywords']).union(self._doc['user_keywords']))
+        self._tagset = Tagset.merge(Tagset(tag_arr=_doc['tags']), self._tagset)
+        self._doc['paths'] = list(set(_doc['paths']).union(self._doc['paths']))
+        self._doc['tags'] = self._tagset.get_tag_arr()
+        self._doc['size'] = _doc['size']
+        self._doc['_rev'] = _doc['_rev']
         
-        del _doc['_id']
         _headers = {"Content-Type": "application/json"}
-        return requests.put(self._doc_url, json=_doc, headers=_headers)
+        return requests.put(self._doc_url, json=self._doc, headers=_headers)
     
 
     def downloadDoc(self, url):
@@ -78,6 +102,11 @@ class Uploader():
 
     
 if __name__ == "__main__":
+    import sys
+    import argparse
+    
+    from argparse import RawTextHelpFormatter
+    
     _description = 'upload_pics.py photo uploader'
     _epilog = '\n\nThis uploads the given photo and metadata\n\n'
     _parser = argparse.ArgumentParser(prog=sys.argv[0], description=_description, \
@@ -86,8 +115,6 @@ if __name__ == "__main__":
     _parser.add_argument('-db', nargs='?', required=True, help='path to CouchDb db')
     _parser.add_argument('-creds', nargs='?', required=True, help='CouchDb db credentials (user:pswd)')
     _parser.add_argument('-pic', nargs='?', required=True, help='path to image file')
-    _parser.add_argument('-keywords', nargs='*', action='append', required=False, \
-                         help='space-separated keywords for image')
     
     _args = _parser.parse_args(args=sys.argv[1:])
 
@@ -99,7 +126,7 @@ if __name__ == "__main__":
     print("ECHO(%s:%s): db: %s" % (__name__, nowstr(), _args.db))
     print("ECHO(%s:%s): pic: %s" % (__name__, nowstr(), _args.pic))
 
-    _tags = _args.keywords[0] if not _args.keywords is None else []
-    _u = Uploader(_args.db, _args.pic, _tags, _args.creds.split(":"))
+    _u = Uploader(_args.db, _args.pic, _args.creds.split(":"))
+    _u.recognize()
     _r = _u.updateEntry() if _u.docExists() else _u.createEntry()
     
