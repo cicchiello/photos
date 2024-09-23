@@ -44,19 +44,27 @@ class Uploader():
         _original_path = self._doc['paths'][0]
         _path = _original_path
         _cnt = 0
+        print("TRACE(%s:%s): _path: %s" % (__name__, nowstr(), _path))
         while len(open(_path, 'rb').read()) > 4000000:
             # have to scale the image down to size
-            # > ffmpeg -i <given-file> -vf scale="iw/2:ih/2" <halved-file>
+            # > convert <given-file> -scale 50% <halved-file>
             _newpath = "/tmp/%s_%s" % (_cnt, os.path.basename(_original_path))
             _cnt += 1
+            print("TRACE(%s:%s): _newpath: %s" % (__name__, nowstr(), _newpath))
             if exists(_newpath):
+                print("TRACE(%s:%s): removing _newpath: %s" % (__name__, nowstr(), _newpath))
                 os.remove(_newpath)
-            subprocess.call(["ffmpeg", "-i", _path, "-vf", "scale=iw/2:ih/2", _newpath])
+            subprocess.call(["convert", _path, "-scale", "50%", _newpath])
+            if exists(_newpath):
+                print("TRACE(%s:%s): just created _newpath: %s" % (__name__, nowstr(), _newpath))
             if exists(_path) and (_path != _original_path):
+                print("TRACE(%s:%s): removing _path: %s" % (__name__, nowstr(), _path))
                 os.remove(_path)
             _path = _newpath
+            print("TRACE(%s:%s): _path: %s" % (__name__, nowstr(), _path))
         self._tagset.recognize(_path)
         if exists(_path) and (_path != _original_path):
+            print("TRACE(%s:%s): removing _path: %s" % (__name__, nowstr(), _path))
             os.remove(_path)
 
         
