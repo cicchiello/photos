@@ -1,0 +1,12 @@
+{
+  "_id": "_design/photos",
+  "views": {
+    "users": {
+      "map": "function (doc) {\n  if (doc.type && (typeof doc.type === 'string') && (doc.type === 'user'))\n    emit(\"user:\"+doc.username, doc);\n}"
+    },
+    "photos": {
+      "map": "function (doc) {\n  if (doc.type && (typeof doc.type === 'string') && (doc.type === 'photo'))\n    emit(doc.paths[0], doc);\n}"
+    }
+  },
+  "language": "javascript"
+}

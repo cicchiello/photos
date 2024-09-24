@@ -56,7 +56,7 @@
          $DbBase = $ini['couchbase'];
          $Db = $ini['dbname'];
 
-	 $usersUrl = $DbBase.'/'.$Db.'/_design/'.$Db.'/_view/user?key="'.$_COOKIE['login_user'].'"';
+	 $usersUrl = $DbBase.'/'.$Db.'/_design/'.$Db.'/_view/users?key="user:'.$_COOKIE['login_user'].'"';
          $row = json_decode(file_get_contents($usersUrl), true)['rows'][0]['value'];
          $id = $row['_id'];
 	 $fname = $row['fname'];
