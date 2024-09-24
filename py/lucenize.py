@@ -20,7 +20,7 @@ class Lucenize():
             [c for c in "ABCDEFGHIJKLMNOPQRSTUVWXYZ"] + \
             [c for c in '1234567890']
 
-        print("words: %s" % words)
+        #print("words: %s" % words)
         _x = list(set([word for word in words if not word in Spurious]))
         return list(set([word for word in _x if word[0] != "_"]))
 
