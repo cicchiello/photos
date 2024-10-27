@@ -1,15 +1,15 @@
      #menuArea {
         display: block; /* block element by default */
         position: fixed; /* Fixed position */
-        top: 20px; /* Place the button at the top of the page */
-        left: 30px; /* Place the button 30px from the left */
+        top: 15px; /* Place the button at the top of the page */
+        left: 15px; /* Place the button 15px from the left */
         z-index: 99; /* Make sure it does not overlap */
         border: none; /* Remove borders */
         outline: none; /* Remove outline */
         background-color: #989BAE; /* Set a background color */
         color: white; /* Text color */
         padding: 5px; /* Some padding */
-        border-radius: 10px; /* Rounded corners */
+        border-radius: 5px; /* Rounded corners */
      }
 
      .Btn:hover {

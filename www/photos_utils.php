@@ -86,29 +86,10 @@ function getMenuCnts()
    $Db = "photos";
    $DbViewBase = $DbBase.'/'.$Db.'/_design/photos/_view';
 
-   $url = "http://ipv4-api.hdhomerun.com/discover";
-   $devices = json_decode(file_get_contents($url), true);
-
    $numRecordings = 0;
    $numCapturing = 0;
    $numChannels = 0;
    $numScheduled = 0;
-   foreach ($devices as $device) {
-      $deviceUrl = $device['DiscoverURL'];
-      $device_detail = json_decode(file_get_contents($deviceUrl), true);
-      $lineupJsonUrl = $device_detail['LineupURL'];
-      $recordingsUrl = $DbViewBase.'/recordings';
-      $capturingUrl = $DbViewBase.'/capturing';
-	     
-      $numChannels += sizeof(json_decode(file_get_contents($lineupJsonUrl), true));
-      $numRecordings += json_decode(file_get_contents($recordingsUrl), true)['total_rows'];
-      $numCapturing += json_decode(file_get_contents($capturingUrl), true)['total_rows'];
-
-      $scheduledUrl = $DbViewBase.'/scheduled';
-      $result = json_decode(file_get_contents($scheduledUrl), true);
-      $scheduled = $result['rows'];
-      $numScheduled = $result['total_rows'];
-   }
 
    return array(
       "numChannels" => $numChannels,
@@ -119,8 +100,11 @@ function getMenuCnts()
 }
 
 
-function renderRecordingsTable($items, $actions)
+function renderImgArrayTable($items, $action)
 {
+   $ini = parse_ini_file("./config.ini");
+   $urlBase = $ini['couchbase'].'/photos';
+   
    $result = '';
    $cnt = 0;
    foreach ($items as $item) {
@@ -134,24 +118,28 @@ function renderRecordingsTable($items, $actions)
          $result .= '<tr style="background-color:#e2f4dd">';
 
       $id = $item['value']['_id'];
-      $start = $item['value']['record-start'];
-      $delta = $item['value']['record-end'] - $start;
-      $channel = $item['value']['channel'];
+      $imgUrl = $urlBase.'/'.$id.'/thumbnail';
       
-      $result .= '  <th rowspan="1" style="text-align:left">'.$item['value']['description'].'</th>';
-      $result .= '  <td>';
-      $result .= '              <div class="thumbs">';
-
       $q = "'";
-      foreach ($actions as $action) {
-         $result .= '              <span class="columns-'.count($actions).'-wide">';
-	 $result .= '              <img onclick="'.$action['onclick'].'('.$q.$id.$q.')"';
-         $result .= '                     src="'.$action['src'].'" class="Btn"';
-         $result .= '                     title="'.$action['title'].'">';
-	 $result .= '              </span>';
-      }
 
-      $result .= '              </div>';
+      $result .= '  <th rowspan="1" style="text-align:left">';
+      $result .= '        <img id="image" src="'.$imgUrl.'" alt="image"';
+      $result .= '             class="album-img album-container Btn"';
+      $result .= '             onclick="'.$action['onclick'].'('.$q.$id.$q.')"';
+      $result .= '             style="vertical-align:middle;margin:0px 50px"';
+      $result .= '             title="Image"/>';
+      $result .= '  </th>';      
+      $result .= '  <td>';
+      
+      $result .= '    <div class="thumbs">';
+
+      $result .= '      <span class="columns-1-wide">';
+      $result .= '        <img onclick="'.$action['onclick'].'('.$q.$id.$q.')"';
+      $result .= '             src="'.$action['src'].'" class="Btn"';
+      $result .= '             title="'.$action['title'].'">';
+      $result .= '      </span>';
+
+      $result .= '    </div>';
       $result .= '  </td>';
       $result .= '</tr>';
       
@@ -159,155 +147,72 @@ function renderRecordingsTable($items, $actions)
          $result .= '<tr style="background-color:#b8d7b0">';
       else
          $result .= '<tr style="background-color:#e2f4dd">';
-      $result .= '  <td>Ch '.$channel.' for '.deltaTimeStr($delta).'</td>';
-      $result .= '  <td>'.date(" @g:ia\, D j\-M-y",$start).'</td>';
       $result .= '</tr>';
       $cnt += 1;
    }
    if ($cnt == 0) {
-      $result .= "<p>Nothing Scheduled.</p>";
+      $result .= "<p>No Images.</p>";
    } else {
       $result .= '</table>';
    }
    return $result;
 }
 
-function renderEntryInfo($id)
+function renderImgInfo($id)
 {
    $ini = parse_ini_file("./config.ini");
    $DbBase = $ini['couchbase'];
    $Db = "photos";
    $detailUrl = $DbBase.'/'.$Db.'/'.$id;
+   $imgUrl = $detailUrl.'/web_image';
 
    $detail = json_decode(file_get_contents($detailUrl), true);
-   $channel = $detail['channel'];
-   $description = $detail['description'];
-   $recordStart = $detail['record-start'];
-   $recordEnd = $detail['record-end'];
-   $date = date("D M j, 'y",$recordStart);
-   $startTimeStr = date("h:i a",$recordStart);
-   $actualStart = $detail['capture-start-timestamp'];
-   $actualStartStr = date("h:i a",$actualStart);
-   $actualEnd = $detail['capture-stop-timestamp'];
-   $file = $detail['file'];
-   $isCompressed = $detail['is-compressed'];
-
-   $url = "http://ipv4-api.hdhomerun.com/discover";
-   $devices = json_decode(file_get_contents($url), true);
-   foreach ($devices as $device) {
-      $deviceUrl = $device['DiscoverURL'];
-      $device_detail = json_decode(file_get_contents($deviceUrl), true);
-      $deviceId = $device_detail['DeviceID'];
-      $lineupJsonUrl = $device_detail['LineupURL'];
-      $lineup = json_decode(file_get_contents($lineupJsonUrl), true);
-   }
-
-   $channelName = 'unknown';
-   foreach ($lineup as $c) {
-      $num = $c['GuideNumber'];
-      $name = $c['GuideName'];
-      if ($num === $channel) $channelName = $name;
-   }
-
-   $showDbId = false;
+   $id = $detail['_id'];
+   $path = $detail['paths'][0];
+   $size = $detail['size'];
    
    $result = '';
-   $result .= '<table>';
-   $result .= '  <tr>';
-   $result .= '    <td>Channel:</td>';
-   $result .= '    <td>';
-   $result .= '       <b style="color:blue" class="w3-right">'.$channel.'</b>';
-   $result .= '    </td>';
-   $result .= '    <td>';
-   $result .= '       <b style="color:blue" class="w3-right">'.$channelName.'</b>';
-   $result .= '	   </td>';
-   $result .= '	 </tr>';
-   $result .= '	 <tr>';
-   $result .= '	   <td>Description:</td>';
-   $result .= '	   <td colspan="2">';
-   $result .= '	      <b style="color:blue" class="w3-right">'.$description.'</b>';
-   $result .= '	   </td>';
-   $result .= '	 </tr>';
-   $result .= '	 <tr>';
-   $result .= '	   <td>Date:</td>';
-   $result .= '	   <td colspan="2">';
-   $result .= '	      <b style="color:blue" class="w3-right">'.$date.'</b>';
-   $result .= '	   </td>';
-   $result .= '	 </tr>';
-
-   $startDiscrepancy = abs($recordStart - $actualStart) > 120;
-   $result .= '	 <tr>';
-   $result .= '	   <td>'.($startDiscrepancy ? 'Scheduled Start':'Start Time').':</td>';
-   $result .= '	   <td colspan="2">';
-   $result .= '	      <b style="color:blue" class="w3-right">'.$startTimeStr.'</b>';
-   $result .= '	   </td>';
-   $result .= '	 </tr>';
-   if ($startDiscrepancy) {
-      $result .= '	 <tr>';
-      $result .= '	   <td>Actual Start:</td>';
-      $result .= '	   <td colspan="2">';
-      $result .= '	      <b style="color:red" class="w3-right">'.$actualStartStr.'</b>';
-      $result .= '	   </td>';
-      $result .= '	 </tr>';
-      $showDbId = true;
+   $result .= '	 <div>';
+   $result .= '       <img class="image" id="image" src="'.$imgUrl.'"';
+   $result .= '            align="center" title="Image"/>';
+   $cnt = 0;
+   $confidenceLimit = 70.0;
+   foreach($detail['tags'] as $tag) {
+      if ($tag['source'] == 'rekognition') {
+        $confidence = $tag['Confidence'];
+        if ($confidence > $confidenceLimit) {
+	  $confidenceStr = sprintf("%2.1f", $confidence);
+	  $strength = ($confidence-$confidenceLimit)/(100.0-$confidenceLimit);
+	  $cstr = '#0a'.sprintf("%02x", 255*$strength).'40';
+	  if ($strength < 0.5) {
+            $color = 'white';
+	  } else {
+            $color = 'black';
+	  }
+          $result .= '    <button class="pillButton" style="background-color:'.$cstr;
+          $result .= ';color:'.$color.'" title="'.$confidenceStr.'">';
+	  $result .= $tag['Name'].'<small></small> <b>-</b></button>';
+          $cnt += 1;
+        }
+      }
    }
-
-   $scheduledDurationStr = deltaTimeStr($recordEnd-$recordStart);
-   $scheduledDuration = $recordEnd-$recordStart;
-   $actualDurationStr = deltaTimeStr($actualEnd-$actualStart);
-   $actualDuration = $actualEnd-$actualStart;
-   $durationDiscrepancy = abs($scheduledDuration - $actualDuration) > 120;
-   $result .= '	 <tr>';
-   $result .= '	   <td>'.($durationDiscrepancy ? 'Scheduled Duration':'Duration').':</td>';
-   $result .= '	   <td colspan="2">';
-   $result .= '	      <b style="color:blue" class="w3-right">'.$scheduledDurationStr.'</b>';
-   $result .= '	   </td>';
-   $result .= '	 </tr>';
-   if ($durationDiscrepancy) {
-      $result .= '	 <tr>';
-      $result .= '	   <td>Actual Duration:</td>';
-      $result .= '	   <td colspan="2">';
-      $result .= '	      <b style="color:red" class="w3-right">'.$actualDurationStr.'</b>';
-      $result .= '	   </td>';
-      $result .= '	 </tr>';
-      $showDbId = true;
-   }
-
-   // Uncomment the following to show the path to the selected file
-   $result .= '	 <tr>';
-   $result .= '	   <td>'.($isCompressed ? 'Compressed ':'').'File:</td>';
-   $result .= '	   <td colspan="2">';
-   $result .= '<b style="color:blue" class="w3-right">'.$file;
-   $result .= '       </b>';
-   $result .= '	   </td>';
-   $result .= '	 </tr>';
+   $result .= '	 </div>';
+   $result .= '<p>';
    
-   $fileExists = file_exists($file);
+   $result .= '<table>';
    $result .= '	 <tr>';
-   if ($fileExists) {
-      $result .= '	   <td>'.($isCompressed ? 'Compressed ':'').'File size:</td>';
-      $result .= '	   <td colspan="2">';
-      $result .= '<b style="color:blue" class="w3-right">'.readableSize(realFileSize($file));
-   } else {
-      $result .= '	   <td>File not found:</td>';
-      $result .= '	   <td colspan="2">';
-      $result .= '<b style="color:red; font-size:80%;" class="w3-right">'.$file;
-      $showDbId = true;
-   }
-   $result .= '       </b>';
-   $result .= '	   </td>';
+   $result .= '	   <td>File:</td>';
+   $result .= '	   <td colspan="2" style="color:blue" class="w3-right">'.$path.'</td>';
    $result .= '	 </tr>';
-
-   $showDbId = true;
-   if ($showDbId) {
-      $result .= '  <tr>';
-      $result .= '    <td>Db Id:</td>';
-      $result .= '    <td colspan="2">';
-      $result .= '       <p style="color:blue; font-size:80%" class="w3-right">'.$id.'</p>';
-      $result .= '    </td>';
-      $result .= '  </tr>';
-      $result .= '</table>';
-   }
+   $result .= '	 <tr>';
+   $result .= '	   <td>File size:</td>';
+   $result .= '	   <td colspan="2" style="color:blue" class="w3-right">'.readableSize($size).'</td>';
+   $result .= '	 </tr>';
+   $result .= '  <tr>';
+   $result .= '    <td>Db Id:</td>';
+   $result .= '	   <td colspan="2" style="color:blue; font-size:80%" class="w3-right">'.$id.'</td>';
+   $result .= '  </tr>';
+   $result .= '</table>';
    
    return $result;
 }
@@ -425,7 +330,7 @@ function renderMainMenu($userName)
    $result .= renderProfileArea($userName);
    $result .= ' <div id="menuArea">';
    $result .= '   <input onclick="menuAction()" type="image" src="img/showmenu.png"';
-   $result .= '          width="64" height="64" title="Menu" class="Btn">';
+   $result .= '          width="48" height="48" title="Menu" class="Btn">';
    $result .= '   <div id="menuItems" class="w3-hide">';
    $result .= renderMenuItems($enabled,$refs);
    $result .= '   </div>';
@@ -515,7 +420,7 @@ function renderMenu($enabled, $userName)
    $result .= renderProfileArea($userName);
    $result .= ' <div id="menuArea">';
    $result .= '   <a style="border:5px" class="_URL" href="./index.php">';
-   $result .= '     <img src="img/home.png" width="64" height="64" title="Home" style="padding:5px;" class="Btn">';
+   $result .= '     <img src="img/home.png" width="48" height="48" title="Home" style="padding:5px;" class="Btn">';
    $result .= '   </a>';
    $result .= '   <div id="menuItems" class="w3-show">';
    $result .= renderMenuItems($enabled,$refs);

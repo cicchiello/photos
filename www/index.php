@@ -1,4 +1,13 @@
 <!DOCTYPE html>
+<?php
+    // intentionally place this before the html tag
+
+    // Uncomment to see php errors
+    ini_set('display_errors', 1);
+    ini_set('display_startup_errors', 1);
+    error_reporting(E_ALL);
+  ?>
+
 <html>
   
   <head>
@@ -11,6 +20,14 @@
   </style>
 
   <script>
+    function init() {
+       var f = document.getElementById("imgArrayFrame");
+       f.callback = function onChannel(url) {
+	  /* alert("TRACE(index.php:init:f.callback): url: "+url); */
+          window.location.replace(url, "", "", true);
+       };
+    }
+
     function menuAction() {
       var x = document.getElementById("menuItems");
       if (x.className.indexOf("w3-show") == -1) {
@@ -36,22 +53,26 @@
   <body class="bg"
 
     <?php       
-       // Uncomment to see php errors
-       //ini_set('display_errors', 1);
-       //ini_set('display_startup_errors', 1);
-       //error_reporting(E_ALL);
-
        include('photos_utils.php');
 
        if (isset($_COOKIE['login_user'])) {
-         echo '> ';
+         echo 'onload="init()">';
          echo renderMainMenu($_COOKIE['login_user']);
        } else {
          echo 'onload="forceLogin()">';
-         echo '> ';
        }
-       //echo var_dump(isset($_COOKIE['login_user']));
+       #echo var_dump(isset($_COOKIE['login_user']));
     ?>
+
+    <div style="height:90%; width:75%; padding:10px; margin-right:2px"
+	 class="w3-white w3-round-large w3-panel w3-display-right">
+
+      <iframe id="imgArrayFrame" src="./imgArrayTbl.php" frameBorder="0"
+	      height="100%" width="100%" style="float:right; z-index:999">
+	<p>Your browser does not support iframes.</p>
+      </iframe>
+
+    </div>
 
   </body>
 </html>
