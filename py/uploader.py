@@ -38,6 +38,7 @@ class Uploader():
         self._tagset.append_metadata_tags(path)
         self._doc = {}
         self._doc['paths'] = [path]
+        self._doc['type'] = "photo"
         self._doc['image_type'] = "image/%s" % path.split(".")[-1]
         self._doc['upload_timestamp'] = calendar.timegm(time.gmtime())
 
@@ -76,7 +77,49 @@ class Uploader():
                 print("DEBUG(%s:%s): removing: %s" % (__name__, nowstr(), _path))
             os.remove(_path)
 
+
+    def attachWebSuitable(self, base_path, revision):
+        # > convert <given-file> -resize 640 <web-suitable-file>
+        _web_suitable_path = "/tmp/%s" % os.path.basename(base_path)
         
+        if self._verbose:
+            print("DEBUG(%s:%s): creating web suitable image: %s" % (__name__, nowstr(), _web_suitable_path))
+            
+        subprocess.call(["convert", base_path, "-resize", "640", _web_suitable_path])
+        _web_suitable_attachmentUrl = "%s/web_image?rev=%s" % (self._doc_url, revision)
+        _web_suitable_attachmentHeaders = {"Content-Type": "image/%s" % base_path.split(".")[-1]}
+
+        time.sleep(0.5)
+        
+        if self._verbose:
+            print("DEBUG(%s:%s): attaching web-suitable image to document(%s)" % (__name__, nowstr(), self._doc_id))
+        _web_suitable_attachmentData = open(_web_suitable_path, 'rb').read()
+        _r = requests.put(_web_suitable_attachmentUrl, data=_web_suitable_attachmentData,
+                          headers=_web_suitable_attachmentHeaders)
+        return json.loads(_r.content)["rev"]
+
+    
+    def attachThumbnail(self, base_path, revision):
+        # > convert <given-file> -resize 128 <thumbnail-file>
+        _thumbnail_path = "/tmp/thumb_%s" % os.path.basename(base_path)
+        
+        if self._verbose:
+            print("DEBUG(%s:%s): creating thumbnail image: %s" % (__name__, nowstr(), _thumbnail_path))
+            
+        subprocess.call(["convert", base_path, "-resize", "128", _thumbnail_path])
+        _thumbnail_attachmentUrl = "%s/thumbnail?rev=%s" % (self._doc_url, revision)
+        _thumbnail_attachmentHeaders = {"Content-Type": "image/%s" % base_path.split(".")[-1]}
+
+        time.sleep(0.5)
+        
+        if self._verbose:
+            print("DEBUG(%s:%s): attaching thumbnail to document(%s)" % (__name__, nowstr(), self._doc_id))
+        _thumbnail_attachmentData = open(_thumbnail_path, 'rb').read()
+        _r = requests.put(_thumbnail_attachmentUrl, data=_thumbnail_attachmentData,
+                          headers=_thumbnail_attachmentHeaders)
+        return json.loads(_r.content)["rev"]
+
+    
     def createEntry(self):
         if self._verbose:
             print("DEBUG(%s:%s): creating CouchDb document(%s)" % (__name__, nowstr(), self._doc_id))
@@ -103,22 +146,16 @@ class Uploader():
         _r = requests.put(_attachmentUrl, data=_attachmentData, headers=_attachmentHeaders)
         _rev = json.loads(_r.content)["rev"]
 
-        # > convert <given-file> -resize 640 <web-suitable-file>
-        _web_suitable_path = "/tmp/%s" % os.path.basename(_path)
+        time.sleep(0.5)
         
-        if self._verbose:
-            print("DEBUG(%s:%s): createing web suitable image: %s" % (__name__, nowstr(), _web_suitable_path))
-            
-        subprocess.call(["convert", _path, "-resize", "640", _web_suitable_path])
-        _web_suitable_attachmentUrl = "%s/web_image?rev=%s" % (self._doc_url, _rev)
-        _web_suitable_attachmentHeaders = {"Content-Type": "image/%s" % _path.split(".")[-1]}
+        _rev = self.attachWebSuitable(_path, _rev)
         
-        if self._verbose:
-            print("DEBUG(%s:%s): attaching web-suitable image to document(%s)" % (__name__, nowstr(), self._doc_id))
-        _web_suitable_attachmentData = open(_web_suitable_path, 'rb').read()
-        _r = requests.put(_web_suitable_attachmentUrl, data=_web_suitable_attachmentData, headers=_attachmentHeaders)
+        time.sleep(0.5)
 
-    
+        _rev = self.attachThumbnail(_path, _rev)
+
+        time.sleep(0.5)
+        
 
     def updateEntry(self):
         if self._verbose:
@@ -152,7 +189,7 @@ if __name__ == "__main__":
     
     from argparse import RawTextHelpFormatter
     
-    _description = 'upload_pics.py photo uploader'
+    _description = 'uploader.py photo uploader'
     _epilog = '\n\nThis uploads the given photo and metadata\n\n'
     _parser = argparse.ArgumentParser(prog=sys.argv[0], description=_description, \
                                       epilog=_epilog, formatter_class=RawTextHelpFormatter)
