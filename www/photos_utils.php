@@ -106,51 +106,43 @@ function renderImgArrayTable($items, $action)
    $urlBase = $ini['couchbase'].'/photos';
    
    $result = '';
-   $cnt = 0;
+   $row = 0;
+   $col = 0;
+   $numColumns = 4;
    foreach ($items as $item) {
-      if ($cnt == 0) {
-         $result .= '<table style="width:100%">';
-      }
+      if ($col == 0) {
+          if ($row == 0) {
+             $result .= '<table style="width:100%">';
+          }
 
-      if ($cnt%2 == 0) 
-         $result .= '<tr style="background-color:#b8d7b0">';
-      else
-         $result .= '<tr style="background-color:#e2f4dd">';
+          if ($row%2 == 0) 
+             $result .= '<tr style="background-color:#b8d7b0">';
+          else
+             $result .= '<tr style="background-color:#e2f4dd">';
+      }
 
       $id = $item['value']['_id'];
       $imgUrl = $urlBase.'/'.$id.'/thumbnail';
       
       $q = "'";
 
-      $result .= '  <th rowspan="1" style="text-align:left">';
+      $result .= '  <td style="text-align:left">';
       $result .= '        <img id="image" src="'.$imgUrl.'" alt="image"';
       $result .= '             class="album-img album-container Btn"';
       $result .= '             onclick="'.$action['onclick'].'('.$q.$id.$q.')"';
       $result .= '             style="vertical-align:middle;margin:0px 50px"';
-      $result .= '             title="Image"/>';
-      $result .= '  </th>';      
-      $result .= '  <td>';
+      $result .= '             title="'.basename($item['value']['paths'][0]).'"/>';
+      $result .= '  </td>';      
       
-      $result .= '    <div class="thumbs">';
+      $col += 1;
+      if ($col == $numColumns) {
+          $result .= '</tr>';
 
-      $result .= '      <span class="columns-1-wide">';
-      $result .= '        <img onclick="'.$action['onclick'].'('.$q.$id.$q.')"';
-      $result .= '             src="'.$action['src'].'" class="Btn"';
-      $result .= '             title="'.$action['title'].'">';
-      $result .= '      </span>';
-
-      $result .= '    </div>';
-      $result .= '  </td>';
-      $result .= '</tr>';
-      
-      if ($cnt%2 == 0) 
-         $result .= '<tr style="background-color:#b8d7b0">';
-      else
-         $result .= '<tr style="background-color:#e2f4dd">';
-      $result .= '</tr>';
-      $cnt += 1;
+          $row += 1;
+	  $col = 0;
+      }
    }
-   if ($cnt == 0) {
+   if (($row == 0) && ($col == 0)) {
       $result .= "<p>No Images.</p>";
    } else {
       $result .= '</table>';
