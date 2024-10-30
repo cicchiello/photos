@@ -21,11 +21,16 @@
 
   <script>
     function init() {
-       var f = document.getElementById("imgArrayFrame");
-       f.callback = function onChannel(url) {
-	  /* alert("TRACE(index.php:init:f.callback): url: "+url); */
-          window.location.replace(url, "", "", true);
-       };
+        console.log("TRACE(index.php:init)");	
+        var f = document.getElementById("imgArrayFrame");
+        f.callback = function onChannel(url) {
+            /* alert("TRACE(index.php:init:f.callback): url: "+url); */
+            window.location.replace(url, "", "", true);
+        };
+
+        // Load the imgArrayTbl *after* the init function finishes so callback
+        // is set before users might click on images
+        f.src = "./imgArrayTbl.php";
     }
 
     function menuAction() {
@@ -67,7 +72,7 @@
     <div style="height:90%; width:75%; padding:10px; margin-right:2px"
 	 class="w3-white w3-round-large w3-panel w3-display-right">
 
-      <iframe id="imgArrayFrame" src="./imgArrayTbl.php" frameBorder="0"
+      <iframe id="imgArrayFrame" src="" frameBorder="0"
 	      height="100%" width="100%" style="float:right; z-index:999">
 	<p>Your browser does not support iframes.</p>
       </iframe>

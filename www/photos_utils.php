@@ -422,20 +422,28 @@ function renderMenu($enabled, $userName)
 }
 
 
-function putDb($couchUrl,$row) {
-  //$couchUrl = $WriteDb.'/'.$id;
-  $ch = curl_init($couchUrl);
-  $dataStr = json_encode($row);
-  curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
-  curl_setopt($ch, CURLOPT_POSTFIELDS, $dataStr);
-  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-  curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-       'Content-Type: application/json;charset=UTF-8',
-       'Content-Length: '.strlen($dataStr))
-  );
-  $resultStr = curl_exec($ch);
-  $result = json_decode($resultStr, true);
-  return $result;
+function downloadFile($url,$dstpath) {
+  set_time_limit(0);
+
+  // File we'll be creating
+  $file = fopen($dstpath, "w+");
+  
+  //Here is the file we are downloading; if any spaces, replace with %20
+  $ch = curl_init(str_replace(" ","%20",$url));
+  
+  // make sure to set timeout high enough to avoid interruption
+  curl_setopt($ch, CURLOPT_TIMEOUT, 600);
+  
+  // write curl response to file
+  curl_setopt($ch, CURLOPT_FILE, $file);
+  curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+
+  // do it!
+  curl_exec ($ch);
+
+  // clean up
+  curl_close($ch);
+  fclose($file);
 }
 
 
