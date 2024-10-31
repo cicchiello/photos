@@ -100,57 +100,70 @@ function getMenuCnts()
 }
 
 
-function renderImgArrayTable($items, $action)
+function renderImgArrayTable($firstrow, $onClickAction)
 {
-   $ini = parse_ini_file("./config.ini");
-   $urlBase = $ini['couchbase'].'/photos';
+    $ini = parse_ini_file("./config.ini");
+    $Db = $ini['dbname'];
+    $DbBase = $ini['couchbase'].'/'.$Db;
+    $url = $DbBase.'/_design/photos/_view/photos?descending=false';
+	      
+    $items = json_decode(file_get_contents($url), true)['rows'];
    
-   $result = '';
-   $row = 0;
-   $col = 0;
-   $numColumns = 4;
-   foreach ($items as $item) {
-      if ($col == 0) {
-          if ($row == 0) {
-             $result .= '<table style="width:100%">';
-          }
+    $q = "'";
 
-          if ($row%2 == 0) 
-             $result .= '<tr style="background-color:#b8d7b0">';
-          else
-             $result .= '<tr style="background-color:#e2f4dd">';
-      }
+    $result = '';
+    $rendering = false;
+    $row = 0;
+    $col = 0;
+    $numColumns = 4;
+    foreach ($items as $item) {
+        if ($col == 0) {
+            if ($row == $firstrow) {
+                $rendering = true;	    
+                $result .= '<table style="width:100%">';
+            }
 
-      $id = $item['value']['_id'];
-      $imgUrl = $urlBase.'/'.$id.'/thumbnail';
+            if ($rendering) {
+                if ($row%2 == 0) 
+                    $result .= '<tr style="background-color:#b8d7b0">';
+                else
+                    $result .= '<tr style="background-color:#e2f4dd">';
+            }
+        }
+
+        if ($rendering) {
+            $id = $item['value']['_id'];
+            $imgUrl = $DbBase.'/'.$id.'/thumbnail';
       
-      $q = "'";
+            $result .= '  <td style="text-align:left">';
+            $result .= '        <img id="image" src="'.$imgUrl.'" alt="image"';
+            $result .= '             class="album-img album-container Btn"';
+            $result .= '             onclick="'.$onClickAction.'('.$q.$id.$q.','.$q.$firstrow.$q.')"';
+            $result .= '             style="vertical-align:middle;margin:0px 50px"';
+            $result .= '             title="'.basename($item['value']['paths'][0]).'"/>';
+            $result .= '  </td>';      
+        }
+	
+        $col += 1;
+        if ($col == $numColumns) {
+	    if ($rendering) {
+                $result .= '</tr>';
+            }
 
-      $result .= '  <td style="text-align:left">';
-      $result .= '        <img id="image" src="'.$imgUrl.'" alt="image"';
-      $result .= '             class="album-img album-container Btn"';
-      $result .= '             onclick="'.$action['onclick'].'('.$q.$id.$q.')"';
-      $result .= '             style="vertical-align:middle;margin:0px 50px"';
-      $result .= '             title="'.basename($item['value']['paths'][0]).'"/>';
-      $result .= '  </td>';      
-      
-      $col += 1;
-      if ($col == $numColumns) {
-          $result .= '</tr>';
-
-          $row += 1;
-	  $col = 0;
-      }
-   }
-   if (($row == 0) && ($col == 0)) {
-      $result .= "<p>No Images.</p>";
-   } else {
-      $result .= '</table>';
-   }
-   return $result;
+            $row += 1;
+	    $col = 0;
+        }
+    }
+    if (($row == 0) && ($col == 0)) {
+        $result .= "<p>No Images.</p>";
+    } else {
+        $result .= '</table>';
+    }
+    return $result;
 }
 
-function renderImgInfo($id)
+
+function renderImgInfo($id,$row)
 {
    $ini = parse_ini_file("./config.ini");
    $DbBase = $ini['couchbase'];

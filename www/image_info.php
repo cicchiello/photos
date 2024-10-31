@@ -61,9 +61,9 @@
             };
         }
     
-        function reloadAction(id) {
-           /*alert("TRACE(image_info.php:reload):");*/
-           window.location.replace('./index.php', "", "", true);
+        function reloadAction(id,row) {
+            /*alert("TRACE(image_info.php:reload):");*/
+            window.location.replace('./index.php?row='+row, "", "", true);
         }
     
         async function downloadAction(id) {
@@ -97,14 +97,15 @@
           <legend>Image Detail:</legend>
 	  <?php 
                $id = $_GET['id'];
-               echo renderImgInfo($id); 
+               $row = $_GET['row'];
+               echo renderImgInfo($id,$row); 
            ?>
        </fieldset>
 	
 	<br>
 	<div class="popupBtn">
 	    <?php
-                echo '<img id="return" onclick="reloadAction('."'".$id."'".')" src="img/return.png" ';
+                echo '<img id="return" onclick="reloadAction('."'".$id."','".$row."'".')" src="img/return.png" ';
                 echo '     width="48" height = "48" title="Return" align="left">';
 
                 echo '<img onclick="downloadAction('."'".$id."'".')" src="img/download.png" ';

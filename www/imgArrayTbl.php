@@ -48,13 +48,14 @@
     </style>
     
     <script>
-        function infoAction(id) {
-           var f = parent.document.getElementById("imgArrayFrame");
-           if (f) {
-	      /*alert("TRACE(imgArrayTbl.php:infoAction): before callback; id: "+id);*/
-              f.callback('./image_info.php?id='+id);
-           }else
-              document.getElementById("result").innerHTML = "no imgArrayFrame to process "+id;
+        function infoAction(id,row) {
+            var f = parent.document.getElementById("imgArrayFrame");
+	    if (!row) row = 0;
+            if (f) {
+	        /*alert("TRACE(imgArrayTbl.php:infoAction): before callback; id: "+id);*/
+                f.callback('./image_info.php?id='+id+'&row='+row);
+            } else
+                document.getElementById("result").innerHTML = "no imgArrayFrame to process "+id;
 	}
 	
     </script>
@@ -67,20 +68,8 @@
            <?php
 	      include('photos_utils.php');
 	      
-	      $ini = parse_ini_file("./config.ini");
-	      $DbBase = $ini['couchbase'];
-	      $Db = "photos";
-	      $DbViewBase = $DbBase.'/'.$Db.'/_design/photos/_view';
-	      
-	      $url = $DbViewBase.'/photos?descending=false';
-
-              $infoAction = array(
-	         "onclick" => "infoAction",
-		 "src" => "img/info.png",
-		 "title" => "Info"
-	      );
-	      echo renderImgArrayTable(json_decode(file_get_contents($url), true)['rows'],
-              	   	               $infoAction);
+              $row = array_key_exists('rowfoo', $_GET) ? $_GET['row'] : 0;
+	      echo renderImgArrayTable($row, 'infoAction');
            ?>
         </table>
   </body>

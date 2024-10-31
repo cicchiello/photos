@@ -20,7 +20,7 @@
   </style>
 
   <script>
-    function init() {
+    function init(row) {
         console.log("TRACE(index.php:init)");	
         var f = document.getElementById("imgArrayFrame");
         f.callback = function onChannel(url) {
@@ -30,7 +30,7 @@
 
         // Load the imgArrayTbl *after* the init function finishes so callback
         // is set before users might click on images
-        f.src = "./imgArrayTbl.php";
+        f.src = "./imgArrayTbl.php?row="+row;
     }
 
     function menuAction() {
@@ -58,15 +58,17 @@
   <body class="bg"
 
     <?php       
-       include('photos_utils.php');
+        include('photos_utils.php');
 
-       if (isset($_COOKIE['login_user'])) {
-         echo 'onload="init()">';
-         echo renderMainMenu($_COOKIE['login_user']);
-       } else {
-         echo 'onload="forceLogin()">';
-       }
-       #echo var_dump(isset($_COOKIE['login_user']));
+        $row = array_key_exists('rowfoo', $_GET) ? $_GET['row'] : 0;
+
+        if (isset($_COOKIE['login_user'])) {
+            echo 'onload="init('."'".$row."'".')">';
+            echo renderMainMenu($_COOKIE['login_user']);
+        } else {
+            echo 'onload="forceLogin()">';
+        }
+        #echo var_dump(isset($_COOKIE['login_user']));
     ?>
 
     <div style="height:90%; width:75%; padding:10px; margin-right:2px"
