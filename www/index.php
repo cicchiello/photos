@@ -21,7 +21,6 @@
 
   <script>
     function init(row) {
-        console.log("TRACE(index.php:init)");	
         var f = document.getElementById("imgArrayFrame");
         f.callback = function onChannel(url) {
             /* alert("TRACE(index.php:init:f.callback): url: "+url); */
@@ -60,7 +59,7 @@
     <?php       
         include('photos_utils.php');
 
-        $row = array_key_exists('rowfoo', $_GET) ? $_GET['row'] : 0;
+        $row = array_key_exists('row', $_GET) ? $_GET['row'] : 0;
 
         if (isset($_COOKIE['login_user'])) {
             echo 'onload="init('."'".$row."'".')">';
@@ -71,7 +70,7 @@
         #echo var_dump(isset($_COOKIE['login_user']));
     ?>
 
-    <div style="height:90%; width:75%; padding:10px; margin-right:2px"
+    <div style="height:90%; width:80%; padding:10px; margin:20px"
 	 class="w3-white w3-round-large w3-panel w3-display-right">
 
       <iframe id="imgArrayFrame" src="" frameBorder="0"

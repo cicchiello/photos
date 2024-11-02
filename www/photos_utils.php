@@ -100,52 +100,55 @@ function getMenuCnts()
 }
 
 
-function renderImgArrayTable($firstrow, $onClickAction)
+function renderImgArrayTable($firstrow, $DbBase, $items, $onClickAction)
 {
-    $ini = parse_ini_file("./config.ini");
-    $Db = $ini['dbname'];
-    $DbBase = $ini['couchbase'].'/'.$Db;
-    $url = $DbBase.'/_design/photos/_view/photos?descending=false';
-	      
-    $items = json_decode(file_get_contents($url), true)['rows'];
-   
     $q = "'";
 
     $result = '';
     $rendering = false;
     $row = 0;
     $col = 0;
-    $numColumns = 4;
+    $ColsPerRow = 5;
+    $NumRows = 5;
     foreach ($items as $item) {
         if ($col == 0) {
             if ($row == $firstrow) {
-                $rendering = true;	    
+                $rendering = true;
                 $result .= '<table style="width:100%">';
             }
+	    if ($row == $firstrow+$NumRows ) {
+                $rendering = false;
+	    }
 
             if ($rendering) {
-                if ($row%2 == 0) 
-                    $result .= '<tr style="background-color:#b8d7b0">';
+                if ($row%2 == 0)
+                    $style = "background-color:#b8d7b0";
                 else
-                    $result .= '<tr style="background-color:#e2f4dd">';
+                    $style = "background-color:#e2f4dd";
+		$class = 'row'.$row;
+                $result .= '<tr class="'.$class.'" style="'.$style.'">';	    
             }
         }
 
+        $cnt = $row*$ColsPerRow+$col;
         if ($rendering) {
             $id = $item['value']['_id'];
+	    $imgId = "image".$cnt;
             $imgUrl = $DbBase.'/'.$id.'/thumbnail';
       
             $result .= '  <td style="text-align:left">';
-            $result .= '        <img id="image" src="'.$imgUrl.'" alt="image"';
+            $result .= '        <img id="'.$imgId.'" src="'.$imgUrl.'" alt="image"';
+            $result .= '             data-objid="'.$id.'"';
+            $result .= '             data-firstrow="'.$firstrow.'"';
             $result .= '             class="album-img album-container Btn"';
-            $result .= '             onclick="'.$onClickAction.'('.$q.$id.$q.','.$q.$firstrow.$q.')"';
+            $result .= '             onclick="'.$onClickAction.'('.$q.$imgId.$q.')"';
             $result .= '             style="vertical-align:middle;margin:0px 50px"';
             $result .= '             title="'.basename($item['value']['paths'][0]).'"/>';
             $result .= '  </td>';      
-        }
+	}
 	
         $col += 1;
-        if ($col == $numColumns) {
+        if ($col == $ColsPerRow) {
 	    if ($rendering) {
                 $result .= '</tr>';
             }
@@ -157,6 +160,39 @@ function renderImgArrayTable($firstrow, $onClickAction)
     if (($row == 0) && ($col == 0)) {
         $result .= "<p>No Images.</p>";
     } else {
+    
+        while (($row >= $firstrow) && ($row < $firstrow+$NumRows) && ($col < $ColsPerRow)) {
+            if ($col == 0) {
+                if ($row%2 == 0)
+                    $style = "background-color:#b8d7b0";
+                else
+                    $style = "background-color:#e2f4dd";
+                $class = 'row'.$row;
+                $result .= '<tr class="'.$class.'" style="'.$style.'">';	    
+            }
+	
+            $cnt = $row*$ColsPerRow+$col;
+	    $imgId = "image".$cnt;
+      
+            $result .= '  <td style="text-align:left">';
+            $result .= '        <img id="'.$imgId.'" src="img/transparent.png" alt="image"';
+            $result .= '             data-objid="null"';
+            $result .= '             data-firstrow="'.$firstrow.'"';
+            $result .= '             class="album-img album-container Btn"';
+            $result .= '             onclick="'.$onClickAction.'('.$q.$imgId.$q.')"';
+            $result .= '             style="vertical-align:middle;margin:0px 50px"';
+            $result .= '             title=""/>';
+            $result .= '  </td>';
+	    
+            $col += 1;
+            if ($col == $ColsPerRow) {
+                $result .= '</tr>';
+
+                $row += 1;
+	        $col = 0;
+            }
+	}
+	
         $result .= '</table>';
     }
     return $result;

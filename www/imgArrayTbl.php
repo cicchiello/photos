@@ -12,6 +12,7 @@
   <head>
   
     <link href="./thumbs.css" media="all" rel="stylesheet" />
+    <link rel="stylesheet" href="pagination.css">
     
     <style>
       .bg {
@@ -25,7 +26,7 @@
      
       th, td {
           padding: 5px;
-	  width: 120px; /* any fixed value for the parent */
+	  width: 100px; /* any fixed value for the parent */
       }
      
       .Btn:hover {
@@ -35,7 +36,7 @@
       }
       
       .album-container {
-	  height: 120px; /* any fixed value for the parent */
+	  height: 100px; /* any fixed value for the parent */
       }
 
       img {
@@ -47,31 +48,70 @@
 
     </style>
     
+    <script src="http://code.jquery.com/jquery-1.9.1.min.js">    </script>
+    
     <script>
-        function infoAction(id,row) {
+        function init(row) {
+	    const rowsPerPage = 4;
+	    paginateTable(true, Math.trunc(row/rowsPerPage));
+        }
+      
+        function infoAction(elemid) {
             var f = parent.document.getElementById("imgArrayFrame");
-	    if (!row) row = 0;
-            if (f) {
-	        /*alert("TRACE(imgArrayTbl.php:infoAction): before callback; id: "+id);*/
-                f.callback('./image_info.php?id='+id+'&row='+row);
-            } else
-                document.getElementById("result").innerHTML = "no imgArrayFrame to process "+id;
+	    var img = document.getElementById(elemid);
+	    var objid = img.getAttribute('data-objid');
+	    if (objid !== "null") {
+                var row = img.getAttribute('data-firstrow');
+                f.callback('./image_info.php?id='+objid+'&row='+row);
+	    }
 	}
 	
     </script>
 
   </head>
 
-  <body class="bg">
-     <p id="result"></p>
-        <table style="width:100%; overflow:scroll">
-           <?php
-	      include('photos_utils.php');
+  <body class="bg"
+	<?php
+	    include('photos_utils.php');
 	      
-              $row = array_key_exists('rowfoo', $_GET) ? $_GET['row'] : 0;
-	      echo renderImgArrayTable($row, 'infoAction');
+            $row = array_key_exists('row', $_GET) ? $_GET['row'] : 0;
+
+            echo 'onload="init('."'".$row."'".')">';
+	 ?>
+     <div id="myTableParent" class="table-responsive">
+       <span id = "dbUrl" hidden>
+           <?php
+              $ini = parse_ini_file("./config.ini");
+              $Db = $ini['dbname'];
+              $DbBase = $ini['couchbase'].'/'.$Db;
+	      echo $DbBase;
            ?>
-        </table>
+       </span>
+       <table id="myTable" style="width:100%; overflow:scroll">
+           <?php
+              $viewUrl = $DbBase.'/_design/photos/_view/photos?descending=false';
+              $view0 = json_decode(file_get_contents($viewUrl),true);
+              $numitems = $view0['total_rows'];
+
+              $items = $view0['rows'];
+	      echo renderImgArrayTable($row, $DbBase, $items, 'infoAction');
+           ?>
+       </table>
+     </div>
+     <div id="pagination">
+       <div id="entriesDisplayDiv">
+         Showing <span id="from"> </span> to <span id="to"></span> out of
+	 <span id="totalTableEntries"><?php echo $numitems; ?></span> entries 
+       </div>
+       <div id="pageNumbersContainer">
+         <div id="pageNumbers"></div>
+         <div id="goToPage">Go to Page <input id="pageNumberInput" type="number">
+	   <button id="goToPageButton">Confirm</button>
+	 </div>
+       </div>
+     </div>
+	
+     <script src="pagination.js"></script>
   </body>
   
 </html>
