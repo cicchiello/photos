@@ -6,6 +6,9 @@
     },
     "photos": {
       "map": "function (doc) {\n  if (doc.type && (typeof doc.type === 'string') && (doc.type === 'photo'))\n    emit(doc.paths[0], doc);\n}"
+    },
+    "photo_ids": {
+      "map": "function (doc) {\n  if (doc.type && (typeof doc.type === 'string') && (doc.type === 'photo'))\n    emit(doc.paths[0], null);\n}"
     }
   },
   "language": "javascript"

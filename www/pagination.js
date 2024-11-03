@@ -39,7 +39,7 @@ function paginateTable(initialCall, pageIdx) {
 
 function setImages0(page, dburl, bookmark, onCompletion) {
     if (!bookmark) {
-        var viewurl = dburl+"/_design/photos/_view/photos?descending=false";
+        var viewurl = dburl+"/_design/photos/_view/photo_ids?descending=false";
 	fetch(viewurl)
 	    .then(res => {
 		if (!res.ok) {

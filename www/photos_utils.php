@@ -81,10 +81,10 @@ function renderLookAndFeel()
 
 function getMenuCnts()
 {
-   $ini = parse_ini_file("./config.ini");
-   $DbBase = $ini['couchbase'];
-   $Db = "photos";
-   $DbViewBase = $DbBase.'/'.$Db.'/_design/photos/_view';
+//   $ini = parse_ini_file("./config.ini");
+//   $DbBase = $ini['couchbase'];
+//   $Db = "photos";
+//   $DbViewBase = $DbBase.'/'.$Db.'/_design/photos/_view';
 
    $numRecordings = 0;
    $numCapturing = 0;
@@ -132,7 +132,7 @@ function renderImgArrayTable($firstrow, $DbBase, $items, $onClickAction)
         }
 
         if ($rendering) {
-            $id = $item['value']['_id'];
+            $id = $item['id'];
 	    $imgId = "image".$cnt;
             $imgUrl = $DbBase.'/'.$id.'/thumbnail';
       
@@ -143,7 +143,7 @@ function renderImgArrayTable($firstrow, $DbBase, $items, $onClickAction)
             $result .= '             class="album-img album-container center Btn"';
             $result .= '             onclick="'.$onClickAction.'('.$q.$imgId.$q.')"';
             $result .= '             style="vertical-align:horizontal-align;margin:2px 2px 2px 2px"';
-            $result .= '             title="'.basename($item['value']['paths'][0]).'"/>';
+            $result .= '             title="'.basename($item['key']).'"/>';
             $result .= '  </td>';
 
             $cnt += 1;

@@ -94,7 +94,7 @@
        </span>
        <table id="myTable" style="width:100%; overflow:scroll">
            <?php
-              $viewUrl = $DbBase.'/_design/photos/_view/photos?descending=false';
+              $viewUrl = $DbBase.'/_design/photos/_view/photo_ids?descending=false';
               $view0 = json_decode(file_get_contents($viewUrl),true);
               $numitems = $view0['total_rows'];
 
