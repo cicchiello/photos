@@ -38,17 +38,22 @@
       .album-container {
 	  height: 100px; /* any fixed value for the parent */
       }
-
+      
+      .center {
+          display: block;
+          margin-left: auto;
+          margin-right: auto;
+          width: 100%;
+      }
+      
       img {
 	  width: auto;
 	  height: 100%;
 	  aspect-ratio: 1; /* will make width equal to height (500px container) */
-	  object-fit: cover; /* use the one you need */
+	  object-fit: contain; /* use the one you need */
       }
 
     </style>
-    
-    <script src="http://code.jquery.com/jquery-1.9.1.min.js">    </script>
     
     <script>
         function init(row) {

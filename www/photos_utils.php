@@ -108,8 +108,9 @@ function renderImgArrayTable($firstrow, $DbBase, $items, $onClickAction)
     $rendering = false;
     $row = 0;
     $col = 0;
-    $ColsPerRow = 5;
+    $ColsPerRow = 6;
     $NumRows = 5;
+    $cnt = 0;
     foreach ($items as $item) {
         if ($col == 0) {
             if ($row == $firstrow) {
@@ -130,7 +131,6 @@ function renderImgArrayTable($firstrow, $DbBase, $items, $onClickAction)
             }
         }
 
-        $cnt = $row*$ColsPerRow+$col;
         if ($rendering) {
             $id = $item['value']['_id'];
 	    $imgId = "image".$cnt;
@@ -140,11 +140,13 @@ function renderImgArrayTable($firstrow, $DbBase, $items, $onClickAction)
             $result .= '        <img id="'.$imgId.'" src="'.$imgUrl.'" alt="image"';
             $result .= '             data-objid="'.$id.'"';
             $result .= '             data-firstrow="'.$firstrow.'"';
-            $result .= '             class="album-img album-container Btn"';
+            $result .= '             class="album-img album-container center Btn"';
             $result .= '             onclick="'.$onClickAction.'('.$q.$imgId.$q.')"';
-            $result .= '             style="vertical-align:middle;margin:0px 50px"';
+            $result .= '             style="vertical-align:horizontal-align;margin:2px 2px 2px 2px"';
             $result .= '             title="'.basename($item['value']['paths'][0]).'"/>';
-            $result .= '  </td>';      
+            $result .= '  </td>';
+
+            $cnt += 1;
 	}
 	
         $col += 1;
@@ -171,18 +173,19 @@ function renderImgArrayTable($firstrow, $DbBase, $items, $onClickAction)
                 $result .= '<tr class="'.$class.'" style="'.$style.'">';	    
             }
 	
-            $cnt = $row*$ColsPerRow+$col;
 	    $imgId = "image".$cnt;
       
             $result .= '  <td style="text-align:left">';
             $result .= '        <img id="'.$imgId.'" src="img/transparent.png" alt="image"';
             $result .= '             data-objid="null"';
             $result .= '             data-firstrow="'.$firstrow.'"';
-            $result .= '             class="album-img album-container Btn"';
+            $result .= '             class="album-img album-container center Btn"';
             $result .= '             onclick="'.$onClickAction.'('.$q.$imgId.$q.')"';
-            $result .= '             style="vertical-align:middle;margin:0px 50px"';
+            $result .= '             style="vertical-align:horizontal-align;margin:2px 2px 2px 2px"';
             $result .= '             title=""/>';
             $result .= '  </td>';
+	    
+            $cnt += 1;
 	    
             $col += 1;
             if ($col == $ColsPerRow) {
