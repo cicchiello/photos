@@ -1,6 +1,6 @@
 //let currentPage = pageNumberInput.value === "" ? 1 : pageNumberInput.value;
 const RowsPerPage = 5;
-const ColsPerRow = 6;
+const ColsPerRow = 5;
 let totalPages;
 const pageNumbers = document.getElementById("pageNumbers");
 

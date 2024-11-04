@@ -108,7 +108,7 @@ function renderImgArrayTable($firstrow, $DbBase, $items, $onClickAction)
     $rendering = false;
     $row = 0;
     $col = 0;
-    $ColsPerRow = 6;
+    $ColsPerRow = 5;
     $NumRows = 5;
     $cnt = 0;
     foreach ($items as $item) {
@@ -137,6 +137,11 @@ function renderImgArrayTable($firstrow, $DbBase, $items, $onClickAction)
             $imgUrl = $DbBase.'/'.$id.'/thumbnail';
       
             $result .= '  <td style="text-align:left">';
+	    $result .= '     <div>';
+	    $result .= '        <label class="check-container">';
+	    $result .= '           <input type="checkbox">';
+	    $result .= '           <span class="checkmark"></span>';
+	    $result .= '        </label>';
             $result .= '        <img id="'.$imgId.'" src="'.$imgUrl.'" alt="image"';
             $result .= '             data-objid="'.$id.'"';
             $result .= '             data-firstrow="'.$firstrow.'"';
@@ -144,6 +149,7 @@ function renderImgArrayTable($firstrow, $DbBase, $items, $onClickAction)
             $result .= '             onclick="'.$onClickAction.'('.$q.$imgId.$q.')"';
             $result .= '             style="vertical-align:horizontal-align;margin:2px 2px 2px 2px"';
             $result .= '             title="'.basename($item['key']).'"/>';
+	    $result .= '     </div>';
             $result .= '  </td>';
 
             $cnt += 1;
@@ -176,6 +182,7 @@ function renderImgArrayTable($firstrow, $DbBase, $items, $onClickAction)
 	    $imgId = "image".$cnt;
       
             $result .= '  <td style="text-align:left">';
+	    $result .= '     <div>';
             $result .= '        <img id="'.$imgId.'" src="img/transparent.png" alt="image"';
             $result .= '             data-objid="null"';
             $result .= '             data-firstrow="'.$firstrow.'"';
@@ -183,6 +190,7 @@ function renderImgArrayTable($firstrow, $DbBase, $items, $onClickAction)
             $result .= '             onclick="'.$onClickAction.'('.$q.$imgId.$q.')"';
             $result .= '             style="vertical-align:horizontal-align;margin:2px 2px 2px 2px"';
             $result .= '             title=""/>';
+	    $result .= '     </div>';
             $result .= '  </td>';
 	    
             $cnt += 1;

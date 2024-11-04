@@ -35,15 +35,91 @@
          cursor: pointer;
       }
       
+      .album-img {
+	  width: auto;
+	  height: 90%;
+	  aspect-ratio: 1; /* will make width equal to height (500px container) */
+	  object-fit: contain; /* use the one you need */
+	  /*object-position: 35% 100%;*/
+      }
+
+      /* The checkbox container */
+      .check-container {
+        display: block;
+        position: relative;
+        padding-left: 35px;
+        margin-bottom: 0px;
+        cursor: pointer;
+        font-size: 22px;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+      }
+
+      /* Hide the browser's default checkbox */
+      .check-container input {
+        position: absolute;
+        opacity: 0;
+        cursor: pointer;
+        height: 0;
+        width: 0;
+      }
+
+      /* Create a custom checkbox */
+      .checkmark {
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 25px;
+        width: 25px;
+        background-color: #eee;
+	border: 1px solid black;
+      }
+
+      /* On mouse-over, add a grey background color */
+      .check-container:hover input ~ .checkmark {
+        background-color: #ccc;
+      }
+
+      /* When the checkbox is checked, add a blue background */
+      .check-container input:checked ~ .checkmark {
+        background-color: #2196F3;
+      }
+
+      /* Create the checkmark/indicator (hidden when not checked) */
+      .checkmark:after {
+        content: "";
+        position: absolute;
+        display: none;
+      }
+
+      /* Show the checkmark when checked */
+      .check-container input:checked ~ .checkmark:after {
+        display: block;
+      }
+      
+      /* Style the checkmark/indicator */
+      .check-container .checkmark:after {
+        left: 9px;
+        top: 5px;
+        width: 5px;
+        height: 10px;
+        border: solid white;
+        border-width: 0 3px 3px 0;
+        -webkit-transform: rotate(45deg);
+        -ms-transform: rotate(45deg);
+        transform: rotate(45deg);
+      }
+
       .album-container {
 	  height: 100px; /* any fixed value for the parent */
       }
-      
+
       .center {
-          display: block;
-          margin-left: auto;
-          margin-right: auto;
-          width: 100%;
+          display: inline;
+	  float: right;
+          width: 80%;
       }
       
       img {
@@ -57,7 +133,7 @@
     
     <script>
         function init(row) {
-	    const rowsPerPage = 4;
+	    const rowsPerPage = 5;
 	    paginateTable(true, Math.trunc(row/rowsPerPage));
         }
       
