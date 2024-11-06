@@ -20,12 +20,75 @@
   </style>
 
   <script>
-    function init(row) {
+    var rekognizeConfidence = 0;
+    var allTags = {};
+
+    function calcIntersection() {
+	var intersection = new Set();
+	var first = true;
+	for (const objid in allTags) {
+	    if (first) {
+		intersection = allTags[objid];
+	    } else {
+		intersection = intersection.intersection(allTags[objid]);
+	    }
+	    first = false;
+	}
+	return intersection;
+    }
+
+    function renderTagset(tagset) {
+	var str = "";
+	tagset.forEach(tag => {str += tag+"\n";});
+
+	var keyArea = document.getElementById("key-area");
+	keyArea.innerHTML = str;
+    }
+    
+    function checkboxAction(checkboxElem, dburl, objid) {
+        if (checkboxElem.checked) {
+	    var objurl = dburl+"/"+objid;
+	    fetch(objurl)
+		.then(res => {
+		    if (!res.ok) {
+			console.log("ERROR(checkboxAction): network error");
+		    } else {
+			return res.json();
+		    }
+		})
+		.then(data => {
+		    allTags[objid] = new Set();
+		    data.tags.forEach(tagobj => {
+			if (tagobj.source === 'rekognition') {
+			    if (tagobj.Confidence > rekognizeConfidence) {
+				allTags[objid].add(tagobj.Name);
+			    }
+			}
+		    });
+
+		    renderTagset(calcIntersection());
+		})
+		.catch(error => {
+		    console.log("ERROR(checkboxAction): Fetch error: "+error);
+		});
+	} else {
+	    delete allTags[objid];
+	    
+	    renderTagset(calcIntersection());
+	}
+    }
+    
+    function init(row, confidence) {
+	rekognizeConfidence = confidence;
+	
         var f = document.getElementById("imgArrayFrame");
         f.callback = function onChannel(url) {
             /* alert("TRACE(index.php:init:f.callback): url: "+url); */
             window.location.replace(url, "", "", true);
         };
+	f.checkboxAction = function checkAction(checkboxElem, dbUrl, objid) {
+	    checkboxAction(checkboxElem, dbUrl, objid);
+	};
 
         // Load the imgArrayTbl *after* the init function finishes so callback
         // is set before users might click on images
@@ -59,10 +122,13 @@
     <?php       
         include('photos_utils.php');
 
+        $ini = parse_ini_file("./config.ini");
+	$confidence = $ini['rekognizeConfidence'];
+
         $row = array_key_exists('row', $_GET) ? $_GET['row'] : 0;
 
         if (isset($_COOKIE['login_user'])) {
-            echo 'onload="init('."'".$row."'".')">';
+            echo 'onload="init('."'".$row."',".$confidence.')">';
             echo renderMainMenu($_COOKIE['login_user']);
         } else {
             echo 'onload="forceLogin()">';
@@ -70,8 +136,13 @@
         #echo var_dump(isset($_COOKIE['login_user']));
     ?>
 
-    <div style="height:90%; width:80%; padding:10px; margin:20px"
-	 class="w3-white w3-round-large w3-panel w3-display-right">
+    <textarea id="key-area" rows="10" cols="4"
+	      style="width:27%; padding:20px; margin:10px"
+	      class="w3-round-large w3-display-bottomleft">
+    </textarea>
+      
+    <div style="height:80%; width:70%; padding:10px; margin:10px"
+	 class="w3-white w3-round-large w3-panel w3-display-bottomright">
 
       <iframe id="imgArrayFrame" src="" frameBorder="0"
 	      height="100%" width="100%" style="float:right; z-index:999">

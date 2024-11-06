@@ -100,7 +100,7 @@ function getMenuCnts()
 }
 
 
-function renderImgArrayTable($firstrow, $DbBase, $items, $onClickAction)
+function renderImgArrayTable($firstrow, $DbBase, $items, $onImgAction, $onCheckAction)
 {
     $q = "'";
 
@@ -139,14 +139,14 @@ function renderImgArrayTable($firstrow, $DbBase, $items, $onClickAction)
             $result .= '  <td style="text-align:left">';
 	    $result .= '     <div>';
 	    $result .= '        <label class="check-container">';
-	    $result .= '           <input type="checkbox">';
+	    $result .= '           <input type="checkbox" onclick="'.$onCheckAction.'(this,'.$q.$DbBase.$q.','.$q.$id.$q.')">';
 	    $result .= '           <span class="checkmark"></span>';
 	    $result .= '        </label>';
             $result .= '        <img id="'.$imgId.'" src="'.$imgUrl.'" alt="image"';
             $result .= '             data-objid="'.$id.'"';
             $result .= '             data-firstrow="'.$firstrow.'"';
             $result .= '             class="album-img album-container center Btn"';
-            $result .= '             onclick="'.$onClickAction.'('.$q.$imgId.$q.')"';
+            $result .= '             onclick="'.$onImgAction.'('.$q.$imgId.$q.')"';
             $result .= '             style="vertical-align:horizontal-align;margin:2px 2px 2px 2px"';
             $result .= '             title="'.basename($item['key']).'"/>';
 	    $result .= '     </div>';
@@ -213,6 +213,7 @@ function renderImgArrayTable($firstrow, $DbBase, $items, $onClickAction)
 function renderImgInfo($id,$row)
 {
    $ini = parse_ini_file("./config.ini");
+   $confidenceLimit = $ini['rekognizeConfidence']; 
    $DbBase = $ini['couchbase'];
    $Db = "photos";
    $detailUrl = $DbBase.'/'.$Db.'/'.$id;
@@ -228,7 +229,6 @@ function renderImgInfo($id,$row)
    $result .= '       <img class="image" id="image" src="'.$imgUrl.'"';
    $result .= '            align="center" title="Image"/>';
    $cnt = 0;
-   $confidenceLimit = 70.0;
    foreach($detail['tags'] as $tag) {
       if ($tag['source'] == 'rekognition') {
         $confidence = $tag['Confidence'];

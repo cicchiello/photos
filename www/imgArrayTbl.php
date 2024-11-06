@@ -40,7 +40,6 @@
 	  height: 90%;
 	  aspect-ratio: 1; /* will make width equal to height (500px container) */
 	  object-fit: contain; /* use the one you need */
-	  /*object-position: 35% 100%;*/
       }
 
       /* The checkbox container */
@@ -71,8 +70,8 @@
         position: absolute;
         top: 0;
         left: 0;
-        height: 25px;
-        width: 25px;
+        height: 20px;
+        width: 20px;
         background-color: #eee;
 	border: 1px solid black;
       }
@@ -101,8 +100,8 @@
       
       /* Style the checkmark/indicator */
       .check-container .checkmark:after {
-        left: 9px;
-        top: 5px;
+        left: 7px;
+        top: 2px;
         width: 5px;
         height: 10px;
         border: solid white;
@@ -113,7 +112,7 @@
       }
 
       .album-container {
-	  height: 100px; /* any fixed value for the parent */
+	  height: 85px; /* any fixed value for the parent */
       }
 
       .center {
@@ -137,7 +136,7 @@
 	    paginateTable(true, Math.trunc(row/rowsPerPage));
         }
       
-        function infoAction(elemid) {
+        function imgInfoAction(elemid) {
             var f = parent.document.getElementById("imgArrayFrame");
 	    var img = document.getElementById(elemid);
 	    var objid = img.getAttribute('data-objid');
@@ -146,7 +145,12 @@
                 f.callback('./image_info.php?id='+objid+'&row='+row);
 	    }
 	}
-	
+
+        function checkAction(checkboxElem, dburl, objid) {
+            var f = parent.document.getElementById("imgArrayFrame");
+	    f.checkboxAction(checkboxElem, dburl, objid);
+	}
+      
     </script>
 
   </head>
@@ -175,7 +179,7 @@
               $numitems = $view0['total_rows'];
 
               $items = $view0['rows'];
-	      echo renderImgArrayTable($row, $DbBase, $items, 'infoAction');
+	      echo renderImgArrayTable($row, $DbBase, $items, 'imgInfoAction', 'checkAction');
            ?>
        </table>
      </div>

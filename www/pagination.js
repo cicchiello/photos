@@ -74,7 +74,7 @@ function setImages0(page, dburl, bookmark, onCompletion) {
 }
 
 
-function changePage(e,pageNumber) {
+function changePage(e, pageNumber) {
     if((pageNumber == 0)||(pageNumber==totalPages+1)) return;
     e.preventDefault();
     pageNumberInput.value = "";
@@ -115,14 +115,14 @@ function createPageLink(linkText,pageNumber) {
     pageLink.href = "#";
     pageLink.innerHTML = linkText;
     pageLink.addEventListener("click",function(e){
-	changePage(e,pageNumber);
+	changePage(e, pageNumber);
     });
     pageNumbers.appendChild(pageLink);
 }
 
 
 goToPageButton.addEventListener("click",(e)=>{
-    changePage(e,pageNumberInput.value);
+    changePage(e, pageNumberInput.value);
 });
 
 
