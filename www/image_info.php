@@ -61,16 +61,16 @@
             };
         }
     
-        function reloadAction(id,row) {
+        function reloadAction(id, row) {
             /*alert("TRACE(image_info.php:reload):");*/
             window.location.replace('./index.php?row='+row, "", "", true);
         }
     
-        async function downloadAction(id) {
+        async function downloadAction(id, row) {
             //console.log("TRACE(image_info.php:downloadAction): id: "+id);
             var f = document.getElementById("detail");
             if ("callback" in f) {
-                f.callback('./image_download.php?id='+id);
+                f.callback('./image_download.php?id='+id+'&row='+row);
 	    } else {
                 console.log("ERROR(image_info.php:downloadAction): f doesn't have a callback member");
 	    }
@@ -108,7 +108,7 @@
                 echo '<img id="return" onclick="reloadAction('."'".$id."','".$row."'".')" src="img/return.png" ';
                 echo '     width="48" height = "48" title="Return" align="left">';
 
-                echo '<img onclick="downloadAction('."'".$id."'".')" src="img/download.png" ';
+                echo '<img onclick="downloadAction('."'".$id."',".$row.')" src="img/download.png" ';
                 echo '    class="Btn" title="Download" width="48" height="48" align="right">';
 	    ?>
 	</div>

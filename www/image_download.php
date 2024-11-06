@@ -32,7 +32,7 @@
        return new Promise(resolve => setTimeout(resolve, ms));
     }
 
-    async function init(id, imagepath, basename) {
+    async function init(id, row, imagepath, basename) {
         //console.log('TRACE(image_download.php): id: '+id);
         //console.log('TRACE(image_download.php): imagepath: '+imagepath);
         //console.log('TRACE(image_download.php): basename: '+basename);
@@ -41,7 +41,7 @@
 	b.href = imagepath;
         b.download = basename;
         b.click();
-        var url = "./image_info.php?id="+id;
+        var url = "./image_info.php?id="+id+"&row="+row;
         open(url, "_self");
     }
 
@@ -53,6 +53,7 @@
 
     <?php
         $id = $_GET['id'];
+        $row = $_GET['row'];
 
         $ini = parse_ini_file("./config.ini");
         $DbBase = $ini['couchbase'];
@@ -68,7 +69,7 @@
         downloadFile($imageUrl, $dstpath);
 
         $basename = basename($doc['paths'][0]);
-        echo ' onload="init('."'".$id."','".$dstpath."','".$basename."'".')" >';
+        echo ' onload="init('."'".$id."',".$row.",'".$dstpath."','".$basename."'".')" >';
         $enabled = array(
             'live' => false,
             'library' => true,
