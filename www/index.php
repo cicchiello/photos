@@ -17,6 +17,13 @@
   <link href="./menu.css" media="all" rel="stylesheet">
 
   <style>
+    textarea:placeholder-shown {
+        font-style: italic;
+    }
+    
+    textarea {
+        resize: none;
+    }
   </style>
 
   <script>
@@ -44,37 +51,45 @@
 	var keyArea = document.getElementById("key-area");
 	keyArea.innerHTML = str;
     }
+
+    function clearChecks() {
+	allTags = {};
+		
+	renderTagset(calcIntersection());
+    }
     
     function checkboxAction(checkboxElem, dburl, objid) {
-        if (checkboxElem.checked) {
-	    var objurl = dburl+"/"+objid;
-	    fetch(objurl)
-		.then(res => {
-		    if (!res.ok) {
-			console.log("ERROR(checkboxAction): network error");
-		    } else {
-			return res.json();
-		    }
-		})
-		.then(data => {
-		    allTags[objid] = new Set();
-		    data.tags.forEach(tagobj => {
-			if (tagobj.source === 'rekognition') {
-			    if (tagobj.Confidence > rekognizeConfidence) {
-				allTags[objid].add(tagobj.Name);
-			    }
+	if (objid) {
+            if (checkboxElem.checked) {
+		var objurl = dburl+"/"+objid;
+		fetch(objurl)
+		    .then(res => {
+			if (!res.ok) {
+			    console.log("ERROR(checkboxAction): network error");
+			} else {
+			    return res.json();
 			}
+		    })
+		    .then(data => {
+			allTags[objid] = new Set();
+			data.tags.forEach(tagobj => {
+			    if (tagobj.source === 'rekognition') {
+				if (tagobj.Confidence > rekognizeConfidence) {
+				    allTags[objid].add(tagobj.Name);
+				}
+			    }
+			});
+			
+			renderTagset(calcIntersection());
+		    })
+		    .catch(error => {
+			console.log("ERROR(checkboxAction): Fetch error: "+error);
 		    });
-
-		    renderTagset(calcIntersection());
-		})
-		.catch(error => {
-		    console.log("ERROR(checkboxAction): Fetch error: "+error);
-		});
-	} else {
-	    delete allTags[objid];
-	    
-	    renderTagset(calcIntersection());
+	    } else {
+		delete allTags[objid];
+		
+		renderTagset(calcIntersection());
+	    }
 	}
     }
     
@@ -88,6 +103,9 @@
         };
 	f.checkboxAction = function checkAction(checkboxElem, dbUrl, objid) {
 	    checkboxAction(checkboxElem, dbUrl, objid);
+	};
+	f.clearChecksAction = function clearChecksAction() {
+	    clearChecks();
 	};
 
         // Load the imgArrayTbl *after* the init function finishes so callback
@@ -136,12 +154,12 @@
         #echo var_dump(isset($_COOKIE['login_user']));
     ?>
 
-    <textarea id="key-area" rows="10" cols="4"
+    <textarea readonly placeholder="Common tags of selected images..."
+	      id="key-area" rows="10" cols="4"
 	      style="width:27%; padding:20px; margin:10px"
-	      class="w3-round-large w3-display-bottomleft">
-    </textarea>
+	      class="w3-round-large w3-display-bottomleft"></textarea>
       
-    <div style="height:80%; width:70%; padding:10px; margin:10px"
+    <div style="height:85%; width:70%; padding:10px; margin:10px"
 	 class="w3-white w3-round-large w3-panel w3-display-bottomright">
 
       <iframe id="imgArrayFrame" src="" frameBorder="0"

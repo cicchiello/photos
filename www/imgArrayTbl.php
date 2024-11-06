@@ -128,6 +128,10 @@
 	  object-fit: contain; /* use the one you need */
       }
 
+      input:placeholder-shown {
+          font-style: italic;
+      }
+    
     </style>
     
     <script>
@@ -142,12 +146,15 @@
 	    var objid = img.getAttribute('data-objid');
 	    if (objid !== "null") {
                 var row = img.getAttribute('data-firstrow');
+		f.clearChecksAction();
                 f.callback('./image_info.php?id='+objid+'&row='+row);
 	    }
 	}
 
-        function checkAction(checkboxElem, dburl, objid) {
+        function checkAction(checkboxElem, dburl, elemid) {
             var f = parent.document.getElementById("imgArrayFrame");
+	    var img = document.getElementById(elemid);
+	    var objid = img.getAttribute('data-objid');
 	    f.checkboxAction(checkboxElem, dburl, objid);
 	}
       
@@ -172,6 +179,12 @@
 	      echo $DbBase;
            ?>
        </span>
+       <span>
+         <label for="search-key">Search tag: </label>
+         <input id="tagInput" type="text" size="15" placeholder="some tag">
+	 <button id="findImagesButton">Get</button>
+       </span>
+       <p></p>
        <table id="myTable" style="width:100%; overflow:scroll">
            <?php
               $viewUrl = $DbBase.'/_design/photos/_view/photo_ids?descending=false';

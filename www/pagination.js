@@ -56,6 +56,13 @@ function setImages0(page, dburl, bookmark, onCompletion) {
 			img.src = dburl+"/"+data.rows[i].id+"/thumbnail";
 			img.setAttribute("data-objid", data.rows[i].id);
 			img.setAttribute("data-firstrow", (page*RowsPerPage));
+
+			var check = document.getElementById("check"+imageCnt);
+			check.checked = false;
+			
+			var f = parent.document.getElementById("imgArrayFrame");
+			f.clearChecksAction();
+			
 			imageCnt += 1;
 		    }
 		}
@@ -71,19 +78,6 @@ function setImages0(page, dburl, bookmark, onCompletion) {
 		console.log("ERROR(setImages0): Fetch error: "+error);
 	    });
     }
-}
-
-
-function changePage(e, pageNumber) {
-    if((pageNumber == 0)||(pageNumber==totalPages+1)) return;
-    e.preventDefault();
-    pageNumberInput.value = "";
-
-    var dburl = document.getElementById("dbUrl").innerHTML.trim();
-    
-    setImages0(pageNumber-1, dburl, null, function onCompletion() {
-	paginateTable(false, pageNumber-1);
-    });
 }
 
 
@@ -114,15 +108,71 @@ function createPageLink(linkText,pageNumber) {
     let pageLink = document.createElement("a");
     pageLink.href = "#";
     pageLink.innerHTML = linkText;
+    
+    const dburl = document.getElementById("dbUrl").innerHTML.trim();
+    
     pageLink.addEventListener("click",function(e){
-	changePage(e, pageNumber);
+	changePage(e, dburl, pageNumber);
     });
     pageNumbers.appendChild(pageLink);
 }
 
 
+
+function changePage(e, dburl, pageNumber) {
+    if((pageNumber == 0)||(pageNumber==totalPages+1)) return;
+    e.preventDefault();
+    pageNumberInput.value = "";
+
+    setImages0(pageNumber-1, dburl, null, function onCompletion() {
+	paginateTable(false, pageNumber-1);
+    });
+}
+
+
+const exampleMangoQuery = {
+   "selector": {
+      "type": {
+         "$eq": "photo"
+      },
+      "tags": {
+         "$or": [
+            {
+               "$elemMatch": {
+                  "Name": "cherry"
+               }
+            },
+            {
+               "$elemMatch": {
+                  "Name": "butterfly"
+               }
+            }
+         ]
+      }
+   },
+   "fields": [
+      "_id"
+   ],
+   "limit": 10
+};
+
+
+function search(e, tag) {
+    console.log("DEBUG(search): tag: "+tag);
+    e.preventDefault();
+
+    const dburl = document.getElementById("dbUrl").innerHTML.trim();
+    changePage(e, dburl, "2");
+}
+
+
 goToPageButton.addEventListener("click",(e)=>{
-    changePage(e, pageNumberInput.value);
+    const dburl = document.getElementById("dbUrl").innerHTML.trim();
+    changePage(e, dburl, pageNumberInput.value);
 });
 
+
+findImagesButton.addEventListener("click",(e)=>{
+    search(e, tagInput.value);
+});
 

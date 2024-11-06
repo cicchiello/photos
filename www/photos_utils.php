@@ -134,12 +134,14 @@ function renderImgArrayTable($firstrow, $DbBase, $items, $onImgAction, $onCheckA
         if ($rendering) {
             $id = $item['id'];
 	    $imgId = "image".$cnt;
+	    $checkId = "check".$cnt;
             $imgUrl = $DbBase.'/'.$id.'/thumbnail';
       
             $result .= '  <td style="text-align:left">';
 	    $result .= '     <div>';
 	    $result .= '        <label class="check-container">';
-	    $result .= '           <input type="checkbox" onclick="'.$onCheckAction.'(this,'.$q.$DbBase.$q.','.$q.$id.$q.')">';
+	    $result .= '           <input id="'.$checkId.'" type="checkbox" ';
+	    $result .= '                  onclick="'.$onCheckAction.'(this,'.$q.$DbBase.$q.','.$q.$imgId.$q.')">';
 	    $result .= '           <span class="checkmark"></span>';
 	    $result .= '        </label>';
             $result .= '        <img id="'.$imgId.'" src="'.$imgUrl.'" alt="image"';
@@ -183,11 +185,15 @@ function renderImgArrayTable($firstrow, $DbBase, $items, $onImgAction, $onCheckA
       
             $result .= '  <td style="text-align:left">';
 	    $result .= '     <div>';
+	    $result .= '        <label class="check-container">';
+	    $result .= '           <input type="checkbox" onclick="'.$onCheckAction.'(this,'.$q.$DbBase.$q.',null)">';
+	    $result .= '           <span class="checkmark"></span>';
+	    $result .= '        </label>';
             $result .= '        <img id="'.$imgId.'" src="img/transparent.png" alt="image"';
             $result .= '             data-objid="null"';
             $result .= '             data-firstrow="'.$firstrow.'"';
             $result .= '             class="album-img album-container center Btn"';
-            $result .= '             onclick="'.$onClickAction.'('.$q.$imgId.$q.')"';
+            $result .= '             onclick="'.$onImgAction.'('.$q.$imgId.$q.')"';
             $result .= '             style="vertical-align:horizontal-align;margin:2px 2px 2px 2px"';
             $result .= '             title=""/>';
 	    $result .= '     </div>';
