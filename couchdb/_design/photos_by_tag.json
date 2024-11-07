@@ -1,0 +1,11 @@
+{
+  "_id": "_design/photos_by_tag",
+  "indexes": {
+    "photos_by_tag": {
+      "analyzer": "standard",
+      "index": "function(doc) {\n    if (doc.type && (doc.type === 'photo')) {\n        for (var tidx = 0; tidx < doc.tags.length; tidx++) {\n            index(\"default\", doc.tags[tidx].Name, {\"store\":true});\n        }\n    }\n}\n"
+    }
+  },
+  "language": "javascript",
+  "views": {}
+}

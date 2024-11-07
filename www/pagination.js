@@ -81,6 +81,57 @@ function setImages0(page, dburl, bookmark, onCompletion) {
 }
 
 
+function findImages0(page, dburl, postDoc, bookmark, onCompletion) {
+    if (!bookmark) {
+        var searchurl = dburl+"/_find";
+//searchurl = "http://mediaserver:5984/photos/_find";
+console.log("DEBUG(findImages0): searchurl: "+searchurl);
+	fetch(searchurl, {
+	    method: 'POST',
+	    headers: {'Content-Type': 'application/json'},
+	    body: JSON.stringify(postDoc)
+	})
+	    .then(res => {
+		if (!res.ok) {
+		    console.log("ERROR(setImages0): network error");
+		} else {
+		    return res.json();
+		}
+	    })
+	    .then(data => {
+console.log("DEBUG(findImages0): data: "+JSON.stringify(data));
+		var imageCnt = 0;
+		for (var i = 0; i < data.docs.length; i++) {
+		    if ((i >= page*RowsPerPage*ColsPerRow) && (i < (page+1)*RowsPerPage*ColsPerRow)) {
+			var img = document.getElementById("image"+imageCnt);
+			img.src = dburl+"/"+data.docs[i]._id+"/thumbnail";
+			img.setAttribute("data-objid", data.docs[i]._id);
+			img.setAttribute("data-firstrow", (page*RowsPerPage));
+
+			var check = document.getElementById("check"+imageCnt);
+			check.checked = false;
+			
+			var f = parent.document.getElementById("imgArrayFrame");
+			f.clearChecksAction();
+			
+			imageCnt += 1;
+		    }
+		}
+		while ((imageCnt > 0) && (imageCnt < RowsPerPage*ColsPerRow)) {
+		    var img = document.getElementById("image"+imageCnt);
+		    img.src = "img/transparent.png";
+		    img.setAttribute("data-objid", null);
+		    imageCnt += 1;
+		}
+		onCompletion();
+	    })
+	    .catch(error => {
+		console.log("ERROR(setImages0): Fetch error: "+error);
+	    });
+    }
+}
+
+
 function forceRedraw(element) {
     if (!element) { return; }
 
@@ -119,14 +170,25 @@ function createPageLink(linkText,pageNumber) {
 
 
 
-function changePage(e, dburl, pageNumber) {
+function changePage(e, dburl, postDoc, pageNumber) {
+    console.log("DEBUG(changePage): entry");
+    console.log("DEBUG(changePage): pageNumber: "+pageNumber);
     if((pageNumber == 0)||(pageNumber==totalPages+1)) return;
+    
+    console.log("TRACE(changePage): trace 1");
     e.preventDefault();
     pageNumberInput.value = "";
 
-    setImages0(pageNumber-1, dburl, null, function onCompletion() {
-	paginateTable(false, pageNumber-1);
-    });
+    if (postDoc) {
+console.log("TRACE(changePage): trace 2");
+	findImages0(pageNumber-1, dburl, postDoc, null, function onCompletion() {
+	    paginateTable(false, 0);
+	});
+    } else {
+	setImages0(pageNumber-1, dburl, null, function onCompletion() {
+	    paginateTable(false, pageNumber-1);
+	});
+    }
 }
 
 
@@ -162,7 +224,23 @@ function search(e, tag) {
     e.preventDefault();
 
     const dburl = document.getElementById("dbUrl").innerHTML.trim();
-    changePage(e, dburl, "2");
+    const mangoQuery = {
+	"selector": {
+	    "type": {
+		"$eq": "photo"
+	    },
+	    "tags": {
+		"$elemMatch": {
+		    "Name": tag
+		}
+	    }
+	},
+	"fields": [
+	    "_id"
+	],
+	"limit": RowsPerPage*ColsPerRow
+    };
+    changePage(e, dburl, mangoQuery, "1");
 }
 
 
