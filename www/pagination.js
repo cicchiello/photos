@@ -3,6 +3,7 @@ const ColsPerRow = 5;
 const pageNumbers = document.getElementById("pageNumbers");
 
 var totalPages = null;
+var searchTagList = [];
 var searchResultset = null;
 
 function forceRedraw(element) {
@@ -215,7 +216,6 @@ function collectResultset(resultset, packetIdx, baseSearchurl, bookmark, onCompl
 	})
 	.then(data => {
 	    data.rows.forEach(r => {resultset.push(r.id);});
-
 	    if (resultset.length < data.total_rows) 
 		collectResultset(resultset, packetIdx+1, baseSearchurl, data.bookmark, onCompletion);
 	    else 
@@ -235,18 +235,29 @@ goToPageButton.addEventListener("click",(e)=>{
 });
 
 
-findImagesButton.addEventListener("click",(e)=>{
-    e.preventDefault();
+function prettyPrintTagList(tagList) {
+    var str = null;
+    tagList.forEach(tag => {
+	if (str === null) str = tag;
+	else str += " "+tag;
+    });
+    return str === null ? "" : str;
+}
 
+
+function onFindImagesButton(onCompletion) {
     const dburl = document.getElementById("dbUrl").innerHTML.trim();
-    const searchTerm = tagInput.value;
+    searchTagList.push(tagInput.value);
+    tagList.value = prettyPrintTagList(searchTagList);
+    tagInput.value = null;
 
     const PacketSz = 100;
-    const searchurl = dburl+"/_design/photos_by_tag/_search/photos_by_tag?limit="+PacketSz+"&q="+searchTerm;
-    //like: "http://mediaserver:5984/photos/_design/photos_by_tag/_search/photos_by_tag?limit=200&q=cherry";
+    var searchurl = dburl+"/_design/photos_by_tag/_search/photos_by_tag?limit="+PacketSz+"&q=";
+    searchTagList.forEach((tag,i) => {if (i>0) searchurl += " AND "; searchurl += tag;});
+    //like: "http://mediaserver:5984/photos/_design/photos_by_tag/_search/photos_by_tag?limit=200&q=man AND woman";
 
-    collectResultset([], 0, searchurl, null, function onCompletion (resultset) {
-	console.log("DEBUG(findImagesButton): resultset.length: "+resultset.length);
+    collectResultset([], 0, searchurl, null, resultset => {
+	//console.log("DEBUG(findImagesButton): resultset.length: "+resultset.length);
 
 	searchResultset = resultset;
 
@@ -255,7 +266,15 @@ findImagesButton.addEventListener("click",(e)=>{
 	updateTableRendering(getVisibleSubset(resultset, offset), pageIdx, dburl);
 	
 	paginate(resultset, offset, resultset.length);
+	if (onCompletion) onCompletion();
     });
+}
+
+
+findImagesButton.addEventListener("click",(e)=>{
+    e.preventDefault();
+
+    onFindImagesButton(function onCompletion() {});
 });
 
 
@@ -263,7 +282,20 @@ clearFindButton.addEventListener("click",(e)=>{
     e.preventDefault();
 
     searchResultset = null;
-    tagInput.value = ""
+    searchTagList = []
+    tagInput.value = null;
+    tagList.value = null;
     changeSearchPage(e, null, "1");
 });
 
+
+tagInput.addEventListener("keypress", function(event) {
+    if (event.key === "Enter") {
+        event.preventDefault();
+	onFindImagesButton(function onCompletion() {
+	    setTimeout(function(){
+		tagInput.focus();
+	    },50); // you can play with this timeout to make it as short as possible
+	});
+    }
+});

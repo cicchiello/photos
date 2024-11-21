@@ -132,6 +132,10 @@
           font-style: italic;
       }
     
+      .tagList { 
+          text-align: right; 
+      }
+      
     </style>
     
     <script>
@@ -183,8 +187,9 @@
        </span>
        <span>
          <label for="search-key">Search tag: </label>
-         <input id="tagInput" type="text" size="15" placeholder="some tag">
-	 <button id="findImagesButton">Get</button>
+         <input id="tagInput" type="text" size="15" placeholder="enter tag here">
+	 <button id="findImagesButton">&gt;&gt;&gt;&gt;</button>
+         <input id="tagList" class="tagList" type="text" placeholder="tag filters collect here..." style="width:55%;" readonly>
 	 <button id="clearFindButton">Clear</button>
        </span>
        <p></p>
