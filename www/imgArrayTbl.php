@@ -112,7 +112,7 @@
       }
 
       .album-container {
-	  height: 85px; /* any fixed value for the parent */
+	  height: 74px; /* any fixed value for the parent */
       }
 
       .center {
@@ -137,7 +137,7 @@
     <script>
         function init(row) {
 	    const rowsPerPage = 5;
-	    paginateTable(true, Math.trunc(row/rowsPerPage));
+	    paginate(null, Math.trunc(row/rowsPerPage), null);
         }
       
         function imgInfoAction(elemid) {
@@ -155,7 +155,9 @@
             var f = parent.document.getElementById("imgArrayFrame");
 	    var img = document.getElementById(elemid);
 	    var objid = img.getAttribute('data-objid');
-	    f.checkboxAction(checkboxElem, dburl, objid);
+	    if (objid !== "null") {
+		f.checkboxAction(checkboxElem, dburl, objid);
+	    }
 	}
       
     </script>
@@ -183,6 +185,7 @@
          <label for="search-key">Search tag: </label>
          <input id="tagInput" type="text" size="15" placeholder="some tag">
 	 <button id="findImagesButton">Get</button>
+	 <button id="clearFindButton">Clear</button>
        </span>
        <p></p>
        <table id="myTable" style="width:100%; overflow:scroll">

@@ -133,15 +133,18 @@ function renderImgArrayTable($firstrow, $DbBase, $items, $onImgAction, $onCheckA
 
         if ($rendering) {
             $id = $item['id'];
-	    $imgId = "image".$cnt;
-	    $checkId = "check".$cnt;
+	    $imgId = 'image'.$cnt;
+	    $entryId = 'entry'.$cnt;
+	    $labelId = 'label'.$cnt;
+	    $checkId = 'check'.$cnt;
+	    $checkStr = $onCheckAction.'(this,'.$q.$DbBase.$q.','.$q.$imgId.$q.')';
             $imgUrl = $DbBase.'/'.$id.'/thumbnail';
       
             $result .= '  <td style="text-align:left">';
-	    $result .= '     <div>';
-	    $result .= '        <label class="check-container">';
+	    $result .= '     <div id="'.$entryId.'">';
+	    $result .= '        <label id="'.$labelId.'" class="check-container">';
 	    $result .= '           <input id="'.$checkId.'" type="checkbox" ';
-	    $result .= '                  onclick="'.$onCheckAction.'(this,'.$q.$DbBase.$q.','.$q.$imgId.$q.')">';
+	    $result .= '                  onclick="'.$checkStr.'">';
 	    $result .= '           <span class="checkmark"></span>';
 	    $result .= '        </label>';
             $result .= '        <img id="'.$imgId.'" src="'.$imgUrl.'" alt="image"';
@@ -181,12 +184,16 @@ function renderImgArrayTable($firstrow, $DbBase, $items, $onImgAction, $onCheckA
                 $result .= '<tr class="'.$class.'" style="'.$style.'">';	    
             }
 	
-	    $imgId = "image".$cnt;
+	    $imgId = 'image'.$cnt;
+	    $entryId = 'entry'.$cnt;
+	    $labelId = 'label'.$cnt;
+	    $checkId = 'check'.$cnt;
       
-            $result .= '  <td style="text-align:left">';
-	    $result .= '     <div>';
-	    $result .= '        <label class="check-container">';
-	    $result .= '           <input type="checkbox" onclick="'.$onCheckAction.'(this,'.$q.$DbBase.$q.',null)">';
+            $result .= '  <td style="text-align:left; >';
+	    $result .= '     <div id="'.$entryId.'">';
+	    $result .= '        <label id="'.$labelId.'" class="check-container" style="visibility:hidden">';
+	    $result .= '           <input id="'.$checkId.'" type="checkbox"';
+	    $result .= '                  onclick="'.$onCheckAction.'(this,'.$q.$DbBase.$q.',null)">';
 	    $result .= '           <span class="checkmark"></span>';
 	    $result .= '        </label>';
             $result .= '        <img id="'.$imgId.'" src="img/transparent.png" alt="image"';
@@ -194,7 +201,7 @@ function renderImgArrayTable($firstrow, $DbBase, $items, $onImgAction, $onCheckA
             $result .= '             data-firstrow="'.$firstrow.'"';
             $result .= '             class="album-img album-container center Btn"';
             $result .= '             onclick="'.$onImgAction.'('.$q.$imgId.$q.')"';
-            $result .= '             style="vertical-align:horizontal-align;margin:2px 2px 2px 2px"';
+            $result .= '             style="vertical-align:horizontal-align;margin:2px 2px 2px 2px; visibility:hidden"';
             $result .= '             title=""/>';
 	    $result .= '     </div>';
             $result .= '  </td>';

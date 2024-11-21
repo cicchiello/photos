@@ -159,7 +159,7 @@
 	      style="width:27%; padding:20px; margin:10px"
 	      class="w3-round-large w3-display-bottomleft"></textarea>
       
-    <div style="height:85%; width:70%; padding:10px; margin:10px"
+    <div style="height:90%; width:70%; padding:10px; margin:10px"
 	 class="w3-white w3-round-large w3-panel w3-display-bottomright">
 
       <iframe id="imgArrayFrame" src="" frameBorder="0"
