@@ -4,12 +4,6 @@
     "users": {
       "map": "function (doc) {\n  if (doc.type && (typeof doc.type === 'string') && (doc.type === 'user'))\n    emit(\"user:\"+doc.username, doc);\n}"
     },
-    "photos": {
-      "map": "function (doc) {\n  if (doc.type && (typeof doc.type === 'string') && (doc.type === 'photo'))\n    emit(doc.paths[0], doc);\n}"
-    },
-    "photos_by_key": {
-      "map": "function (doc) {\r\n    if (doc.type && (typeof doc.type === 'string') && (doc.type === 'photo')) {\r\n        for (var idx in doc.tags) {\r\n            const tag = doc.tags[idx];\r\n            emit(tag.Name, null);\r\n        }\r\n    }\r\n}"
-    },
     "photo_ids": {
       "map": "function (doc) {\n  if (doc.type && (typeof doc.type === 'string') && (doc.type === 'photo'))\n    emit(doc.paths[0], null);\n}"
     }
