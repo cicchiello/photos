@@ -112,7 +112,7 @@
       }
 
       .album-container {
-	  height: 74px; /* any fixed value for the parent */
+	  height: calc(20vh - 40px); /* any fixed value for the parent */
       }
 
       .center {
@@ -176,7 +176,7 @@
 
             echo 'onload="init('."'".$row."'".')">';
 	 ?>
-     <div id="myTableParent" class="table-responsive">
+     <div id="myTableParent" class="table-responsive" style="width: calc(100% - 15px);" >
        <span id = "dbUrl" hidden>
            <?php
               $ini = parse_ini_file("./config.ini");
@@ -187,9 +187,9 @@
        </span>
        <span>
          <label for="search-key">Search tag: </label>
-         <input id="tagInput" type="text" size="15" placeholder="enter tag here">
+         <input id="tagInput" type="text" size="12" placeholder="enter tag here">
 	 <button id="findImagesButton">&gt;&gt;&gt;&gt;</button>
-         <input id="tagList" class="tagList" type="text" placeholder="tag filters collect here..." style="width:55%;" readonly>
+         <input id="tagList" class="tagList" type="text" placeholder="tag filters collect here..." style="width:45%;" readonly>
 	 <button id="clearFindButton">Clear</button>
        </span>
        <p></p>
@@ -203,17 +203,17 @@
 	      echo renderImgArrayTable($row, $DbBase, $items, 'imgInfoAction', 'checkAction');
            ?>
        </table>
-     </div>
-     <div id="pagination">
-       <div id="entriesDisplayDiv">
-         Showing <span id="from"> </span> to <span id="to"></span> out of
-	 <span id="totalTableEntries"><?php echo $numitems; ?></span> entries 
-       </div>
-       <div id="pageNumbersContainer">
-         <div id="pageNumbers"></div>
-         <div id="goToPage">Go to Page <input id="pageNumberInput" type="number">
-	   <button id="goToPageButton">Confirm</button>
-	 </div>
+       <div id="pagination">
+         <div id="entriesDisplayDiv">
+           Showing <span id="from"> </span> to <span id="to"></span> out of
+	   <span id="totalTableEntries"><?php echo $numitems; ?></span> entries 
+         </div>
+         <div id="pageNumbersContainer">
+           <div id="pageNumbers"></div>
+           <div id="goToPage">Go to Page <input id="pageNumberInput" type="number">
+	     <button id="goToPageButton">Confirm</button>
+	   </div>
+         </div>
        </div>
      </div>
 	
