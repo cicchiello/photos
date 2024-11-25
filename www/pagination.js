@@ -254,7 +254,7 @@ function onFindImagesButton(onCompletion) {
     const PacketSz = 100;
     var searchurl = dburl+"/_design/photos_by_tag/_search/photos_by_tag?limit="+PacketSz+"&q=";
     searchTagList.forEach((tag,i) => {if (i>0) searchurl += " AND "; searchurl += tag;});
-    //like: "http://mediaserver:5984/photos/_design/photos_by_tag/_search/photos_by_tag?limit=200&q=man AND woman";
+    //like: "http://HOST:5984/photos/_design/photos_by_tag/_search/photos_by_tag?limit=200&q=man AND woman";
 
     collectResultset([], 0, searchurl, null, resultset => {
 	//console.log("DEBUG(findImagesButton): resultset.length: "+resultset.length);

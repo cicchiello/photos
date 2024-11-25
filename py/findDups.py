@@ -30,7 +30,7 @@ class AllDocsView():
     def __init__(self, db, creds, verbose=False):
         self._creds = creds
         self._baseurl = "%s/_design/photos/_view/photo_ids?descending=false" % db
-        #like: "http://mediaserver:5984/photos/_design/photos/_view/photo_ids?descending=false&skip="+offset
+        #like: "http://HOST:5984/photos/_design/photos/_view/photo_ids?descending=false&skip="+offset
 
     def getBatch(self, limit, offset):
         _headers = {"Content-Type": "application/json"}
