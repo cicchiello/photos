@@ -186,11 +186,11 @@
            ?>
        </span>
        <span>
-         <label for="search-key">Search tag: </label>
-         <input id="tagInput" type="text" size="12" placeholder="enter tag here">
-	 <button id="findImagesButton">&gt;&gt;&gt;&gt;</button>
-         <input id="tagList" class="tagList" type="text" placeholder="tag filters collect here..." style="width:45%;" readonly>
-	 <button id="clearFindButton">Clear</button>
+         <label for="tagInput" class="w3-small" style="font-weight:bold">Search tag: </label>
+         <input id="tagInput" class="w3-small" type="text" size="12" placeholder="enter tag here">
+	 <button id="findImagesButton" class="w3-small" style="font-weight:bold">&gt;&gt;&gt;&gt;</button>
+         <input id="tagList" class="tagList w3-small" type="text" placeholder="tag filters collect here..." style="width:45%;" readonly>
+	 <button id="clearFindButton" class="w3-small" style="font-weight:bold">Clear</button>
        </span>
        <p></p>
        <table id="myTable" style="width:100%; overflow:scroll">

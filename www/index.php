@@ -24,6 +24,35 @@
     textarea {
         resize: none;
     }
+    
+    div.relative {
+      position: relative;
+      width: 100%;
+      height: 10%;
+    }
+
+    .addTagArea {
+        position: absolute;
+        bottom: 10px;
+        left: 20px;
+        width: 200px;
+        height: 100px;
+        border: 3px solid #73AD21;
+    }
+
+    input:placeholder-shown {
+        font-style: italic;
+    }
+    
+    .tagAddArea {
+	position: relative;
+	bottom: 10px;
+	padding: 10px;
+	margin: 10px;
+        display: flex;
+        justify-content: center;
+    }
+
   </style>
 
   <script>
@@ -147,27 +176,49 @@
 
         if (isset($_COOKIE['login_user'])) {
             echo 'onload="init('."'".$row."',".$confidence.')">';
-            echo renderMainMenu($_COOKIE['login_user']);
+            echo renderProfileArea($_COOKIE['login_user']);
         } else {
             echo 'onload="forceLogin()">';
         }
         #echo var_dump(isset($_COOKIE['login_user']));
     ?>
 
-    <textarea readonly placeholder="Common tags of selected images..."
-	      id="key-area" rows="10" cols="4"
-	      style="width:27%; padding:20px; margin:10px"
-	      class="w3-round-large w3-display-bottomleft"></textarea>
+    <div style="height:90%; width:90%;">
+
+        <div class="relative">
+        </div>
+	
+        <div style="position: relative;">
+	  
+            <textarea readonly placeholder="Common tags of selected images..."
+                id="key-area" rows="18" cols="4"
+                style="position:fixed; width:27%; height:80%; padding-left:10px; margin-left:10px; padding-top:10px"
+                class="w3-round-large"></textarea>
+
+            <div style="position:fixed; width:27%; bottom:0; height:45px; margin:10px; z-index:999;"
+                class="w3-white w3-round-large">
+	      
+                <div class="tagAddArea">
+                    <label for="newTag" class="w3-small">New tag:&nbsp;</label>
+                    <input id="newTag" type="text" size="12" class="w3-small" placeholder="enter tag here">
+                    <button id="addNewTagButton" class="w3-small" style="font-weight:bold">Add</button>
+                </div>
+		
+            </div>
+       
+        </div>
+	
+        <div style="height:90%; width:70%; padding:10px; margin:10px"
+            class="w3-white w3-round-large w3-panel w3-display-bottomright">
+
+            <iframe id="imgArrayFrame" src="" frameBorder="0"
+                height="100%" width="100%" style="float:right; z-index:999">
+                <p>Your browser does not support iframes.</p>
+            </iframe>
+
+      </div>
       
-    <div style="height:90%; width:70%; padding:10px; margin:10px"
-	 class="w3-white w3-round-large w3-panel w3-display-bottomright">
-
-      <iframe id="imgArrayFrame" src="" frameBorder="0"
-	      height="100%" width="100%" style="float:right; z-index:999">
-	<p>Your browser does not support iframes.</p>
-      </iframe>
-
     </div>
-
+    
   </body>
 </html>
