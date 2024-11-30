@@ -225,10 +225,12 @@ function renderImgArrayTable($firstrow, $DbBase, $items, $onImgAction, $onCheckA
 
 function renderImgInfo($id,$row)
 {
+   $q = "'";
+
    $ini = parse_ini_file("./config.ini");
    $confidenceLimit = $ini['rekognizeConfidence']; 
    $DbBase = $ini['couchbase'];
-   $Db = "photos";
+   $Db = $ini['dbname'];
    $detailUrl = $DbBase.'/'.$Db.'/'.$id;
    $imgUrl = $detailUrl.'/web_image';
 
@@ -242,23 +244,39 @@ function renderImgInfo($id,$row)
    $result .= '       <img class="image" id="image" src="'.$imgUrl.'"';
    $result .= '            align="center" title="Image"/>';
    $cnt = 0;
+
+   // Sort tags by confidence
+   usort($detail['tags'], function($a, $b) {
+       $confA = strcasecmp($a['source'], 'user') === 0 ? 100.0 : $a['Confidence'];
+       $confB = strcasecmp($b['source'], 'user') === 0 ? 100.0 : $b['Confidence'];
+       return $confB <=> $confA;  // Sort in descending order
+   });
+
    foreach($detail['tags'] as $tag) {
-      if ($tag['source'] == 'rekognition') {
+      if (strcasecmp($tag['source'], 'rekognition') === 0) {
         $confidence = $tag['Confidence'];
         if ($confidence > $confidenceLimit) {
-	  $confidenceStr = sprintf("%2.1f", $confidence);
-	  $strength = ($confidence-$confidenceLimit)/(100.0-$confidenceLimit);
-	  $cstr = '#0a'.sprintf("%02x", 255*$strength).'40';
-	  if ($strength < 0.5) {
+          $confidenceStr = sprintf("%2.0f%%", $confidence);
+          $strength = ($confidence-$confidenceLimit)/(100.0-$confidenceLimit);
+          $cstr = '#0a'.sprintf("%02x", 255*$strength).'40';
+          if ($strength < 0.5) {
             $color = 'white';
-	  } else {
+          } else {
             $color = 'black';
-	  }
+          }
           $result .= '    <button class="pillButton" style="background-color:'.$cstr;
-          $result .= ';color:'.$color.'" title="'.$confidenceStr.'">';
-	  $result .= $tag['Name'].'<small></small> <b>-</b></button>';
+          $result .= ';color:'.$color.';cursor:default" title="Confidence '.$confidenceStr.'">';
+          $result .= $tag['Name'].'</button>';
           $cnt += 1;
         }
+      } else if (strcasecmp($tag['source'], 'user') === 0) {
+        // User tags are always shown with full confidence
+        $username = isset($tag['username']) ? $tag['username'] : 'unknown';
+        $result .= '    <button class="pillButton" style="background-color:#6898FF;color:black;cursor:pointer" ';
+        $result .= 'title="Added by '.$username.'" ';
+        $result .= 'onclick="deleteTag('.$q.$tag['Name'].$q.','.$q.$id.$q.');">';
+        $result .= $tag['Name'].'</button>';
+        $cnt += 1;
       }
    }
    $result .= '	 </div>';
@@ -571,6 +589,115 @@ function writeUsername($id,$uname) {
   unset($row['_id']);
   
   putDb($WriteDbBase.'/'.$id, $row);
+}
+
+function updateDoc($objUrl, $doc) {
+    // Update the document in CouchDB
+    $options = array(
+        'http' => array(
+            'header'  => "Content-type: application/json\r\n",
+            'method'  => 'PUT',
+            'content' => json_encode($doc)
+        )
+    );
+    $context = stream_context_create($options);
+    $result = file_get_contents($objUrl, false, $context);
+        
+    return ($result !== FALSE);
+}
+
+function addTagToImage($imageId, $newTag, $username) {
+   // First get the db details
+   $ini = parse_ini_file("./config.ini");
+   $DbBase = $ini['couchbase'];
+   $Db = $ini['dbname'];
+
+    // First get the current document
+    $objUrl = $DbBase.'/'.$Db.'/'.$imageId;
+    $response = file_get_contents($objUrl);
+    
+    if ($response === FALSE) {
+        return false;
+    }
+    
+    $doc = json_decode($response, true);
+    if (!$doc) {
+        return false;
+    }
+
+    // Check if tag already exists with 100.0 confidence
+    $skipTag = false;
+    foreach ($doc['tags'] as $tag) {
+        if ($tag['Name'] === strtolower($newTag) && 
+            isset($tag['Confidence']) && 
+            $tag['Confidence'] == 100.0) {
+            $skipTag = true;
+            break;
+        }
+    }
+
+    if (!$skipTag) {
+        // Create new tag object
+        $newTagObj = array(
+            'Name' => strtolower($newTag),
+            'Confidence' => 100.0,
+            'timestamp' => time(),
+            'source' => 'user',
+            'username' => $username,
+            'Instances' => array(),
+            'Parents' => array(),
+            'Aliases' => array(),
+            'Categories' => array()
+        );
+
+        // Add new tag to document
+        $doc['tags'][] = $newTagObj;
+
+	return updateDoc($objUrl, $doc);
+    }
+    
+    return true;
+}
+
+
+function deleteTagFromImage($imageId, $tagName, $username) {
+   // First get the db details
+   $ini = parse_ini_file("./config.ini");
+   $DbBase = $ini['couchbase'];
+   $Db = $ini['dbname'];
+
+    // Then get the current document
+    $objUrl = $DbBase.'/'.$Db.'/'.$imageId;
+    $response = file_get_contents($objUrl);
+    
+    if ($response === FALSE) {
+        return false;
+    }
+    
+    $doc = json_decode($response, true);
+    if (!$doc) {
+        return false;
+    }
+
+    // Find and remove the tag if it belongs to this user
+    $found = false;
+    $doc['tags'] = array_filter($doc['tags'], function($tag) use ($tagName, $username, &$found) {
+        if (strcasecmp($tag['Name'], $tagName) === 0 && 
+            strcasecmp($tag['source'], 'user') === 0 && 
+            isset($tag['username']) && 
+            $tag['username'] === $username) {
+            $found = true;
+            return false;
+        }
+        return true;
+    });
+
+    if (!$found) {
+        return false;
+    }
+
+    // Update the document in CouchDB 
+    return updateDoc($objUrl, $doc);
 }
 
 ?>

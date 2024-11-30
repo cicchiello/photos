@@ -76,6 +76,26 @@
 	    }
 	}
 
+        async function deleteTag(tagName, imageId) {
+            if (!confirm(`Are you sure you want to delete the tag "${tagName}"?`)) {
+                return;
+            }
+
+            try {
+		const tagnameenc = encodeURIComponent(tagName);
+                const response = await fetch('deleteTag.php?imageid='+imageId+'&tagname='+tagnameenc);
+                if (!response.ok) {
+                    throw new Error('Failed to delete tag');
+                }
+                
+                // Refresh the page to show updated tags
+                location.reload();
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to delete tag: ' + error.message);
+            }
+        }
+
   </script>
   
   </head>
