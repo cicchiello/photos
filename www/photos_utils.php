@@ -226,6 +226,7 @@ function renderImgArrayTable($firstrow, $DbBase, $items, $onImgAction, $onCheckA
 function renderImgInfo($id,$row)
 {
    $q = "'";
+   $userTagColor = '#B3CCFF';  // Medium blue - between bright and subtle
 
    $ini = parse_ini_file("./config.ini");
    $confidenceLimit = $ini['rekognizeConfidence']; 
@@ -272,7 +273,7 @@ function renderImgInfo($id,$row)
       } else if (strcasecmp($tag['source'], 'user') === 0) {
         // User tags are always shown with full confidence
         $username = isset($tag['username']) ? $tag['username'] : 'unknown';
-        $result .= '    <button class="pillButton" style="background-color:#6898FF;color:black;cursor:pointer" ';
+        $result .= '    <button class="pillButton" style="background-color:'.$userTagColor.';color:black;cursor:pointer" ';
         $result .= 'title="Added by '.$username.'" ';
         $result .= 'onclick="deleteTag('.$q.$tag['Name'].$q.','.$q.$id.$q.');">';
         $result .= $tag['Name'].'</button>';

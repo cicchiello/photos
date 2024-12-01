@@ -53,6 +53,11 @@
         justify-content: center;
     }
 
+    .hint-text {
+        color: #999;
+        font-style: italic;
+    }
+
   </style>
 
   <script>
@@ -61,6 +66,7 @@
     var allTags = {};
     var allUserTags = {};
     var selectedImageIds = new Set();
+    var userTagColor = '#B3CCFF';  // Medium blue - between bright and subtle
 
     function calcNonUserIntersection(imageIds) {
         var intersection = new Set();
@@ -97,12 +103,16 @@
 
     function renderTagset(fullTagset, userTagset) {
         var str = "";
-        userTagset.forEach(tag => {
-	    str += tag+"*\n";
-	});
-        fullTagset.forEach(tag => {
-	    str += tag+"\n";
-	});
+        if (fullTagset.length === 0 && userTagset.length === 0) {
+            str = '<span class="hint-text">Common tags of selected images...</span>';
+        } else {
+            userTagset.forEach(tag => {
+		str += `<span class="pillButton" style="background-color:${userTagColor};color:black">${tag}</span>\n`;
+	    });
+            fullTagset.forEach(tag => {
+		str += tag+"\n";
+	    });
+        }
 
         var keyArea = document.getElementById("key-area");
         keyArea.innerHTML = str;
@@ -169,19 +179,16 @@
         updateAddTagButtonState();
     }
     
-    async function persistTagToImage(imageId, newTag) {
+    async function persistTagToImage(imageId, newTag, onCompletion) {
         try {
             const tagenc = encodeURIComponent(newTag);
-            const response = await fetch('addTag.php?imageid='+imageId+'&tag='+tagenc);
+	    const url = 'addTag.php?imageid='+imageId+'&tag='+tagenc;
+            const response = await fetch(url);
             if (!response.ok) {
                 throw new Error('Failed to update tag');
             }
-            
-            // Refresh the tags for this image 
-	    collectTags(baseDbUrl, imageId, function onCompletion() {
-		renderTagset(calcNonUserIntersection(selectedImageIds), calcUserIntersection(selectedImageIds));
-	    });
-	    
+
+	    onCompletion();
         } catch (error) {
             console.error(`Error updating ${objid}:`, error);
             return false;
@@ -189,8 +196,9 @@
     }
 
     function persistTagToImages(imageIds, idx, newTag, onCompletion) {
-	if (idx > imageIds.length) {
+	if (idx >= imageIds.length) {
 	    onCompletion();
+	    
 	    return;
 	} else {
 	    persistTagToImage(imageIds[idx], newTag, function innerOnCompletion() {
@@ -200,8 +208,9 @@
     }
 
     function collectImageListTags(imageIds, idx, onCompletion) {
-	if (idx > imageIds.length) {
+	if (idx >= imageIds.length) {
 	    onCompletion();
+	    
 	    return;
 	} else {
 	    collectTags(baseDbUrl, imageIds[idx], function innerOnCompletion() {
@@ -220,8 +229,10 @@
         }
 
         let success = true;
+        // Clear the input field immediately
+        newTagInput.value = '';
+        
 	persistTagToImages(Array.from(selectedImageIds), 0, newTag, function onCompletion() {
-            newTagInput.value = '';
             allTags = {};
 	    allUserTags = {};
 	    collectImageListTags(selectedImageIds, 0, function innerOnCompletion() {
@@ -318,10 +329,9 @@
 	
         <div style="position: relative;">
 	  
-            <textarea readonly placeholder="Common tags of selected images..."
-                id="key-area" rows="18" cols="4"
-                style="position:fixed; width:27%; height:80%; padding-left:10px; margin-left:10px; padding-top:10px"
-                class="w3-round-large"></textarea>
+            <div id="key-area"
+                style="position:fixed; width:27%; height:80%; padding-left:10px; margin-left:10px; padding-top:10px; white-space:pre; font-family:monospace; overflow-y:auto; background-color:white"
+                class="w3-round-large"><span class="hint-text">Common tags of selected images...</span></div>
 
             <div style="position:fixed; width:27%; bottom:0; height:45px; margin:10px; z-index:999;"
                 class="w3-white w3-round-large">
