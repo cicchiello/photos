@@ -1,5 +1,5 @@
 const RowsPerPage = 5;
-const ColsPerRow = 5;
+const ColsPerRow = 6;
 const pageNumbers = document.getElementById("pageNumbers");
 
 var totalPages = null;
@@ -189,7 +189,7 @@ function changeSearchPage(e, resultset, pageNumber) {
     const pageIdx = pageNumber-1;
     const perpage = RowsPerPage*ColsPerRow;
     const offset = pageIdx*perpage;
-
+    
     const dburl = document.getElementById("dbUrl").innerHTML.trim();
     
     if (resultset === null) {

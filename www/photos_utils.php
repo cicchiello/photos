@@ -108,7 +108,7 @@ function renderImgArrayTable($firstrow, $DbBase, $items, $onImgAction, $onCheckA
     $rendering = false;
     $row = 0;
     $col = 0;
-    $ColsPerRow = 5;
+    $ColsPerRow = 6;
     $NumRows = 5;
     $cnt = 0;
     foreach ($items as $item) {

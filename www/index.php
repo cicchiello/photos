@@ -58,6 +58,13 @@
         font-style: italic;
     }
 
+    .key-area {
+	background-color: #F5F5F5;
+	width: 100%;
+	height: 90%;
+	overflow-y: auto;
+    }
+
   </style>
 
   <script>
@@ -104,13 +111,13 @@
     function renderTagset(fullTagset, userTagset) {
         var str = "";
         if (fullTagset.length === 0 && userTagset.length === 0) {
-            str = '<span class="hint-text">Common tags of selected images...</span>';
+            str = '<span class="hint-text">...of selected images</span>';
         } else {
             userTagset.forEach(tag => {
-		str += `<span class="pillButton" style="background-color:${userTagColor};color:black">${tag}</span>\n`;
+		str += `<span class="pillButton" style="background-color:${userTagColor};color:black">${tag}</span><br>`;
 	    });
             fullTagset.forEach(tag => {
-		str += tag+"\n";
+		str += tag+"<br>";
 	    });
         }
 
@@ -157,7 +164,7 @@
                     console.log("ERROR(collectTags): Fetch error: "+error);
 		    onCompletion();
                 });
-        }
+	}
     }
     
     function checkboxAction(checkboxElem, dburl, imageId) {
@@ -231,11 +238,11 @@
         let success = true;
         // Clear the input field immediately
         newTagInput.value = '';
-        
+
 	persistTagToImages(Array.from(selectedImageIds), 0, newTag, function onCompletion() {
             allTags = {};
 	    allUserTags = {};
-	    collectImageListTags(selectedImageIds, 0, function innerOnCompletion() {
+	    collectImageListTags(Array.from(selectedImageIds), 0, function innerOnCompletion() {
 		renderTagset(calcNonUserIntersection(selectedImageIds), calcUserIntersection(selectedImageIds));
 	    });
 	});
@@ -328,25 +335,30 @@
         </div>
 	
         <div style="position: relative;">
-	  
-            <div id="key-area"
-                style="position:fixed; width:27%; height:80%; padding-left:10px; margin-left:10px; padding-top:10px; white-space:pre; font-family:monospace; overflow-y:auto; background-color:white"
-                class="w3-round-large"><span class="hint-text">Common tags of selected images...</span></div>
+            <div style="position:fixed; width:20%; height:75%; margin-left:10px; background-color:white"
+                 class="w3-round-large">
+                <span class="w3-medium" style="font-weight:bold; margin-left:45px;">Common tags: </span>
+                <div id="key-area" class="key-area" style="font-family:monospace; padding:10px; overflow-y=scroll;">
+                    <span class="hint-text">...of selected images</span>
+                </div>
+	    </div>
 
-            <div style="position:fixed; width:27%; bottom:0; height:45px; margin:10px; z-index:999;"
+            <div style="position:fixed; width:20%; bottom:0; height:70px; margin:10px; z-index:999;"
                 class="w3-white w3-round-large">
 	      
+                <span class="w3-medium" style="font-weight:bold; margin-left:70px;">New tag:</span>
                 <div class="tagAddArea">
-                    <label for="newTag" class="w3-small">New tag:&nbsp;</label>
-                    <input id="newTag" type="text" size="12" class="w3-small" placeholder="enter tag here">
-                    <button id="addNewTagButton" class="w3-small" style="font-weight:bold" onclick="handleAddTag()" disabled>Add</button>
+		    <div>
+                        <input id="newTag" type="text" size="12" class="w3-small" placeholder="enter tag here">
+                        <button id="addNewTagButton" class="w3-small" style="font-weight:bold" onclick="handleAddTag()" disabled>Add</button>
+                    </div>
                 </div>
 		
             </div>
        
         </div>
 	
-        <div style="height:90%; width:70%; padding:10px; margin:10px"
+        <div style="height:89.5%; width:77%; padding:10px; margin:10px"
             class="w3-white w3-round-large w3-panel w3-display-bottomright">
 
             <iframe id="imgArrayFrame" src="" frameBorder="0"
