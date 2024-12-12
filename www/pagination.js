@@ -3,8 +3,28 @@ const ColsPerRow = 6;
 const pageNumbers = document.getElementById("pageNumbers");
 
 var totalPages = null;
-var searchTagList = [];
-var searchResultset = null;
+
+var sSearchTagList = [];
+var sSelectedList = [];
+
+
+function setSearchTagList(taglist) {
+    sSearchTagList = taglist;
+}
+
+function getSearchTagList() {
+    return sSearchTagList;
+}
+
+function setSelectedList(newSelectedList) {
+    sSelectedList = newSelectedList;
+}
+
+function getSelectedList() {
+    return sSelectedList;
+}
+
+
 
 function forceRedraw(element) {
     if (!element) { return; }
@@ -36,12 +56,15 @@ function createSearchPageLink(linkText, resultset, pageNumber) {
     
     pageLink.addEventListener("click", function(e){
 	changeSearchPage(e, resultset, pageNumber);
+	
+	var f = parent.document.getElementById("imgArrayFrame");
+	f.clearChecksAction();
     });
     pageNumbers.appendChild(pageLink);
 }
 
 
-function paginate(resultset, pageIdx, numItems) {
+function paginate(resultset, pageIdx, numItems, onCompletion) {
     currentPage = pageIdx+1; // not zero-based
 
     if (!numItems) numItems = totalTableEntries.innerHTML;
@@ -73,6 +96,9 @@ function paginate(resultset, pageIdx, numItems) {
     from.innerHTML = (currentPage-1)*RowsPerPage*ColsPerRow+1;
     to.innerHTML = currentPage === totalPages ? numItems : (currentPage)*RowsPerPage*ColsPerRow;
     totalTableEntries.innerHTML = numItems;
+
+    if (onCompletion)
+	onCompletion();
 }
 
 
@@ -99,9 +125,6 @@ function setImages0(page, dburl, query, onCompletion) {
 		    var check = document.getElementById("check"+imageCnt);
 		    check.checked = false;
 
-		    var f = parent.document.getElementById("imgArrayFrame");
-		    f.clearChecksAction();
-
 		    var label = document.getElementById("label"+imageCnt);
 		    label.style.visibility = "visible";
 
@@ -122,6 +145,7 @@ function setImages0(page, dburl, query, onCompletion) {
 
 		imageCnt += 1;
 	    }
+
 	    onCompletion(data.total_rows);
 	})
 	.catch(error => {
@@ -161,9 +185,6 @@ function updateTableRendering(visibleSet, pageIdx, dburl) {
 	
 	imageCnt += 1;
     }
-    
-    var f = parent.document.getElementById("imgArrayFrame");
-    f.clearChecksAction();
 }
 
 
@@ -180,11 +201,17 @@ function getVisibleSubset(resultset, offset) {
 
 
 function changeSearchPage(e, resultset, pageNumber) {
+    if (e !== null) 
+	e.preventDefault();
+    
+    pageNumberInput.value = "";
+
+    var numItems = totalTableEntries.innerHTML;
+    if (totalPages === null) 
+	totalPages = Math.trunc(numItems/RowsPerPage/ColsPerRow)+1;
+    
     if((pageNumber <= 0)||(pageNumber>totalPages))
 	return;
-    
-    e.preventDefault();
-    pageNumberInput.value = "";
 
     const pageIdx = pageNumber-1;
     const perpage = RowsPerPage*ColsPerRow;
@@ -192,15 +219,16 @@ function changeSearchPage(e, resultset, pageNumber) {
     
     const dburl = document.getElementById("dbUrl").innerHTML.trim();
     
-    if (resultset === null) {
+    if ((resultset === null) || (resultset.length === 0)) {
 	setImages0(pageIdx, dburl,
                "/_design/photos/_view/photo_ids?descending=false&limit="+perpage+"&skip="+offset,
-               function onCompletion(numItems) {
-		   paginate(null, pageIdx, numItems);
-	       });
+               function onCompletion() {paginate(null, pageIdx, numItems);});
     } else {
 	updateTableRendering(getVisibleSubset(resultset, offset), pageIdx, dburl);
 	paginate(resultset, pageIdx, resultset.length);
+
+	var f = parent.document.getElementById("imgArrayFrame");
+	f.clearChecksAction();
     }
 }
 
@@ -216,23 +244,17 @@ function collectResultset(resultset, packetIdx, baseSearchurl, bookmark, onCompl
 	})
 	.then(data => {
 	    data.rows.forEach(r => {resultset.push(r.id);});
-	    if (resultset.length < data.total_rows) 
+	    if (resultset.length < data.total_rows) {
 		collectResultset(resultset, packetIdx+1, baseSearchurl, data.bookmark, onCompletion);
-	    else 
-		onCompletion(resultset);
+	    } else {
+		if (onCompletion) 
+		    onCompletion(resultset);
+	    }
 	})
 	.catch(error => {
 	    console.log("ERROR(findImages0): Fetch error: "+error);
 	});
 }
-
-
-goToPageButton.addEventListener("click",(e)=>{
-    e.preventDefault();
-
-    changeSearchPage(e, searchResultset, pageNumberInput.value);
-    pageNumberInput.value = ""
-});
 
 
 function prettyPrintTagList(tagList) {
@@ -247,28 +269,47 @@ function prettyPrintTagList(tagList) {
 
 function onFindImagesButton(onCompletion) {
     const dburl = document.getElementById("dbUrl").innerHTML.trim();
-    searchTagList.push(tagInput.value);
-    tagList.value = prettyPrintTagList(searchTagList);
+    var tags = getSearchTagList();
+    if (tagInput.value && !tags.includes(tagInput.value)) {
+	tags.push(tagInput.value);
+	setSearchTagList(tags);
+    }
+    tagList.value = prettyPrintTagList(tags);
     tagInput.value = null;
 
     const PacketSz = 100;
     var searchurl = dburl+"/_design/photos_by_tag/_search/photos_by_tag?limit="+PacketSz+"&q=";
-    searchTagList.forEach((tag,i) => {if (i>0) searchurl += " AND "; searchurl += tag;});
+    tags.forEach((tag,i) => {if (i>0) searchurl += " AND "; searchurl += tag;});
     //like: "http://HOST:5984/photos/_design/photos_by_tag/_search/photos_by_tag?limit=200&q=man AND woman";
 
     collectResultset([], 0, searchurl, null, resultset => {
-	//console.log("DEBUG(findImagesButton): resultset.length: "+resultset.length);
-
-	searchResultset = resultset;
+	setSelectedList(resultset);
 
 	const offset = 0;
 	const pageIdx = 0;
 	updateTableRendering(getVisibleSubset(resultset, offset), pageIdx, dburl);
-	
+
 	paginate(resultset, offset, resultset.length);
-	if (onCompletion) onCompletion();
+	if (onCompletion) 
+	    onCompletion();
     });
 }
+
+
+goToPageButton.addEventListener("click",(e)=>{
+    e.preventDefault();
+
+    if ((getSearchTagList() !== null) && (getSearchTagList().length > 0)) {
+	changeSearchPage(e, getSelectedList(), pageNumberInput.value);
+    } else {
+	changeSearchPage(e, null, pageNumberInput.value);
+    }
+    
+    var f = parent.document.getElementById("imgArrayFrame");
+    f.clearChecksAction();
+    
+    pageNumberInput.value = ""
+});
 
 
 findImagesButton.addEventListener("click",(e)=>{
@@ -281,8 +322,12 @@ findImagesButton.addEventListener("click",(e)=>{
 clearFindButton.addEventListener("click",(e)=>{
     e.preventDefault();
 
-    searchResultset = null;
-    searchTagList = []
+    setSelectedList([]);
+    setSearchTagList([]);
+    
+    var f = parent.document.getElementById("imgArrayFrame");
+    f.clearChecksAction();
+    
     tagInput.value = null;
     tagList.value = null;
     changeSearchPage(e, null, "1");

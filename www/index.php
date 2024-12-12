@@ -73,39 +73,39 @@
     var allTags = {};
     var allUserTags = {};
     var selectedImageIds = new Set();
+    var sCheckedSet = new Set();
+    
     var userTagColor = '#B3CCFF';  // Medium blue - between bright and subtle
 
-    function calcNonUserIntersection(imageIds) {
-        var intersection = new Set();
-        var first = true;
-        
-        for (const objid of imageIds) {
-            if (first) {
-		intersection = allTags[objid];
-                first = false;
-            } else {
-		intersection = intersection.intersection(allTags[objid]);
-            }
-        }
-	imageIds.forEach(imageId => {allUserTags[imageId].forEach(Set.prototype.delete, intersection);});
-
-        return !!intersection ? Array.from(intersection) : [];
+    function getCheckedSet() {
+        return sCheckedSet;
     }
 
-    function calcUserIntersection(imageIds) {
-        var intersection = new Set();
-        var first = true;
-	
-        for (const objid of imageIds) {
-            if (first) {
-		intersection = allUserTags[objid];
-                first = false;
-            } else {
-		intersection = intersection.intersection(allUserTags[objid]);
-            }
-        }
+    function setCheckedSet(newSet) {
+        sCheckedSet = newSet;
+    }
 
-        return !!intersection ? Array.from(intersection) : [];
+    function calcNonUserIntersection(tset) {
+        var inter = null;
+
+        Array.from(tset).forEach(objid => {
+	    inter = inter === null ? allTags[objid] : inter.intersection(allTags[objid]);
+	});
+	Array.from(tset).forEach(objid => {
+	    allUserTags[objid].forEach(o => {inter.delete(o);});
+	});
+
+        return (inter !== null) ? Array.from(inter) : [];
+    }
+    
+    function calcUserIntersection(tset) {
+        var inter = null;
+
+	Array.from(tset).forEach(oid => {
+	    inter = (inter === null) ? allUserTags[oid] : inter.intersection(allUserTags[oid]);
+	});
+
+        return (inter !== null) ? Array.from(inter) : [];
     }
 
     function renderTagset(fullTagset, userTagset) {
@@ -114,11 +114,11 @@
             str = '<span class="hint-text">...of selected images</span>';
         } else {
             userTagset.forEach(tag => {
-		str += `<span class="pillButton" style="background-color:${userTagColor};color:black">${tag}</span><br>`;
+		str += '<span class="pillButton" style="background-color:${userTagColor};color:black">';
+		str += '${tag}';
+		str += '</span><br>';
 	    });
-            fullTagset.forEach(tag => {
-		str += tag+"<br>";
-	    });
+            fullTagset.forEach(tag => {str += tag+"<br>";});
         }
 
         var keyArea = document.getElementById("key-area");
@@ -128,8 +128,8 @@
     function clearChecks() {
         allTags = {};
 	allUserTags = {};
-        selectedImageIds = new Set();
-        renderTagset(calcNonUserIntersection(selectedImageIds), calcUserIntersection(selectedImageIds));
+	setCheckedSet(new Set());
+        renderTagset(calcNonUserIntersection(getCheckedSet()), calcUserIntersection(getCheckedSet()));
     }
 
     function collectTags(dburl, imageId, onCompletion) {
@@ -170,16 +170,18 @@
     function checkboxAction(checkboxElem, dburl, imageId) {
         if (imageId) {
             if (checkboxElem.checked) {
-                selectedImageIds.add(imageId);
+		var r = getCheckedSet().add(imageId);
+		setCheckedSet(r);
 		collectTags(dburl, imageId, function onCompletion() {
-		    renderTagset(calcNonUserIntersection(selectedImageIds), calcUserIntersection(selectedImageIds));
+		    renderTagset(calcNonUserIntersection(getCheckedSet()), calcUserIntersection(getCheckedSet()));
 		    updateAddTagButtonState();
 		});
             } else {
-                selectedImageIds.delete(imageId);
+		getCheckedSet().delete(imageId); // deletes from set in-place
+		setCheckedSet(getCheckedSet());
                 delete allTags[imageId];
 		delete allUserTags[imageId];
-		renderTagset(calcNonUserIntersection(selectedImageIds), calcUserIntersection(selectedImageIds));
+		renderTagset(calcNonUserIntersection(getCheckedSet()), calcUserIntersection(getCheckedSet()));
 		updateAddTagButtonState();
             }
         }
@@ -230,20 +232,20 @@
         const newTagInput = document.getElementById('newTag');
         const newTag = newTagInput.value.trim().toLowerCase();
         
+        // Clear the input field immediately
+        newTagInput.value = '';
+	
         if (newTag === '') {
             alert('Please enter a tag');
             return;
         }
 
-        let success = true;
-        // Clear the input field immediately
-        newTagInput.value = '';
-
-	persistTagToImages(Array.from(selectedImageIds), 0, newTag, function onCompletion() {
+	var checkedList = Array.from(getCheckedSet());
+	persistTagToImages(checkedList, 0, newTag, function onCompletion() {
             allTags = {};
 	    allUserTags = {};
-	    collectImageListTags(Array.from(selectedImageIds), 0, function innerOnCompletion() {
-		renderTagset(calcNonUserIntersection(selectedImageIds), calcUserIntersection(selectedImageIds));
+	    collectImageListTags(checkedList, 0, function innerOnCompletion() {
+		renderTagset(calcNonUserIntersection(getCheckedSet()), calcUserIntersection(getCheckedSet()));
 	    });
 	});
     }
@@ -251,7 +253,7 @@
     function updateAddTagButtonState() {
         const addButton = document.getElementById('addNewTagButton');
         if (addButton) {
-            addButton.disabled = selectedImageIds.size === 0;
+            addButton.disabled = getCheckedSet().size === 0;
         }
     }
 
@@ -268,11 +270,13 @@
         });
     });
 
-    function init(row, confidence) {
+    function init(dbUrl, row, confidence, tagFilters, checkedImages) {
         rekognizeConfidence = confidence;
-        
+
+	baseDbUrl = dbUrl;
+	
         var f = document.getElementById("imgArrayFrame");
-        f.callback = function onChannel(url) {
+        f.callback = function callback(url) {
             window.location.replace(url, "", "", true);
         };
         f.checkboxAction = function checkAction(checkboxElem, dbUrl, objid) {
@@ -282,10 +286,28 @@
         f.clearChecksAction = function clearChecksAction() {
             clearChecks();
         };
+        f.getCheckedImages = function getCheckedImages() {
+            return Array.from(getCheckedSet());
+        };
 
+	const checkedList = decodeURIComponent(checkedImages).split(' ');
+	var tags = new Set();
+	checkedList.forEach(id => {if (id) tags.add(id);});
+	setCheckedSet(tags);
+
+	collectImageListTags(Array.from(getCheckedSet()), 0, function innerOnCompletion() {
+	    renderTagset(calcNonUserIntersection(getCheckedSet()), calcUserIntersection(getCheckedSet()));
+	});
+	
         // Load the imgArrayTbl *after* the init function finishes so callback
         // is set before users might click on images
-        f.src = "./imgArrayTbl.php?row="+row;
+        var src = "./imgArrayTbl.php?row="+row;
+        if (tagFilters) 
+            src += '&tags=' + tagFilters;
+        if (checkedImages) 
+            src += '&checked=' + checkedImages;
+	
+        f.src = src;
     }
 
     function menuAction() {
@@ -318,10 +340,14 @@
         $ini = parse_ini_file("./config.ini");
         $confidence = $ini['rekognizeConfidence'];
 
-        $row = array_key_exists('row', $_GET) ? $_GET['row'] : 0;
-
         if (isset($_COOKIE['login_user'])) {
-            echo 'onload="init('."'".$row."',".$confidence.')">';
+            $Db = $ini['dbname'];
+            $DbBase = $ini['couchbase'].'/'.$Db;
+	    
+            $row = array_key_exists('row', $_GET) ? $_GET['row'] : 0;
+            $tagFilters = array_key_exists('tags', $_GET) ? $_GET['tags'] : '';
+	    $checkedImages = array_key_exists('checked', $_GET) ? $_GET['checked'] : '';
+            echo 'onload="init('."'".$DbBase."','".$row."',".$confidence.",'".$tagFilters."','".$checkedImages."'".')">';
             echo renderProfileArea($_COOKIE['login_user']);
         } else {
             echo 'onload="forceLogin()">';

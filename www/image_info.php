@@ -62,8 +62,19 @@
         }
     
         function reloadAction(id, row) {
-            /*alert("TRACE(image_info.php:reload):");*/
-            window.location.replace('./index.php?row='+row, "", "", true);
+            // Get tag filters and checked images from URL params
+            const urlParams = new URLSearchParams(window.location.search);
+            var url = "./index.php?row="+row;
+ 
+            const tagFilters = urlParams.get('tags');
+            if (tagFilters) 
+                url += "&tags=" + tagFilters;
+
+            const checkedImages = urlParams.get('checked');
+            if (checkedImages) 
+                url += "&checked=" + checkedImages;
+
+            window.location.replace(url, "", "", true);
         }
     
         async function downloadAction(id, row) {
