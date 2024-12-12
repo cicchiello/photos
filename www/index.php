@@ -94,7 +94,7 @@
 	Array.from(tset).forEach(objid => {
 	    allUserTags[objid].forEach(o => {inter.delete(o);});
 	});
-
+	
         return (inter !== null) ? Array.from(inter) : [];
     }
     
@@ -115,7 +115,7 @@
         } else {
             userTagset.forEach(tag => {
 		str += '<span class="pillButton" style="background-color:${userTagColor};color:black">';
-		str += '${tag}';
+		str += tag;
 		str += '</span><br>';
 	    });
             fullTagset.forEach(tag => {str += tag+"<br>";});

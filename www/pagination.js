@@ -102,7 +102,7 @@ function paginate(resultset, pageIdx, numItems, onCompletion) {
 }
 
 
-function setImages0(page, dburl, query, onCompletion) {
+function setImages0(pageIdx, dburl, query, onCompletion) {
     fetch(dburl+query)
 	.then(res => {
 	    if (!res.ok) {
@@ -112,39 +112,12 @@ function setImages0(page, dburl, query, onCompletion) {
 	    }
 	})
 	.then(data => {
-	    var imageCnt = 0;
-	    for (var i = 0; i < data.rows.length; i++) {
-		if ((i+data.offset >= page*RowsPerPage*ColsPerRow) &&
-		    (i+data.offset < (page+1)*RowsPerPage*ColsPerRow)) {
-		    var img = document.getElementById("image"+imageCnt);
-		    img.src = dburl+"/"+data.rows[i].id+"/thumbnail";
-		    img.setAttribute("data-objid", data.rows[i].id);
-		    img.setAttribute("data-firstrow", (page*RowsPerPage));
-		    img.style.visibility = "visible";
-
-		    var check = document.getElementById("check"+imageCnt);
-		    check.checked = false;
-
-		    var label = document.getElementById("label"+imageCnt);
-		    label.style.visibility = "visible";
-
-		    imageCnt += 1;
-		}
-	    }
-	    while (imageCnt < RowsPerPage*ColsPerRow) {
-		var img = document.getElementById("image"+imageCnt);
-		img.src = "img/transparent.png";
-		img.setAttribute("data-objid", null);
-		img.style.visibility = "hidden";
-
-		var check = document.getElementById("check"+imageCnt);
-		check.checked = false;
-
-		var label = document.getElementById("label"+imageCnt);
-		label.style.visibility = "hidden";
-
-		imageCnt += 1;
-	    }
+	    var visibleSet = [];
+	    const itemsPerPage = RowsPerPage*ColsPerRow;
+	    for (var i = 0; (i < data.rows.length) && (i < itemsPerPage); i++) 
+		visibleSet.push(data.rows[i].id);
+	    
+	    updateTableRendering(visibleSet, pageIdx, dburl);
 
 	    onCompletion(data.total_rows);
 	})
@@ -155,12 +128,14 @@ function setImages0(page, dburl, query, onCompletion) {
 
 
 function updateTableRendering(visibleSet, pageIdx, dburl) {
+    const itemsPerPage = RowsPerPage*ColsPerRow;
+    const firstrow = pageIdx*RowsPerPage;
     var imageCnt = 0;
     visibleSet.forEach(r => {
         var img = document.getElementById("image"+imageCnt);
 	img.src = dburl+"/"+r+"/thumbnail";
 	img.setAttribute("data-objid", r);
-	img.setAttribute("data-firstrow", (pageIdx*RowsPerPage));
+	img.setAttribute("data-firstrow", firstrow);
 	img.style.visibility = "visible";
 	
 	var check = document.getElementById("check"+imageCnt);
@@ -171,7 +146,7 @@ function updateTableRendering(visibleSet, pageIdx, dburl) {
 	
 	imageCnt += 1;
     });
-    while (imageCnt < RowsPerPage*ColsPerRow) {
+    while (imageCnt < itemsPerPage) {
 	var img = document.getElementById("image"+imageCnt);
 	img.src = "img/transparent.png";
 	img.setAttribute("data-objid", null);
@@ -221,14 +196,11 @@ function changeSearchPage(e, resultset, pageNumber) {
     
     if ((resultset === null) || (resultset.length === 0)) {
 	setImages0(pageIdx, dburl,
-               "/_design/photos/_view/photo_ids?descending=false&limit="+perpage+"&skip="+offset,
-               function onCompletion() {paginate(null, pageIdx, numItems);});
+		   "/_design/photos/_view/photo_ids?descending=false&limit="+perpage+"&skip="+offset,
+		   function onCompletion(newNumItems) {paginate(null, pageIdx, newNumItems);});
     } else {
 	updateTableRendering(getVisibleSubset(resultset, offset), pageIdx, dburl);
 	paginate(resultset, pageIdx, resultset.length);
-
-	var f = parent.document.getElementById("imgArrayFrame");
-	f.clearChecksAction();
     }
 }
 
@@ -337,6 +309,10 @@ clearFindButton.addEventListener("click",(e)=>{
 tagInput.addEventListener("keypress", function(event) {
     if (event.key === "Enter") {
         event.preventDefault();
+	
+	var f = parent.document.getElementById("imgArrayFrame");
+	f.clearChecksAction();
+    
 	onFindImagesButton(function onCompletion() {
 	    setTimeout(function(){
 		tagInput.focus();
