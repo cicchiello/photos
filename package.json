@@ -1,0 +1,12 @@
+{
+  "name": "photos-staging",
+  "version": "1.0.0",
+  "description": "UI Testing for Photos Application",
+  "scripts": {
+    "test": "cypress open",
+    "test:headless": "cypress run"
+  },
+  "devDependencies": {
+    "cypress": "^13.6.0"
+  }
+}

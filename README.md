@@ -49,6 +49,27 @@ The project uses the following branch structure:
 2. Make your changes
 3. Submit a pull request to merge back into `staging`
 
+## UI Testing
+
+The project uses Cypress for UI testing. To run the tests:
+
+1. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+2. Run tests in interactive mode:
+   ```bash
+   npm test
+   ```
+
+3. Run tests in headless mode:
+   ```bash
+   npm run test:headless
+   ```
+
+Test files are located in the `cypress/e2e` directory.
+
 ## License
 
 [Add appropriate license information]
