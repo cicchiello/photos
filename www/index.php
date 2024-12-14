@@ -103,7 +103,7 @@
     }
 
     async function forceLogin() {
-        await sleep(3000);
+        await sleep(2000);
         open('./login.php',"_self");
     }
     
