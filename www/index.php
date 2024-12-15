@@ -24,111 +24,87 @@
     textarea {
         resize: none;
     }
+    
+    div.relative {
+      position: relative;
+      width: 100%;
+      height: 10%;
+    }
+
+    .addTagArea {
+        position: absolute;
+        bottom: 10px;
+        left: 20px;
+        width: 200px;
+        height: 100px;
+        border: 3px solid #73AD21;
+    }
+
+    input:placeholder-shown {
+        font-style: italic;
+    }
+    
+    .tagAddArea {
+	position: relative;
+	bottom: 10px;
+	padding: 10px;
+	margin: 10px;
+        display: flex;
+        justify-content: center;
+    }
+
+    .hint-text {
+        color: #999;
+        font-style: italic;
+    }
+
+    .key-area {
+	background-color: #F5F5F5;
+	width: 100%;
+	height: 90%;
+	overflow-y: auto;
+    }
+
   </style>
 
+  <script src="tags.js"></script>
+  
   <script>
-    var rekognizeConfidence = 0;
-    var allTags = {};
-
-    function calcIntersection() {
-	var intersection = new Set();
-	var first = true;
-	for (const objid in allTags) {
-	    if (first) {
-		intersection = allTags[objid];
-	    } else {
-		intersection = intersection.intersection(allTags[objid]);
-	    }
-	    first = false;
-	}
-	return intersection;
-    }
-
-    function renderTagset(tagset) {
-	var str = "";
-	tagset.forEach(tag => {str += tag+"\n";});
-
-	var keyArea = document.getElementById("key-area");
-	keyArea.innerHTML = str;
-    }
-
-    function clearChecks() {
-	allTags = {};
-		
-	renderTagset(calcIntersection());
-    }
     
-    function checkboxAction(checkboxElem, dburl, objid) {
-	if (objid) {
-            if (checkboxElem.checked) {
-		var objurl = dburl+"/"+objid;
-		fetch(objurl)
-		    .then(res => {
-			if (!res.ok) {
-			    console.log("ERROR(checkboxAction): network error");
-			} else {
-			    return res.json();
-			}
-		    })
-		    .then(data => {
-			allTags[objid] = new Set();
-			data.tags.forEach(tagobj => {
-			    if (tagobj.source === 'rekognition') {
-				if (tagobj.Confidence > rekognizeConfidence) {
-				    allTags[objid].add(tagobj.Name);
-				}
-			    }
-			});
-			
-			renderTagset(calcIntersection());
-		    })
-		    .catch(error => {
-			console.log("ERROR(checkboxAction): Fetch error: "+error);
-		    });
-	    } else {
-		delete allTags[objid];
-		
-		renderTagset(calcIntersection());
-	    }
-	}
-    }
-    
-    function init(row, confidence) {
-	rekognizeConfidence = confidence;
+    function init(dbUrl, row, confidence, tagFilters, checkedImages) {
+
+	setConfidence(confidence);
+	setDbUrl(dbUrl);
 	
         var f = document.getElementById("imgArrayFrame");
-        f.callback = function onChannel(url) {
-            /* alert("TRACE(index.php:init:f.callback): url: "+url); */
+        f.callback = function callback(url) {
             window.location.replace(url, "", "", true);
         };
-	f.checkboxAction = function checkAction(checkboxElem, dbUrl, objid) {
-	    checkboxAction(checkboxElem, dbUrl, objid);
-	};
-	f.clearChecksAction = function clearChecksAction() {
-	    clearChecks();
-	};
+        f.checkboxAction = function checkAction(checkboxElem, dbUrl, objid) {
+            checkboxAction(checkboxElem, dbUrl, objid);
+        };
+        f.clearChecksAction = function clearChecksAction() {
+            clearChecks();
+        };
+        f.getCheckedImages = function getCheckedImages() {
+            return Array.from(getCheckedSet());
+        };
 
-        // Load the imgArrayTbl *after* the init function finishes so callback
-        // is set before users might click on images
-        f.src = "./imgArrayTbl.php?row="+row;
+	const checkedList = decodeURIComponent(checkedImages).split(' ');
+	var tags = new Set();
+	checkedList.forEach(id => {if (id) tags.add(id);});
+	setCheckedSet(tags);
+
+	collectImagesThenRender(f, row, tagFilters, checkedImages);
     }
-
-    function menuAction() {
-      var x = document.getElementById("menuItems");
-      if (x.className.indexOf("w3-show") == -1) {
-         x.className += " w3-show";
-      } else {
-         x.className = x.className.replace(" w3-show", "");
-      }
-    }
-
+    
     function sleep(ms) {
-       return new Promise(resolve => setTimeout(resolve, ms));
+        return new Promise(resolve => setTimeout(resolve, ms));
     }
 
     async function forceLogin() {
-      await sleep(3000);
-      open('./login.php',"_self");
+        await sleep(3000);
+        open('./login.php',"_self");
     }
     
   </script>
@@ -141,33 +117,63 @@
         include('photos_utils.php');
 
         $ini = parse_ini_file("./config.ini");
-	$confidence = $ini['rekognizeConfidence'];
-
-        $row = array_key_exists('row', $_GET) ? $_GET['row'] : 0;
+        $confidence = $ini['rekognizeConfidence'];
 
         if (isset($_COOKIE['login_user'])) {
-            echo 'onload="init('."'".$row."',".$confidence.')">';
-            echo renderMainMenu($_COOKIE['login_user']);
+            $Db = $ini['dbname'];
+            $DbBase = $ini['couchbase'].'/'.$Db;
+	    
+            $row = array_key_exists('row', $_GET) ? $_GET['row'] : 0;
+            $tagFilters = array_key_exists('tags', $_GET) ? $_GET['tags'] : '';
+	    $checkedImages = array_key_exists('checked', $_GET) ? $_GET['checked'] : '';
+            echo 'onload="init('."'".$DbBase."','".$row."',".$confidence.",'".$tagFilters."','".$checkedImages."'".')">';
+            echo renderProfileArea($_COOKIE['login_user']);
         } else {
             echo 'onload="forceLogin()">';
         }
         #echo var_dump(isset($_COOKIE['login_user']));
     ?>
 
-    <textarea readonly placeholder="Common tags of selected images..."
-	      id="key-area" rows="10" cols="4"
-	      style="width:27%; padding:20px; margin:10px"
-	      class="w3-round-large w3-display-bottomleft"></textarea>
+    <div style="height:90%; width:90%;">
+
+        <div class="relative">
+        </div>
+	
+        <div style="position: relative;">
+            <div style="position:fixed; width:20%; height:75%; margin-left:10px; background-color:white"
+                 class="w3-round-large">
+                <span class="w3-medium" style="font-weight:bold; margin-left:45px;">Common tags: </span>
+                <div id="key-area" class="key-area" style="font-family:monospace; padding:10px; overflow-y=scroll;">
+                    <span class="hint-text">...of selected images</span>
+                </div>
+	    </div>
+
+            <div style="position:fixed; width:20%; bottom:0; height:70px; margin:10px; z-index:999;"
+                class="w3-white w3-round-large">
+	      
+                <span class="w3-medium" style="font-weight:bold; margin-left:70px;">New tag:</span>
+                <div class="tagAddArea">
+		    <div>
+                        <input id="newTag" type="text" size="12" class="w3-small" placeholder="enter tag here">
+                        <button id="addNewTagButton" class="w3-small" style="font-weight:bold" onclick="handleAddTag()" disabled>Add</button>
+                    </div>
+                </div>
+		
+            </div>
+       
+        </div>
+	
+        <div style="height:89.5%; width:77%; padding:10px; margin:10px"
+            class="w3-white w3-round-large w3-panel w3-display-bottomright">
+
+            <iframe id="imgArrayFrame" src="" frameBorder="0"
+                height="100%" width="100%" style="float:right; z-index:999">
+                <p>Your browser does not support iframes.</p>
+            </iframe>
+
+      </div>
       
-    <div style="height:90%; width:70%; padding:10px; margin:10px"
-	 class="w3-white w3-round-large w3-panel w3-display-bottomright">
-
-      <iframe id="imgArrayFrame" src="" frameBorder="0"
-	      height="100%" width="100%" style="float:right; z-index:999">
-	<p>Your browser does not support iframes.</p>
-      </iframe>
-
     </div>
-
+    
   </body>
 </html>

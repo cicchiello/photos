@@ -112,7 +112,7 @@
       }
 
       .album-container {
-	  height: 74px; /* any fixed value for the parent */
+	  height: calc(20vh - 40px); /* any fixed value for the parent */
       }
 
       .center {
@@ -135,13 +135,68 @@
       .tagList { 
           text-align: right; 
       }
+
+      .tag-display {
+          background-color: #f8f8f8;
+          border: 1px solid #ddd;
+          border-radius: 4px;
+          padding: 4px 8px;
+          color: #666;
+          cursor: default;
+      }
       
     </style>
     
     <script>
-        function init(row) {
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        function init(row, tagFilters, checkedImages) {
+            var checkedIds = new Set();
+            if (checkedImages) {
+		const checkedList = decodeURIComponent(checkedImages).split(' ');
+		checkedList.forEach(id => {if (id) checkedIds.add(id);});
+	    }
+
 	    const rowsPerPage = 5;
-	    paginate(null, Math.trunc(row/rowsPerPage), null);
+            // Restore tag filters from URL parameters if they exist
+            const urlParams = new URLSearchParams(window.location.search);
+	    setSearchTagList([]);
+            if (tagFilters) {
+                const tagList = decodeURIComponent(tagFilters);
+                document.getElementById('tagList').value = tagList;
+		
+                // Split and clean the tag list
+		var cleanedSearchTagSet = new Set();
+		tagList.split(' ').forEach((tag,i) => {if (tag) cleanedSearchTagSet.add(tag);});
+		setSearchTagList(Array.from(cleanedSearchTagSet));
+	    }
+	    
+            const setCheckMarksFunc = async function setCheckMarks() {
+		await sleep(1000);
+		var f = document.getElementById("imgArrayFrame");
+		const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+		checkboxes.forEach(checkbox => {
+		    const img = checkbox.parentElement.nextElementSibling;
+		    if (img && checkedIds.has(img.getAttribute('data-objid'))) {
+			checkbox.checked = true;
+		    }
+		});
+	    };
+
+	    if (getSearchTagList().length > 0) {
+		const paginateFunc = async function adjustPagination() {
+		    await sleep(1000);
+		    changeSearchPage(null, getSelectedList(), Math.trunc(row/rowsPerPage)+1);
+		    setCheckMarksFunc();
+		};
+		
+                onFindImagesButton(paginateFunc);
+	    } else {
+		changeSearchPage(null, getSelectedList(), Math.trunc(row/rowsPerPage)+1);
+		setCheckMarksFunc();
+	    }
         }
       
         function imgInfoAction(elemid) {
@@ -150,8 +205,15 @@
 	    var objid = img.getAttribute('data-objid');
 	    if (objid !== "null") {
                 var row = img.getAttribute('data-firstrow');
-		f.clearChecksAction();
-                f.callback('./image_info.php?id='+objid+'&row='+row);
+
+                // Include current tag filters and checked images in the URL
+                var tagFilters = document.getElementById('tagList').value;
+                var tagParam = tagFilters ? '&tags=' + encodeURIComponent(tagFilters) : '';
+                var checkedImages = f.getCheckedImages();
+		var checkedParam = "";
+		if (checkedImages.length > 0)
+		    checkedParam = '&checked=' + encodeURIComponent(checkedImages.join(' '));
+                f.callback('./image_info.php?id='+objid+'&row='+row+tagParam+checkedParam);
 	    }
 	}
 
@@ -173,10 +235,12 @@
 	    include('photos_utils.php');
 	      
             $row = array_key_exists('row', $_GET) ? $_GET['row'] : 0;
+            $tagFilters = array_key_exists('tags', $_GET) ? $_GET['tags'] : '';
+            $checkedImages = array_key_exists('checked', $_GET) ? $_GET['checked'] : '';
 
-            echo 'onload="init('."'".$row."'".')">';
+            echo 'onload="init('."'".$row."','".$tagFilters."','".$checkedImages."'".')">';
 	 ?>
-     <div id="myTableParent" class="table-responsive">
+     <div id="myTableParent" class="table-responsive" style="width: calc(100% - 15px);" >
        <span id = "dbUrl" hidden>
            <?php
               $ini = parse_ini_file("./config.ini");
@@ -186,11 +250,11 @@
            ?>
        </span>
        <span>
-         <label for="search-key">Search tag: </label>
-         <input id="tagInput" type="text" size="15" placeholder="enter tag here">
-	 <button id="findImagesButton">&gt;&gt;&gt;&gt;</button>
-         <input id="tagList" class="tagList" type="text" placeholder="tag filters collect here..." style="width:55%;" readonly>
-	 <button id="clearFindButton">Clear</button>
+         <label for="tagInput" class="w3-small" style="font-weight:bold">Search tag: </label>
+         <input id="tagInput" class="w3-small" type="text" size="12" placeholder="enter tag here">
+	 <button id="findImagesButton" class="w3-small" style="font-weight:bold">&gt;&gt;&gt;&gt;</button>
+         <input id="tagList" class="tagList w3-small tag-display" type="text" placeholder="tag filters collect here..." style="width:45%; border:none; background-color:#f8f8f8;" readonly>
+	 <button id="clearFindButton" class="w3-small" style="font-weight:bold">Clear</button>
        </span>
        <p></p>
        <table id="myTable" style="width:100%; overflow:scroll">
@@ -203,17 +267,17 @@
 	      echo renderImgArrayTable($row, $DbBase, $items, 'imgInfoAction', 'checkAction');
            ?>
        </table>
-     </div>
-     <div id="pagination">
-       <div id="entriesDisplayDiv">
-         Showing <span id="from"> </span> to <span id="to"></span> out of
-	 <span id="totalTableEntries"><?php echo $numitems; ?></span> entries 
-       </div>
-       <div id="pageNumbersContainer">
-         <div id="pageNumbers"></div>
-         <div id="goToPage">Go to Page <input id="pageNumberInput" type="number">
-	   <button id="goToPageButton">Confirm</button>
-	 </div>
+       <div id="pagination">
+         <div id="entriesDisplayDiv">
+           Showing <span id="from"> </span> to <span id="to"></span> out of
+	   <span id="totalTableEntries"><?php echo $numitems; ?></span> entries 
+         </div>
+         <div id="pageNumbersContainer">
+           <div id="pageNumbers"></div>
+           <div id="goToPage">Go to Page <input id="pageNumberInput" type="number">
+	     <button id="goToPageButton">Confirm</button>
+	   </div>
+         </div>
        </div>
      </div>
 	
