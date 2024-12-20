@@ -62,8 +62,19 @@
         }
     
         function reloadAction(id, row) {
-            /*alert("TRACE(image_info.php:reload):");*/
-            window.location.replace('./index.php?row='+row, "", "", true);
+            // Get tag filters and checked images from URL params
+            const urlParams = new URLSearchParams(window.location.search);
+            var url = "./index.php?row="+row;
+ 
+            const tagFilters = urlParams.get('tags');
+            if (tagFilters) 
+                url += "&tags=" + tagFilters;
+
+            const checkedImages = urlParams.get('checked');
+            if (checkedImages) 
+                url += "&checked=" + checkedImages;
+
+            window.location.replace(url, "", "", true);
         }
     
         async function downloadAction(id, row) {
@@ -75,6 +86,26 @@
                 console.log("ERROR(image_info.php:downloadAction): f doesn't have a callback member");
 	    }
 	}
+
+        async function deleteTag(tagName, imageId) {
+            if (!confirm(`Are you sure you want to delete the tag "${tagName}"?`)) {
+                return;
+            }
+
+            try {
+		const tagnameenc = encodeURIComponent(tagName);
+                const response = await fetch('deleteTag.php?imageid='+imageId+'&tagname='+tagnameenc);
+                if (!response.ok) {
+                    throw new Error('Failed to delete tag');
+                }
+                
+                // Refresh the page to show updated tags
+                location.reload();
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to delete tag: ' + error.message);
+            }
+        }
 
   </script>
   
