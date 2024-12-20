@@ -97,12 +97,31 @@ class Tagset():
                 tag['source'] = "path-tokenize"
                 self._tags.append(tag)
                 self._names.add(path_keyword)
+
+    def recognizeWithRetries(self, photo):
+        _tries = 0
+        _sleep = 0.5
+        while _tries < 5:
+            try:
+                _client=boto3.client('rekognition')
+   
+                with open(photo, 'rb') as image:
+                    _r = _client.detect_labels(Image={'Bytes': image.read()})
+
+                return _r
+            except Exception as e:
+                print("WARNING(%s:%s): recognizeWithRetries; caught exception: %s" %
+                      (__name__, nowstr(), str(e)))
+                _tries += 1
+                time.sleep(_sleep)
+                _sleep *= 2
+                
+        print("ERROR(%s:%s): putJsonWithRetries; quitting after 5 tries" % (__name__, nowstr()))
+        exit(-1)
+
     
     def recognize(self, photo):
-        _client=boto3.client('rekognition')
-   
-        with open(photo, 'rb') as image:
-            _r = _client.detect_labels(Image={'Bytes': image.read()})
+        _r = self.recognizeWithRetries(photo)
         
         if self._veryVerbose:
             print('DEBUG(%s:%s): full response: %s' % (__name__, nowstr(), str(_r)))
@@ -112,7 +131,8 @@ class Tagset():
 
         if self._verbose:
             for _label in _r['Labels']:
-                print("INFO(%s:%s): %s : %s" % (__name__, nowstr(), _label['Name'], str(_label['Confidence'])))
+                print("INFO(%s:%s): %s : %s" %
+                      (__name__, nowstr(), _label['Name'], str(_label['Confidence'])))
                 
         for _label in _r['Labels']:
             _label['Name'] = _label['Name'].lower()
