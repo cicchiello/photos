@@ -56,11 +56,12 @@ describe('Cherry Pick Tests', () => {
       .should('not.be.empty')
       .then(cy.wrap)
       .within(() => {
+        cy.wait(500)
         // Type 'fruit' into the tag input and click search
         cy.get('#tagInput')
           .should('be.visible')
           .type('fruit')
-        cy.wait(500)
+        cy.wait(1500)
         
         cy.get('#findImagesButton')
           .should('be.visible')

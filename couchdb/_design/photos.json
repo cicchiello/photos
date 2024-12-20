@@ -6,6 +6,12 @@
     },
     "photo_ids": {
       "map": "function (doc) {\n  if (doc.type && (typeof doc.type === 'string') && (doc.type === 'photo'))\n    emit(doc.paths[0], null);\n}"
+    },
+    "unknown_docs": {
+      "map": "function (doc) {\n  if (!('type' in doc) || !(typeof doc.type === 'string')) \n    emit(doc, null);\n  if (('type' in doc) && (typeof doc.type === 'string')) {\n    if ((doc.type !== 'login_event') && (doc.type !== 'user') && (doc.type !== 'photo'))\n      emit(doc, null);\n  }\n}"
+    },
+    "logins": {
+      "map": "function (doc) {\n  if (('type' in doc) && (typeof doc.type === 'string') && (doc.type === 'login_event'))\n    emit(doc, [doc.username, doc.timestamp]);\n}"
     }
   },
   "language": "javascript"

@@ -6,15 +6,14 @@
     ini_set('display_errors', 1);
     ini_set('display_startup_errors', 1);
     error_reporting(E_ALL);
+
+    include('photos_utils.php');
   ?>
 
 <html>
   
   <head>
-    
-  <link href="./w3.css" media="all" rel="stylesheet">
-  <link href="./style.css" media="all" rel="stylesheet">
-  <link href="./menu.css" media="all" rel="stylesheet">
+    <?php echo renderLookAndFeel(); ?>
 
   <style>
     textarea:placeholder-shown {
@@ -103,7 +102,7 @@
     }
 
     async function forceLogin() {
-        await sleep(3000);
+        await sleep(2000);
         open('./login.php',"_self");
     }
     
@@ -114,8 +113,6 @@
   <body class="bg"
 
     <?php       
-        include('photos_utils.php');
-
         $ini = parse_ini_file("./config.ini");
         $confidence = $ini['rekognizeConfidence'];
 

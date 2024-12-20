@@ -29,6 +29,7 @@ describe('addTag Tests', () => {
 
     // Intercept the CouchDB request
     cy.intercept('GET', '**/photos-staging/_design/photos/_view/photo_ids*').as('photoIds')
+    cy.wait(500)
     
     // Wait for the iframe to load
     cy.get('iframe[src*="imgArrayTbl.php"]')
@@ -44,7 +45,7 @@ describe('addTag Tests', () => {
         .should('exist')
         .check({ force: true })
         .should('be.checked')
-          cy.wait(500)
+          cy.wait(1500)
 
       })
 
@@ -74,7 +75,7 @@ describe('addTag Tests', () => {
         // Click on the cherry image to open info form
         cy.get('img[data-objid="500b6984d64439bab876480128bdb420"]')
           .click()
-        cy.wait(500)
+        cy.wait(1500)
       })
 
     cy.url().should('include', 'image_info.php')

@@ -174,7 +174,7 @@
 	    }
 	    
             const setCheckMarksFunc = async function setCheckMarks() {
-		await sleep(1000);
+		await sleep(100);
 		var f = document.getElementById("imgArrayFrame");
 		const checkboxes = document.querySelectorAll('input[type="checkbox"]');
 		checkboxes.forEach(checkbox => {
@@ -187,7 +187,7 @@
 
 	    if (getSearchTagList().length > 0) {
 		const paginateFunc = async function adjustPagination() {
-		    await sleep(1000);
+		    await sleep(100);
 		    changeSearchPage(null, getSelectedList(), Math.trunc(row/rowsPerPage)+1);
 		    setCheckMarksFunc();
 		};
