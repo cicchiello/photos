@@ -20,7 +20,7 @@
       $ini = parse_ini_file("./config.ini");
       $DbBase = $ini['couchbase'];
       $sessionTimeout_s = $ini['sessionTimeout_s'];
-      $Db = "photos";
+      $Db = $ini["dbname"];
       $DbViewBase = $DbBase.'/'.$Db.'/_design/photos/_view';
 
       $usersUrl = $DbViewBase.'/users?key="user:'.$_POST['uname'].'"';
@@ -37,6 +37,26 @@
 
             // init cookie with timeout
             setcookie("login_user", $_POST['uname'], time()+$sessionTimeout_s, '/');
+
+            // Record login event in CouchDB
+            $loginEvent = array(
+              'type' => 'login_event',
+              'username' => $_POST['uname'],
+              'timestamp' => time(),
+              'ip' => $_SERVER['REMOTE_ADDR']
+            );
+            
+            $opts = array('http' =>
+                array(
+                    'method'  => 'POST',
+                    'header'  => 'Content-Type: application/json',
+                    'content' => json_encode($loginEvent)
+                )
+            );
+
+            $context = stream_context_create($opts);
+            $eventUrl = $DbBase.'/'.$Db;
+            $result = file_get_contents($eventUrl, false, $context);
 
             $success = 1;
          }
