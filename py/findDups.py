@@ -93,7 +93,7 @@ class ImageDoc():
         self._doc = json.loads(_r.content) if _r.status_code == 200 else None
         return self
 
-    
+
     def downloadWebImage(self, path):
         _webimage_attachmentUrl = "%s/web_image" % (self._doc_url)
         subprocess.call(["curl", _webimage_attachmentUrl, "-o", path],
@@ -189,9 +189,7 @@ if __name__ == "__main__":
     _tenth = 1
     for _tagset in _tagsetDict:
         if len(_tagsetDict[_tagset]) > 1:
-            if _args.verbose:
-                print("DEBUG(%s:%s): duplicate candidate: %s" %
-                      (__name__, nowstr(), str(_tagsetDict[_tagset])))
+            print("INFO(%s:%s): duplicate candidate: %s" % (__name__, nowstr(), str(_tagsetDict[_tagset])))
 
             _candidateCnt = 0
             for _id in _tagsetDict[_tagset]:

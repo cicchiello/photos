@@ -213,4 +213,68 @@ describe('Cherry Pick Tests', () => {
         cy.wait(500)
       })
   })
+
+  it('should preserve state when downloading an image', () => {
+    cy.visit('/index.php')
+    cy.wait(500)
+
+    // Wait for the iframe to load
+    cy.get('iframe[src*="imgArrayTbl.php"]')
+      .should('be.visible')
+      .its('0.contentDocument.body')
+      .should('not.be.empty')
+      .then(cy.wrap)
+      .within(() => {
+        // Type 'fruit' into the tag input and click search
+        cy.get('#tagInput')
+          .should('be.visible')
+          .type('cherry')
+        cy.wait(500)
+        
+        cy.get('#findImagesButton')
+          .should('be.visible')
+          .click()
+        cy.wait(500)
+      })
+
+    // Check an image
+    cy.get('iframe[src*="imgArrayTbl.php"]')
+      .should('be.visible')
+      .its('0.contentDocument.body')
+      .should('not.be.empty')
+      .then(cy.wrap)
+      .within(() => {
+        cy.get('img[data-objid="500b6984d64439bab876480128bdb420"]')
+          .parent('div')
+          .find('input[type="checkbox"]')
+          .check({ force: true })
+        cy.wait(500)
+      })
+
+    // Click on the image to go to image_info
+    cy.get('iframe[src*="imgArrayTbl.php"]')
+      .should('be.visible')
+      .its('0.contentDocument.body')
+      .should('not.be.empty')
+      .then(cy.wrap)
+      .within(() => {
+        cy.get('img[data-objid="500b6984d64439bab876480128bdb420"]')
+          .click()
+      })
+
+    // Verify URL contains our state
+    cy.url().should('include', 'tags=cherry')
+    cy.url().should('include', 'checked=500b6984d64439bab876480128bdb420')
+
+    // Click download
+    cy.get('#return').should('be.visible') // Wait for page load
+    cy.get('img[src="img/download.png"]').click()
+
+    cy.wait(5000)
+    
+    // After download completes, verify we're back on image_info with state preserved
+    cy.url().should('include', 'image_info.php')
+    cy.url().should('include', 'tags=cherry')
+    cy.url().should('include', 'checked=500b6984d64439bab876480128bdb420')
+  })
 })
