@@ -1,17 +1,26 @@
 {
   "_id": "_design/photos",
+  "lists": {
+    "dump": "function() {\n    var row; \n    send('[\\n');\n    while (row = getRow()) {\n        send('   \"'+row.key+'\",\\n');\n    }\n    send(']\\n');\n}"
+  },
   "views": {
     "users": {
       "map": "function (doc) {\n  if (doc.type && (typeof doc.type === 'string') && (doc.type === 'user'))\n    emit(\"user:\"+doc.username, doc);\n}"
     },
     "photo_ids": {
-      "map": "function (doc) {\n  if (doc.type && (typeof doc.type === 'string') && (doc.type === 'photo'))\n    emit(doc.paths[0], null);\n}"
+      "map": "function (doc) {\n  if (doc.type && (typeof doc.type === 'string') && (doc.type === 'photo')) {\n    if (!doc.hidden) {\n      emit(doc.paths[0], null);\n    }\n  }\n}"
     },
-    "unknown_docs": {
+    "invalid_type": {
       "map": "function (doc) {\n  if (!('type' in doc) || !(typeof doc.type === 'string')) \n    emit(doc, null);\n  if (('type' in doc) && (typeof doc.type === 'string')) {\n    if ((doc.type !== 'login_event') && (doc.type !== 'user') && (doc.type !== 'photo'))\n      emit(doc, null);\n  }\n}"
     },
     "logins": {
       "map": "function (doc) {\n  if (('type' in doc) && (typeof doc.type === 'string') && (doc.type === 'login_event'))\n    emit(doc, [doc.username, doc.timestamp]);\n}"
+    },
+    "missing_attachments": {
+      "map": "function (doc) {\n  if (doc.type && (typeof doc.type === 'string') && (doc.type === 'photo')) {\n    if (!doc._attachments)\n      emit(doc.paths[0], \"all missing\");\n    else if (!doc._attachments.thumbnail)\n      emit(doc.paths[0], \"thumbnail missing\");\n    else if (!doc._attachments.web_image)\n      emit(doc.paths[0], \"web_image missing\");\n    else if (!doc._attachments.image)\n      emit(doc.paths[0], \"image missing\");\n  }\n}"
+    },
+    "missing_tags": {
+      "map": "function (doc) {\n  if (doc.type && (typeof doc.type === 'string') && (doc.type === 'photo')) {\n    if (!doc.tags)\n      emit(doc.paths[0], \"all tags missing\");\n    else {\n      for (var i = 0; i < doc.tags.length; i++) {\n        if (doc.tags[i].source === \"rekognition\")\n          return;\n      }\n      emit(doc.paths[0], \"missing rekognition tags\");\n    }\n  }\n}"
     }
   },
   "language": "javascript"

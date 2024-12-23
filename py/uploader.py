@@ -36,6 +36,7 @@ class Uploader():
         self._creds = creds
         self._tagset = Tagset(verbose=self._verbose)
         self._tagset.append_metadata_tags(path)
+        self._path = path
         self._doc = {}
         self._doc['paths'] = [path]
         self._doc['type'] = "photo"
@@ -94,6 +95,40 @@ class Uploader():
         exit(-1)
             
             
+    def deleteWithRetries(self, url):
+        _tries = 0
+        _sleep = 0.5
+        while _tries < 5:
+            try:
+                return requests.delete(url)
+            except Exception as e:
+                print("WARNING(%s:%s): deleteWithRetries; caught exception: %s" %
+                      (__name__, nowstr(), str(e)))
+                _tries += 1
+                time.sleep(_sleep)
+                _sleep *= 2
+                
+        print("ERROR(%s:%s): deleteWithRetries; quitting after 5 tries" % (__name__, nowstr()))
+        exit(-1)
+            
+            
+    def headWithRetries(self, url):
+        _tries = 0
+        _sleep = 0.5
+        while _tries < 5:
+            try:
+                return requests.head(url)
+            except Exception as e:
+                print("WARNING(%s:%s): headWithRetries; caught exception: %s" %
+                      (__name__, nowstr(), str(e)))
+                _tries += 1
+                time.sleep(_sleep)
+                _sleep *= 2
+                
+        print("ERROR(%s:%s): getWithRetries; quitting after 5 tries" % (__name__, nowstr()))
+        exit(-1)
+            
+            
     def recognize(self):
         _original_path = self._doc['paths'][0]
         _path = _original_path
@@ -134,46 +169,73 @@ class Uploader():
             return False
             
 
+    def imageUrl(self, revision):
+        return "%s/image?rev=%s" % (self._doc_url, revision)
 
-    def attachWebSuitable(self, base_path, revision):
+    
+    def attachImage(self, revision):
+        # no conversion of original image -- keep original for posterity
+        _imageHeaders = {"Content-Type": "image/%s" % self._path.split(".")[-1]}
+        _imageData = open(self._path, 'rb').read()
+
+        if self._doc['size'] != len(_imageData):
+            print("ERROR(%s:%s): size validation failure in attachImage" % (__name__, nowstr()))
+            exit(-3)
+            
+        if self._verbose:
+            print("DEBUG(%s:%s): attaching image to document(%s)" % (__name__, nowstr(), self._doc_id))
+
+        _r = self.putBinWithRetries(self.imageUrl(revision), _imageData, _imageHeaders)
+        return json.loads(_r.content)["rev"]
+
+
+    def webSuitableUrl(self, revision):
+        return "%s/web_image?rev=%s" % (self._doc_url, revision)
+
+    
+    def attachWebSuitable(self, revision):
         # > convert <given-file> -resize 640 <web-suitable-file>
-        _web_suitable_path = "/tmp/%s" % os.path.basename(base_path)
+        _web_suitable_path = "/tmp/%s" % os.path.basename(self._path)
         
         if self._verbose:
             print("DEBUG(%s:%s): creating web suitable image: %s" %
                   (__name__, nowstr(), _web_suitable_path))
             
-        subprocess.call(["convert", base_path, "-resize", "640", _web_suitable_path])
-        _web_suitable_attachmentUrl = "%s/web_image?rev=%s" % (self._doc_url, revision)
-        _web_suitable_attachmentHeaders = {"Content-Type": "image/%s" % base_path.split(".")[-1]}
+        subprocess.call(["convert", self._path, "-resize", "640", _web_suitable_path])
+        _web_suitable_attachmentHeaders = {"Content-Type": "image/%s" % self._path.split(".")[-1]}
 
         if self._verbose:
-            print("DEBUG(%s:%s): attaching web-suitable image to document(%s)" % (__name__, nowstr(), self._doc_id))
+            print("DEBUG(%s:%s): attaching web-suitable image to document(%s)"
+                  % (__name__, nowstr(), self._doc_id))
+            
         _web_suitable_attachmentData = open(_web_suitable_path, 'rb').read()
 
-        _r = self.putBinWithRetries(_web_suitable_attachmentUrl, _web_suitable_attachmentData,
+        _r = self.putBinWithRetries(self.webSuitableUrl(revision), _web_suitable_attachmentData,
                                     _web_suitable_attachmentHeaders)
 
         os.remove(_web_suitable_path)
         return json.loads(_r.content)["rev"]
 
     
-    def attachThumbnail(self, base_path, revision):
+    def thumbnailUrl(self, revision):
+        return "%s/thumbnail?rev=%s" % (self._doc_url, revision)
+
+    
+    def attachThumbnail(self, revision):
         # > convert <given-file> -resize 128 <thumbnail-file>
-        _thumbnail_path = "/tmp/thumb_%s" % os.path.basename(base_path)
+        _thumbnail_path = "/tmp/thumb_%s" % os.path.basename(self._path)
         
         if self._verbose:
             print("DEBUG(%s:%s): creating thumbnail image: %s" % (__name__, nowstr(), _thumbnail_path))
             
-        subprocess.call(["convert", base_path, "-resize", "128", _thumbnail_path])
-        _thumbnail_attachmentUrl = "%s/thumbnail?rev=%s" % (self._doc_url, revision)
-        _thumbnail_attachmentHeaders = {"Content-Type": "image/%s" % base_path.split(".")[-1]}
+        subprocess.call(["convert", self._path, "-resize", "128", _thumbnail_path])
+        _thumbnail_attachmentHeaders = {"Content-Type": "image/%s" % self._path.split(".")[-1]}
 
         if self._verbose:
             print("DEBUG(%s:%s): attaching thumbnail to document(%s)" % (__name__, nowstr(), self._doc_id))
         _thumbnail_attachmentData = open(_thumbnail_path, 'rb').read()
 
-        _r = self.putBinWithRetries(_thumbnail_attachmentUrl, _thumbnail_attachmentData,
+        _r = self.putBinWithRetries(self.thumbnailUrl(revision), _thumbnail_attachmentData,
                                     _thumbnail_attachmentHeaders)
 
         os.remove(_thumbnail_path)
@@ -185,11 +247,9 @@ class Uploader():
         if self._verbose:
             print("DEBUG(%s:%s): creating CouchDb document(%s)" % (__name__, nowstr(), self._doc_id))
             
-        _path = self._doc['paths'][0]
-        
         _headers = {"Content-Type": "application/json"}
         self._doc['tags'] = self._tagset.get_tag_arr()
-        _attachmentData = open(_path, 'rb').read()
+        _attachmentData = open(self._path, 'rb').read()
         self._doc['size'] = len(_attachmentData)
 
         _r = self.putJsonWithRetries(self._doc_url, self._doc, _headers)
@@ -199,21 +259,25 @@ class Uploader():
             exit(-2)
 
         _rev = json.loads(_r.content)["rev"]
+        _rev = self.attachImage(_rev)
+        _rev = self.attachWebSuitable(_rev)
+        _rev = self.attachThumbnail(_rev)
+
         self._doc['_rev'] = _rev
-        _attachmentUrl = "%s/image?rev=%s" % (self._doc_url, _rev)
-        _attachmentHeaders = {"Content-Type": "image/%s" % _path.split(".")[-1]}
+
         
-        if self._verbose:
-            print("DEBUG(%s:%s): attaching image to document(%s)" % (__name__, nowstr(), self._doc_id))
+    def deleteIfExists(self, url, revision):
+        # determine if url (doc or attachment) exists 
+        _r = self.headWithRetries(url)
+        _missing = _r.status_code == 404
+        if not _missing:
+            _r = self.deleteWithRetries(url)
+            _rev = json.loads(_r.content)['rev']
+            return _rev
+        else:
+            return revision
 
-        _r = self.putBinWithRetries(_attachmentUrl, _attachmentData, _attachmentHeaders)
-        _rev = json.loads(_r.content)["rev"]
-
-        _rev = self.attachWebSuitable(_path, _rev)
-        
-        _rev = self.attachThumbnail(_path, _rev)
-
-
+            
     def updateEntry(self):
         if self._verbose:
             print("DEBUG(%s:%s): updating CouchDb document(%s)" % (__name__, nowstr(), self._doc_id))
@@ -227,6 +291,17 @@ class Uploader():
         
         _headers = {"Content-Type": "application/json"}
 
+        _rev = self._doc['_rev']
+        
+        # determine if attachments exists ('cause they should be deleted before replaced)
+        _rev = self.deleteIfExists(self.imageUrl(_rev), _rev)
+        _rev = self.deleteIfExists(self.webSuitableUrl(_rev), _rev)
+        _rev = self.deleteIfExists(self.thumbnailUrl(_rev), _rev)
+
+        _rev = self.attachImage(_rev)
+        _rev = self.attachWebSuitable(_rev)
+        _rev = self.attachThumbnail(_rev)
+        
         return self.putJsonWithRetries(self._doc_url, self._doc, _headers)
     
 
