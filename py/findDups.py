@@ -81,11 +81,11 @@ class ImageDoc():
                 self._doc = json.loads(_r.content) if _r.status_code == 200 else None
                 return self
             except Exception as e:
-                #print('WARNING(%s:%s): Exception trap: %s' % (__name__, nowstr(), str(e)))
+                print('WARNING(%s:%s): Exception trap: %s' % (__name__, nowstr(), str(e)))
                 _retry += 1
                 time.sleep(0.5)
 
-        print('ERROR(%s:%s): Exception trap: %s' % (__name__, nowstr(), str(e)))
+        print('ERROR(%s:%s): Exception trap: %s' % (__name__, nowstr()))
         exit(-1)
 
     def downloadWebImage(self, path):
@@ -142,9 +142,11 @@ if __name__ == "__main__":
     print("ECHO(%s:%s): verbose: %s" % (__name__, nowstr(), _args.verbose))
 
     _allIds = AllDocsView(_args.db, _args.creds.split(":"), verbose=_args.verbose).getAllIds()
-    print("DEBUG(%s:%s): got %d ids" % (__name__, nowstr(), len(_allIds)))
+    print("INFO(%s:%s): got %d ids" % (__name__, nowstr(), len(_allIds)))
 
     _tagsetDict = {}
+    _cnt = 0
+    _tenth = 1
     for _id in _allIds:
         _imageDoc = ImageDoc(_args.db, _id, _args.creds.split(":"), verbose=_args.verbose)
         _tagset = _imageDoc.downloadDoc().calcRegistrationTagset()
@@ -158,12 +160,16 @@ if __name__ == "__main__":
         else:
             _tagsetDict[_tagset] = [_id]
 
+        # report progress
+        if (_cnt <= _tenth*len(_allIds)/10.0) and (_cnt+1 > _tenth*len(_allIds)/10.0):
+            print("INFO(%s;%s): retrieved %d%%..." % (__name__, nowstr(), _tenth*10))
+            _tenth += 1
+        _cnt += 1
+
     _dupCnt = 0
     for _tagset in _tagsetDict:
         if len(_tagsetDict[_tagset]) > 1:
-            if _args.verbose:
-                print("DEBUG(%s:%s): duplicate candidate: %s" %
-                      (__name__, nowstr(), str(_tagsetDict[_tagset])))
+            print("INFO(%s:%s): duplicate candidate: %s" % (__name__, nowstr(), str(_tagsetDict[_tagset])))
 
             _candidateCnt = 0
             for _id in _tagsetDict[_tagset]:
@@ -199,7 +205,7 @@ if __name__ == "__main__":
                         print("INFO(%s:%s): " % (__name__, nowstr()))
                         print("INFO(%s:%s): " % (__name__, nowstr()))
                         print("INFO(%s:%s): %s %s (%f)" % (__name__, nowstr(), _firstId, _id, _err))
-                        print("INFO(%s:%s): propose to delete: %s" % (__name__, nowstr(), _deleteId))
+                        print("INFO(%s:%s): propose deletion of: %s" % (__name__, nowstr(), _deleteId))
                         print("INFO(%s:%s): " % (__name__, nowstr()))
                         print("INFO(%s:%s): " % (__name__, nowstr()))
                 else:

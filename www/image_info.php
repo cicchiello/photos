@@ -40,10 +40,10 @@
 
       .image {
           border: 1px solid #555;
-	  height: 128px;
-	  width: auto;
-	  float: left;
-	  margin: 15px;
+	      height: 256px;
+	      width: auto;
+	      float: left;
+	      margin: 15px;
       }
       
   </style>
@@ -79,13 +79,25 @@
     
         async function downloadAction(id, row) {
             //console.log("TRACE(image_info.php:downloadAction): id: "+id);
+            const urlParams = new URLSearchParams(window.location.search);
+            var url = './image_download.php?id='+id+'&row='+row;
+
+            // Add tag filters and checked images if present
+            const tagFilters = urlParams.get('tags');
+            if (tagFilters) 
+                url += "&tags=" + tagFilters;
+
+            const checkedImages = urlParams.get('checked');
+            if (checkedImages) 
+                url += "&checked=" + checkedImages;
+
             var f = document.getElementById("detail");
             if ("callback" in f) {
-                f.callback('./image_download.php?id='+id+'&row='+row);
-	    } else {
+                f.callback(url);
+            } else {
                 console.log("ERROR(image_info.php:downloadAction): f doesn't have a callback member");
-	    }
-	}
+            }
+        }
 
         async function deleteTag(tagName, imageId) {
             if (!confirm(`Are you sure you want to delete the tag "${tagName}"?`)) {

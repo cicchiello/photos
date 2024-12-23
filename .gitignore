@@ -11,3 +11,7 @@ fdk-aac
 ffmpeg
 lame
 x264
+
+cypress/downloads/*
+node_modules/*
+package-lock.json

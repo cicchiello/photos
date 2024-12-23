@@ -32,7 +32,7 @@
        return new Promise(resolve => setTimeout(resolve, ms));
     }
 
-    async function init(id, row, imagepath, basename) {
+    async function init(id, row, imagepath, basename, tagFilters, checkedImages) {
         //console.log('TRACE(image_download.php): id: '+id);
         //console.log('TRACE(image_download.php): imagepath: '+imagepath);
         //console.log('TRACE(image_download.php): basename: '+basename);
@@ -42,6 +42,10 @@
         b.download = basename;
         b.click();
         var url = "./image_info.php?id="+id+"&row="+row;
+        if (tagFilters)
+            url += "&tags=" + tagFilters;
+        if (checkedImages)
+            url += "&checked=" + checkedImages;
         open(url, "_self");
     }
 
@@ -54,6 +58,8 @@
     <?php
         $id = $_GET['id'];
         $row = $_GET['row'];
+        $tagFilters = isset($_GET['tags']) ? $_GET['tags'] : '';
+        $checkedImages = isset($_GET['checked']) ? $_GET['checked'] : '';
 
         $ini = parse_ini_file("./config.ini");
         $DbBase = $ini['couchbase'];
@@ -69,7 +75,7 @@
         downloadFile($imageUrl, $dstpath);
 
         $basename = basename($doc['paths'][0]);
-        echo ' onload="init('."'".$id."',".$row.",'".$dstpath."','".$basename."'".')" >';
+        echo ' onload="init('."'".$id."',".$row.",'".$dstpath."','".$basename."','".$tagFilters."','".$checkedImages."'".')" >';
         $enabled = array(
             'live' => false,
             'library' => true,
