@@ -160,15 +160,17 @@ if __name__ == "__main__":
     _parser.add_argument('-creds', nargs='?', required=True, help='CouchDb db credentials (user:pswd)')
     _parser.add_argument('-verbose', default=False, action='store_true', help='provide extra debug output')
     _parser.add_argument('-exemplarId', nargs='?', required=True, help='id of the example face')
+    _parser.add_argument('-tag', nargs='?', required=True, help='tag to check for matching faces')
     
     _args = _parser.parse_args(args=sys.argv[1:])
 
     print("ECHO(%s:%s): db: %s" % (__name__, nowstr(), _args.db))
     print("ECHO(%s:%s): verbose: %s" % (__name__, nowstr(), _args.verbose))
     print("ECHO(%s:%s): exemplarId: %s" % (__name__, nowstr(), _args.exemplarId))
+    print("ECHO(%s:%s): tag: %s" % (__name__, nowstr(), _args.tag))
 
     _allIds = AllDocsView(_args.db, _args.creds.split(":"), verbose=_args.verbose).getAllIds()
-    print("INFO(%s:%s): got %d ids" % (__name__, nowstr(), len(_allIds)-1))
+    print("INFO(%s:%s): Processing %d images" % (__name__, nowstr(), len(_allIds)-1))
 
     _exemplarDoc = ImageDoc(_args.db, _args.exemplarId,
                             _args.creds.split(":"),
@@ -180,28 +182,77 @@ if __name__ == "__main__":
             
     _cnt = 0
     _tenth = 1
+    _stats = {
+        'total_processed': 0,
+        'skipped_already_tagged': 0,
+        'skipped_no_person': 0,
+        'faces_found': 0
+    }
+
     for _id in _allIds:
         if _id != _args.exemplarId:
+            _stats['total_processed'] += 1
             _imageDoc = ImageDoc(_args.db, _id,
                                  _args.creds.split(":"),
                                  verbose=_args.verbose).downloadDoc()
             _ext = os.path.basename(_imageDoc.getDoc()['paths'][0]).split(".")[-1]
-            _filename = "/tmp/candidate%d.%s" % (_cnt, _ext)
             #print("DEBUG(%s:%s): tagset: %s" % (__name__, nowstr(), _tagset))
-            if _args.verbose:
-                print("DEBUG(%s:%s): downloading webimage to: %s" %
-                      (__name__, nowstr(), _filename))
-            _imageDoc.downloadWebImage(_filename)
 
-            _similarity = compare_faces(_exemplarFilename, _filename)
-            if _similarity != None:
-                print("INFO(%s:%s): found face in %s (score: %3.1f%%)" %
-                      (__name__, nowstr(), _id, float(_similarity)))
+            # Check if tag already exists if tag parameter is provided
+            _skip_aws = False
+            _skip_reason = None
+            if 'tags' in _imageDoc.getDoc():
+                for tag in _imageDoc.getDoc()['tags']:
+                    if tag.get('Name') == _args.tag:
+                        _skip_aws = True
+                        _skip_reason = "already tagged as '%s'" % _args.tag
+                        _stats['skipped_already_tagged'] += 1
+                        break
+
+            # Skip if no "person" tag exists
+            if not _skip_aws and 'tags' in _imageDoc.getDoc():
+                _has_person = False
+                for tag in _imageDoc.getDoc()['tags']:
+                    if tag.get('Name', '').lower() == 'person':
+                        _has_person = True
+                        break
+                if not _has_person:
+                    _skip_aws = True
+                    _skip_reason = "no 'person' tag found"
+                    _stats['skipped_no_person'] += 1
+
+            if _skip_aws and _args.verbose:
+                print("DEBUG(%s:%s): skipping AWS call for %s - %s" %
+                      (__name__, nowstr(), _id, _skip_reason))
+
+            if not _skip_aws:
+                _filename = "/tmp/candidate%d.%s" % (_cnt, _ext)
+                if _args.verbose:
+                    print("DEBUG(%s:%s): downloading webimage to: %s" %
+                          (__name__, nowstr(), _filename))
+                _imageDoc.downloadWebImage(_filename)
+                _similarity = compare_faces(_exemplarFilename, _filename)
+                os.remove(_filename)
+                if _similarity != None:
+                    _stats['faces_found'] += 1
+                    print("INFO(%s:%s): found %s in %s (score: %3.1f%%)" %
+                          (__name__, nowstr(), _args.tag, _id, float(_similarity)))
             
             # report progress
             if (_cnt <= _tenth*len(_allIds)/10.0) and (_cnt+1 > _tenth*len(_allIds)/10.0):
-                print("INFO(%s;%s): retrieved %d%%..." % (__name__, nowstr(), _tenth*10))
+                print("INFO(%s:%s): %d%% complete..." % (__name__, nowstr(), _tenth*10))
                 _tenth += 1
                 
             _cnt += 1
 
+    # Print statistics at the end
+    print("")
+    print("STATS(%s:%s): Processing Results" % (__name__, nowstr()))
+    print("STATS(%s:%s): ------------------" % (__name__, nowstr()))
+    print("STATS(%s:%s): Total images processed: %d" % (__name__, nowstr(), _stats['total_processed']))
+    print("STATS(%s:%s): Skipped (already tagged): %d" % (__name__, nowstr(), _stats['skipped_already_tagged']))
+    print("STATS(%s:%s): Skipped (no person tag): %d" % (__name__, nowstr(), _stats['skipped_no_person']))
+    print("STATS(%s:%s): Total AWS calls made: %d" % (__name__, nowstr(), 
+          _stats['total_processed'] - _stats['skipped_already_tagged'] - _stats['skipped_no_person']))
+    print("STATS(%s:%s): Faces found: %d" % (__name__, nowstr(), _stats['faces_found']))
+    print("")
