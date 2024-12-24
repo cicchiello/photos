@@ -34,8 +34,9 @@ class Uploader():
         self._doc_id = md5(path)
         self._doc_url = "%s/%s" % (db, self._doc_id)
         self._creds = creds
-        self._tagset = Tagset()
+        self._tagset = Tagset(verbose=self._verbose)
         self._tagset.append_metadata_tags(path)
+        self._path = path
         self._doc = {}
         self._doc['paths'] = [path]
         self._doc['type'] = "photo"
@@ -43,6 +44,91 @@ class Uploader():
         self._doc['upload_timestamp'] = calendar.timegm(time.gmtime())
 
 
+    def putJsonWithRetries(self, url, jdoc, headers):
+        _tries = 0
+        _sleep = 0.5
+        while _tries < 5:
+            try:
+                return requests.put(url, json=jdoc, headers=headers)
+            except Exception as e:
+                print("WARNING(%s:%s): putJsonWithRetries; caught exception: %s" %
+                      (__name__, nowstr(), str(e)))
+                _tries += 1
+                time.sleep(_sleep)
+                _sleep *= 2
+                
+        print("ERROR(%s:%s): putJsonWithRetries; quitting after 5 tries" % (__name__, nowstr()))
+        exit(-1)
+        
+            
+    def putBinWithRetries(self, url, data, headers):
+        _tries = 0
+        _sleep = 0.5
+        while _tries < 5:
+            try:
+                return requests.put(url, data=data, headers=headers)
+            except Exception as e:
+                print("WARNING(%s:%s): putBinWithRetries; caught exception: %s" %
+                      (__name__, nowstr(), str(e)))
+                _tries += 1
+                time.sleep(_sleep)
+                _sleep *= 2
+                
+        print("ERROR(%s:%s): putBinWithRetries; quitting after 5 tries" % (__name__, nowstr()))
+        exit(-1)
+        
+            
+    def getWithRetries(self, url, headers):
+        _tries = 0
+        _sleep = 0.5
+        while _tries < 5:
+            try:
+                return requests.get(url, headers=headers)
+            except Exception as e:
+                print("WARNING(%s:%s): getWithRetries; caught exception: %s" %
+                      (__name__, nowstr(), str(e)))
+                _tries += 1
+                time.sleep(_sleep)
+                _sleep *= 2
+                
+        print("ERROR(%s:%s): getWithRetries; quitting after 5 tries" % (__name__, nowstr()))
+        exit(-1)
+            
+            
+    def deleteWithRetries(self, url):
+        _tries = 0
+        _sleep = 0.5
+        while _tries < 5:
+            try:
+                return requests.delete(url)
+            except Exception as e:
+                print("WARNING(%s:%s): deleteWithRetries; caught exception: %s" %
+                      (__name__, nowstr(), str(e)))
+                _tries += 1
+                time.sleep(_sleep)
+                _sleep *= 2
+                
+        print("ERROR(%s:%s): deleteWithRetries; quitting after 5 tries" % (__name__, nowstr()))
+        exit(-1)
+            
+            
+    def headWithRetries(self, url):
+        _tries = 0
+        _sleep = 0.5
+        while _tries < 5:
+            try:
+                return requests.head(url)
+            except Exception as e:
+                print("WARNING(%s:%s): headWithRetries; caught exception: %s" %
+                      (__name__, nowstr(), str(e)))
+                _tries += 1
+                time.sleep(_sleep)
+                _sleep *= 2
+                
+        print("ERROR(%s:%s): getWithRetries; quitting after 5 tries" % (__name__, nowstr()))
+        exit(-1)
+            
+            
     def recognize(self):
         _original_path = self._doc['paths'][0]
         _path = _original_path
@@ -68,55 +154,92 @@ class Uploader():
                 os.remove(_path)
             _path = _newpath
             
-        if self._verbose:
-            print("DEBUG(%s:%s): calling AWS Rekognition with: %s" % (__name__, nowstr(), _path))
-        self._tagset.recognize(_path)
-        
-        if exists(_path) and (_path != _original_path):
+        if os.path.getsize(_path) > 0:
             if self._verbose:
-                print("DEBUG(%s:%s): removing: %s" % (__name__, nowstr(), _path))
-            os.remove(_path)
-
-
-    def attachWebSuitable(self, base_path, revision):
-        # > convert <given-file> -resize 640 <web-suitable-file>
-        _web_suitable_path = "/tmp/%s" % os.path.basename(base_path)
+                print("DEBUG(%s:%s): calling AWS Rekognition with: %s" % (__name__, nowstr(), _path))
+            self._tagset.recognize(_path)
         
-        if self._verbose:
-            print("DEBUG(%s:%s): creating web suitable image: %s" % (__name__, nowstr(), _web_suitable_path))
+            if exists(_path) and (_path != _original_path):
+                if self._verbose:
+                    print("DEBUG(%s:%s): removing: %s" % (__name__, nowstr(), _path))
+                os.remove(_path)
+            return True
+        else:
+            print("WARNING(%s:%s): couldn't recognize invalid file: %s" % (__name__, nowstr(), _path))
+            return False
             
-        subprocess.call(["convert", base_path, "-resize", "640", _web_suitable_path])
-        _web_suitable_attachmentUrl = "%s/web_image?rev=%s" % (self._doc_url, revision)
-        _web_suitable_attachmentHeaders = {"Content-Type": "image/%s" % base_path.split(".")[-1]}
 
-        time.sleep(0.5)
+    def imageUrl(self, revision):
+        return "%s/image?rev=%s" % (self._doc_url, revision)
+
+    
+    def attachImage(self, revision):
+        # no conversion of original image -- keep original for posterity
+        _imageHeaders = {"Content-Type": "image/%s" % self._path.split(".")[-1]}
+        _imageData = open(self._path, 'rb').read()
+
+        if self._doc['size'] != len(_imageData):
+            print("ERROR(%s:%s): size validation failure in attachImage" % (__name__, nowstr()))
+            exit(-3)
+            
+        if self._verbose:
+            print("DEBUG(%s:%s): attaching image to document(%s)" % (__name__, nowstr(), self._doc_id))
+
+        _r = self.putBinWithRetries(self.imageUrl(revision), _imageData, _imageHeaders)
+        return json.loads(_r.content)["rev"]
+
+
+    def webSuitableUrl(self, revision):
+        return "%s/web_image?rev=%s" % (self._doc_url, revision)
+
+    
+    def attachWebSuitable(self, revision):
+        # > convert <given-file> -resize 640 <web-suitable-file>
+        _web_suitable_path = "/tmp/%s" % os.path.basename(self._path)
         
         if self._verbose:
-            print("DEBUG(%s:%s): attaching web-suitable image to document(%s)" % (__name__, nowstr(), self._doc_id))
+            print("DEBUG(%s:%s): creating web suitable image: %s" %
+                  (__name__, nowstr(), _web_suitable_path))
+            
+        subprocess.call(["convert", self._path, "-resize", "640", _web_suitable_path])
+        _web_suitable_attachmentHeaders = {"Content-Type": "image/%s" % self._path.split(".")[-1]}
+
+        if self._verbose:
+            print("DEBUG(%s:%s): attaching web-suitable image to document(%s)"
+                  % (__name__, nowstr(), self._doc_id))
+            
         _web_suitable_attachmentData = open(_web_suitable_path, 'rb').read()
-        _r = requests.put(_web_suitable_attachmentUrl, data=_web_suitable_attachmentData,
-                          headers=_web_suitable_attachmentHeaders)
+
+        _r = self.putBinWithRetries(self.webSuitableUrl(revision), _web_suitable_attachmentData,
+                                    _web_suitable_attachmentHeaders)
+
+        os.remove(_web_suitable_path)
         return json.loads(_r.content)["rev"]
 
     
-    def attachThumbnail(self, base_path, revision):
+    def thumbnailUrl(self, revision):
+        return "%s/thumbnail?rev=%s" % (self._doc_url, revision)
+
+    
+    def attachThumbnail(self, revision):
         # > convert <given-file> -resize 128 <thumbnail-file>
-        _thumbnail_path = "/tmp/thumb_%s" % os.path.basename(base_path)
+        _thumbnail_path = "/tmp/thumb_%s" % os.path.basename(self._path)
         
         if self._verbose:
             print("DEBUG(%s:%s): creating thumbnail image: %s" % (__name__, nowstr(), _thumbnail_path))
             
-        subprocess.call(["convert", base_path, "-resize", "128", _thumbnail_path])
-        _thumbnail_attachmentUrl = "%s/thumbnail?rev=%s" % (self._doc_url, revision)
-        _thumbnail_attachmentHeaders = {"Content-Type": "image/%s" % base_path.split(".")[-1]}
+        subprocess.call(["convert", self._path, "-resize", "128", _thumbnail_path])
+        _thumbnail_attachmentHeaders = {"Content-Type": "image/%s" % self._path.split(".")[-1]}
 
-        time.sleep(0.5)
-        
         if self._verbose:
             print("DEBUG(%s:%s): attaching thumbnail to document(%s)" % (__name__, nowstr(), self._doc_id))
         _thumbnail_attachmentData = open(_thumbnail_path, 'rb').read()
-        _r = requests.put(_thumbnail_attachmentUrl, data=_thumbnail_attachmentData,
-                          headers=_thumbnail_attachmentHeaders)
+
+        _r = self.putBinWithRetries(self.thumbnailUrl(revision), _thumbnail_attachmentData,
+                                    _thumbnail_attachmentHeaders)
+
+        os.remove(_thumbnail_path)
+
         return json.loads(_r.content)["rev"]
 
     
@@ -124,39 +247,37 @@ class Uploader():
         if self._verbose:
             print("DEBUG(%s:%s): creating CouchDb document(%s)" % (__name__, nowstr(), self._doc_id))
             
-        _path = self._doc['paths'][0]
-        
         _headers = {"Content-Type": "application/json"}
         self._doc['tags'] = self._tagset.get_tag_arr()
-        _attachmentData = open(_path, 'rb').read()
+        _attachmentData = open(self._path, 'rb').read()
         self._doc['size'] = len(_attachmentData)
-        _r = requests.put(self._doc_url, json=self._doc, headers=_headers)
+
+        _r = self.putJsonWithRetries(self._doc_url, self._doc, _headers)
         
         if b'conflict' in _r.content:
             print("ERROR(%s:%s): conflict" % (__name__, nowstr()))
             exit(-2)
 
         _rev = json.loads(_r.content)["rev"]
+        _rev = self.attachImage(_rev)
+        _rev = self.attachWebSuitable(_rev)
+        _rev = self.attachThumbnail(_rev)
+
         self._doc['_rev'] = _rev
-        _attachmentUrl = "%s/image?rev=%s" % (self._doc_url, _rev)
-        _attachmentHeaders = {"Content-Type": "image/%s" % _path.split(".")[-1]}
-        
-        if self._verbose:
-            print("DEBUG(%s:%s): attaching image to document(%s)" % (__name__, nowstr(), self._doc_id))
-        _r = requests.put(_attachmentUrl, data=_attachmentData, headers=_attachmentHeaders)
-        _rev = json.loads(_r.content)["rev"]
 
-        time.sleep(0.5)
         
-        _rev = self.attachWebSuitable(_path, _rev)
-        
-        time.sleep(0.5)
+    def deleteIfExists(self, url, revision):
+        # determine if url (doc or attachment) exists 
+        _r = self.headWithRetries(url)
+        _missing = _r.status_code == 404
+        if not _missing:
+            _r = self.deleteWithRetries(url)
+            _rev = json.loads(_r.content)['rev']
+            return _rev
+        else:
+            return revision
 
-        _rev = self.attachThumbnail(_path, _rev)
-
-        time.sleep(0.5)
-        
-
+            
     def updateEntry(self):
         if self._verbose:
             print("DEBUG(%s:%s): updating CouchDb document(%s)" % (__name__, nowstr(), self._doc_id))
@@ -169,12 +290,24 @@ class Uploader():
         self._doc['_rev'] = _doc['_rev']
         
         _headers = {"Content-Type": "application/json"}
-        return requests.put(self._doc_url, json=self._doc, headers=_headers)
+
+        _rev = self._doc['_rev']
+        
+        # determine if attachments exists ('cause they should be deleted before replaced)
+        _rev = self.deleteIfExists(self.imageUrl(_rev), _rev)
+        _rev = self.deleteIfExists(self.webSuitableUrl(_rev), _rev)
+        _rev = self.deleteIfExists(self.thumbnailUrl(_rev), _rev)
+
+        _rev = self.attachImage(_rev)
+        _rev = self.attachWebSuitable(_rev)
+        _rev = self.attachThumbnail(_rev)
+        
+        return self.putJsonWithRetries(self._doc_url, self._doc, _headers)
     
 
     def downloadDoc(self, url):
         _headers = {"Content-Type": "application/json"}
-        _r = requests.get(url, headers=_headers)
+        _r = self.getWithRetries(url, headers=_headers)
         return json.loads(_r.content) if _r.status_code == 200 else None
     
 
@@ -211,6 +344,10 @@ if __name__ == "__main__":
     print("ECHO(%s:%s): verbose: %s" % (__name__, nowstr(), _args.verbose))
 
     _u = Uploader(_args.db, _args.pic, _args.creds.split(":"), verbose=_args.verbose)
-    _u.recognize()
-    _u.updateEntry() if _u.docExists() else _u.createEntry()
+    if _u.recognize():
+        _u.updateEntry() if _u.docExists() else _u.createEntry()
+    else:
+        print("WARNING(%s:%s): skipping unrecognized (invalid) file: %s" %
+              (__name__, nowstr(), _args.pic))
+        
     
