@@ -74,6 +74,7 @@
 
 	setConfidence(confidence);
 	setDbUrl(dbUrl);
+	setNewTagListener(document);
 	
         var f = document.getElementById("imgArrayFrame");
         f.callback = function callback(url) {
@@ -81,6 +82,9 @@
         };
         f.checkboxAction = function checkAction(checkboxElem, dbUrl, objid) {
             checkboxAction(checkboxElem, dbUrl, objid);
+        };
+        f.selectAllAction = function selectAllActionCallback(allCheckboxElems, checked, dbUrl) {
+	    selectAllAction(allCheckboxElems, checked, dbUrl);
         };
         f.clearChecksAction = function clearChecksAction() {
             clearChecks();

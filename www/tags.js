@@ -116,14 +116,12 @@ function checkboxAction(checkboxElem, dburl, imageId) {
 	    });
         } else {
 	    getCheckedSet().delete(imageId); // deletes from set in-place
-	    setCheckedSet(getCheckedSet());
             delete allTags[imageId];
 	    delete allUserTags[imageId];
 	    renderTagset(calcNonUserIntersection(getCheckedSet()), calcUserIntersection(getCheckedSet()));
 	    updateAddTagButtonState();
         }
     }
-    updateAddTagButtonState();
 }
 
 async function persistTagToImage(imageId, newTag, onCompletion) {
@@ -188,6 +186,7 @@ async function handleAddTag() {
     });
 }
 
+
 function updateAddTagButtonState() {
     const addButton = document.getElementById('addNewTagButton');
     if (addButton) {
@@ -195,18 +194,62 @@ function updateAddTagButtonState() {
     }
 }
 
-document.addEventListener('DOMContentLoaded', function() {
+
+function setAllCheckboxes(checkboxes, idx, dbUrl, onCompletion) {
+    if (idx >= checkboxes.length) {
+	onCompletion();
+    } else {
+	const checkbox = checkboxes[idx];
+	const img = checkbox.parentElement.nextElementSibling;
+	const imageId = img ? img.getAttribute('data-objid') : null;
+        checkbox.checked = true;
+        setCheckedSet(getCheckedSet().add(imageId));
+        collectTags(dbUrl, imageId, function onDbCompletion() {
+            setAllCheckboxes(checkboxes, idx+1, dbUrl, onCompletion);
+	});
+    }
+}
+
+
+function clearAllCheckboxes(checkboxes, onCompletion) {
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = false;
+        const img = checkbox.parentElement.nextElementSibling;
+        const imageId = img ? img.getAttribute('data-objid') : null;
+	getCheckedSet().delete(imageId);
+        delete allTags[imageId];
+	delete allUserTags[imageId];
+    });
+    onCompletion();
+}
+
+
+function selectAllAction(checkboxes, checked, dbUrl) {
+    const renderOnCompletion = function r() {
+        renderTagset(calcNonUserIntersection(getCheckedSet()), calcUserIntersection(getCheckedSet()));
+        updateAddTagButtonState();
+    };
+    
+    if (checked) {
+	setAllCheckboxes(checkboxes, 0, dbUrl, renderOnCompletion);
+    } else {
+	clearAllCheckboxes(checkboxes, renderOnCompletion);
+    }
+}
+
+
+function setNewTagListener(document) {
     const newTagInput = document.getElementById('newTag');
     newTagInput.addEventListener('keypress', function(event) {
         if (event.key === 'Enter') {
-            event.preventDefault(); // Prevent form submission
-            const addTagButton = document.getElementById('addNewTagButton');
-            if (!addTagButton.disabled) {
+	    event.preventDefault(); // Prevent form submission
+	    const addTagButton = document.getElementById('addNewTagButton');
+	    if (!addTagButton.disabled) {
                 handleAddTag();
-            }
+	    }
         }
     });
-});
+}
 
 
 function collectImagesThenRender(imgArrayFrame, row, tagFilters, checkedImages) {

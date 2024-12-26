@@ -131,6 +131,8 @@ function updateTableRendering(visibleSet, pageIdx, dburl) {
     const itemsPerPage = RowsPerPage*ColsPerRow;
     const firstrow = pageIdx*RowsPerPage;
     var imageCnt = 0;
+    var selectAllCheckbox = document.getElementById("selectAllCheckbox");
+    selectAllCheckbox.checked = false;
     visibleSet.forEach(r => {
         var img = document.getElementById("image"+imageCnt);
 	img.src = dburl+"/"+r+"/thumbnail";

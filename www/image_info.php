@@ -127,7 +127,6 @@
 
     <?php
         if (isset($_COOKIE['login_user'])) {
-            echo renderMainMenu($_COOKIE['login_user']);
         } else {
             echo 'onload="forceLogin()">';
         }

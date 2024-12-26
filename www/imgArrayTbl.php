@@ -175,15 +175,18 @@
 	    
             const setCheckMarksFunc = async function setCheckMarks() {
 		await sleep(100);
-		var f = document.getElementById("imgArrayFrame");
 		const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+		var allChecked = true;
+		const selectAllCheckboxElem = document.getElementById("selectAllCheckbox");
 		checkboxes.forEach(checkbox => {
-		    const img = checkbox.parentElement.nextElementSibling;
-		    if (img && checkedIds.has(img.getAttribute('data-objid'))) {
-			checkbox.checked = true;
+		    if (checkbox != selectAllCheckboxElem) {
+			const img = checkbox.parentElement.nextElementSibling;
+			checkbox.checked = img && checkedIds.has(img.getAttribute('data-objid'));
+			allChecked &= checkbox.checked;
 		    }
 		});
-	    };
+		selectAllCheckboxElem.checked = allChecked;
+ 	    };
 
 	    if (getSearchTagList().length > 0) {
 		const paginateFunc = async function adjustPagination() {
@@ -225,6 +228,14 @@
 		f.checkboxAction(checkboxElem, dburl, objid);
 	    }
 	}
+
+        function selectAllAction(selectAllCheckboxElem, dburl) {
+	    const checkboxes = Array.from(document.querySelectorAll('input[type="checkbox"]'))
+		  .filter(checkbox => checkbox !== selectAllCheckboxElem);
+	    
+            var f = parent.document.getElementById("imgArrayFrame");
+	    f.selectAllAction(checkboxes, selectAllCheckboxElem.checked, dburl);
+        }
       
     </script>
 
@@ -254,7 +265,12 @@
          <input id="tagInput" class="w3-small" type="text" size="12" placeholder="enter tag here">
 	 <button id="findImagesButton" class="w3-small" style="font-weight:bold">&gt;&gt;&gt;&gt;</button>
          <input id="tagList" class="tagList w3-small tag-display" type="text" placeholder="tag filters collect here..." style="width:45%; border:none; background-color:#f8f8f8;" readonly>
-	 <button id="clearFindButton" class="w3-small" style="font-weight:bold">Clear</button>
+         <label class="check-container" style="float:right; margin-right: 20px;">
+           <input type="checkbox" id="selectAllCheckbox" onclick="selectAllAction(this,'<?php echo $DbBase ?>')">
+           <span class="checkmark"></span>
+           <span style="font-size: 14px; margin-left: 5px;">Select All</span>
+         </label>
+         <button id="clearFindButton" class="w3-small" style="font-weight:bold">Clear</button>
        </span>
        <p></p>
        <table id="myTable" style="width:100%; overflow:scroll">
