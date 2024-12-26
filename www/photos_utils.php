@@ -379,13 +379,13 @@ function renderSchdInfo($id)
 
 function renderProfileArea($userName)
 {
-   $result = '  <div id="profileArea" class="row box col-sm-4 w3-panel w3-card w3-white w3-round-large w3-display-topright">';
-   $result .= '    Hi, '.$userName.'!&nbsp;<b>';
-   $result .= '    <a href="profile.php" id="ProfileBtn" class="Btn" title="My Profile">';
+   $result = '  <div id="profileArea" class="row box col-sm-4 w3-panel w3-card w3-white w3-round-large" style="position:fixed; top:5px; left:10px; z-index:1000; display:flex; align-items:center; gap:10px; padding:5px;">';
+   $result .= '    <span style="min-width:60px; max-width:100px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="Hi, '.$userName.'!">Hi, '.$userName.'!</span>';
+   $result .= '    <a href="profile.php" id="ProfileBtn" class="Btn" title="My Profile" style="display:flex; align-items:center; gap:5px;">';
    $result .= '      <img class="profileIcon" src="img/profile_626.png">';
    $result .= '      Profile';
-   $result .= '    </a>&nbsp;';
-   $result .= '    <a href="logout_action.php" id="LogoutBtn" class="Btn" title="Logout">';
+   $result .= '    </a>';
+   $result .= '    <a href="logout_action.php" id="LogoutBtn" class="Btn" title="Logout" style="display:flex; align-items:center; gap:5px;">';
    $result .= '      <img class="profileIcon" src="img/logout_512.png">';
    $result .= '      Logout';
    $result .= '    </a>';

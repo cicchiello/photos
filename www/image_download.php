@@ -82,7 +82,6 @@
             'recording' => false,
             'scheduled' => false
         );
-        echo renderMenu($enabled, $_COOKIE['login_user']);
        ?>
     
     <div class="w3-container w3-display-middle">

@@ -5,6 +5,7 @@ const pageNumbers = document.getElementById("pageNumbers");
 var totalPages = null;
 
 var sSearchTagList = [];
+var sExcludeTagList = [];
 var sSelectedList = [];
 
 
@@ -14,6 +15,14 @@ function setSearchTagList(taglist) {
 
 function getSearchTagList() {
     return sSearchTagList;
+}
+
+function setExcludeTagList(taglist) {
+    sExcludeTagList = taglist;
+}
+
+function getExcludeTagList() {
+    return sExcludeTagList;
 }
 
 function setSelectedList(newSelectedList) {
@@ -231,29 +240,40 @@ function collectResultset(resultset, packetIdx, baseSearchurl, bookmark, onCompl
 }
 
 
-function prettyPrintTagList(tagList) {
+function prettyPrintTagList(includedList, excludedList) {
     var str = null;
-    tagList.forEach(tag => {
+    includedList.forEach(tag => {
 	if (str === null) str = tag;
-	else str += " "+tag;
+	else str += " AND "+tag;
+    });
+    excludedList.forEach(tag => {
+	if (str === null) str = "";
+	str += " NOT "+tag;
     });
     return str === null ? "" : str;
 }
 
 
-function onFindImagesButton(onCompletion) {
+function updateTagset(onCompletion) {
     const dburl = document.getElementById("dbUrl").innerHTML.trim();
-    var tags = getSearchTagList();
-    if (tagInput.value && !tags.includes(tagInput.value)) {
-	tags.push(tagInput.value);
-	setSearchTagList(tags);
-    }
-    tagList.value = prettyPrintTagList(tags);
+    var includes = getSearchTagList();
+    var excludes = getExcludeTagList();
+    
+    tagList.value = prettyPrintTagList(includes, excludes);
     tagInput.value = null;
+    excludeTagInput.value = null;
 
     const PacketSz = 100;
-    var searchurl = dburl+"/_design/photos_by_tag/_search/photos_by_tag?limit="+PacketSz+"&q=";
-    tags.forEach((tag,i) => {if (i>0) searchurl += " AND "; searchurl += tag;});
+    var query = null;
+    includes.forEach((tag,i) => {
+	if (query === null) query = tag;
+	else query += " AND "+tag;
+    });
+    excludes.forEach((tag,i) => {
+	if (query === null) query = "*:*";
+	query += " -"+tag;
+    });
+    var searchurl = dburl+"/_design/photos_by_tag/_search/photos_by_tag?limit="+PacketSz+"&q="+query;
     //like: "http://HOST:5984/photos/_design/photos_by_tag/_search/photos_by_tag?limit=200&q=man AND woman";
 
     collectResultset([], 0, searchurl, null, resultset => {
@@ -267,6 +287,26 @@ function onFindImagesButton(onCompletion) {
 	if (onCompletion) 
 	    onCompletion();
     });
+}
+
+function onExcludeImagesButton(onCompletion) {
+    var tags = getExcludeTagList();
+    if (excludeTagInput.value && !tags.includes(excludeTagInput.value)) {
+	tags.push(excludeTagInput.value);
+	setExcludeTagList(tags);
+    }
+    updateTagset(onCompletion);
+}
+
+
+function onFindImagesButton(onCompletion) {
+    const dburl = document.getElementById("dbUrl").innerHTML.trim();
+    var tags = getSearchTagList();
+    if (tagInput.value && !tags.includes(tagInput.value)) {
+	tags.push(tagInput.value);
+	setSearchTagList(tags);
+    }
+    updateTagset(onCompletion);
 }
 
 
@@ -293,11 +333,19 @@ findImagesButton.addEventListener("click",(e)=>{
 });
 
 
+excludeImagesButton.addEventListener("click",(e)=>{
+    e.preventDefault();
+
+    onExcludeImagesButton(function onCompletion() {});
+});
+
+
 clearFindButton.addEventListener("click",(e)=>{
     e.preventDefault();
 
     setSelectedList([]);
     setSearchTagList([]);
+    setExcludeTagList([]);
     
     var f = parent.document.getElementById("imgArrayFrame");
     f.clearChecksAction();
@@ -316,6 +364,22 @@ tagInput.addEventListener("keypress", function(event) {
 	f.clearChecksAction();
     
 	onFindImagesButton(function onCompletion() {
+	    setTimeout(function(){
+		tagInput.focus();
+	    },50); // you can play with this timeout to make it as short as possible
+	});
+    }
+});
+
+
+excludeTagInput.addEventListener("keypress", function(event) {
+    if (event.key === "Enter") {
+        event.preventDefault();
+	
+	var f = parent.document.getElementById("imgArrayFrame");
+	f.clearChecksAction();
+    
+	onExcludeImagesButton(function onCompletion() {
 	    setTimeout(function(){
 		tagInput.focus();
 	    },50); // you can play with this timeout to make it as short as possible
