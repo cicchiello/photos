@@ -25,10 +25,17 @@
       }
      
       th, td {
-          padding: 5px;
-	  width: 100px; /* any fixed value for the parent */
+          padding: 1px;
+	  width: 100px;
+          height: auto;
       }
-     
+
+      img.thumb {
+          max-width: 100%;
+          height: auto;
+          object-fit: contain;
+      }
+      
       .Btn:hover {
          background-color: #465702; /* Add a dark-grey background on hover */
          outline: none; /* Remove outline */
@@ -145,11 +152,23 @@
           cursor: default;
       }
       
+      .label-container {
+        display: inline-block;
+        width: 90px;
+        text-align: right;
+        margin-right: 5px;
+      }
+      
     </style>
     
     <script>
         function sleep(ms) {
             return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        function getImageId(elem) {
+            const imageId = elem ? elem.getAttribute('data-objid') : null;
+            return imageId === "null" ? null : imageId;
         }
 
         function init(row, tagFilters, checkedImages) {
@@ -181,7 +200,7 @@
 		checkboxes.forEach(checkbox => {
 		    if (checkbox != selectAllCheckboxElem) {
 			const img = checkbox.parentElement.nextElementSibling;
-			checkbox.checked = img && checkedIds.has(img.getAttribute('data-objid'));
+			checkbox.checked = img && checkedIds.has(getImageId(img));
 			allChecked &= checkbox.checked;
 		    }
 		});
@@ -205,7 +224,7 @@
         function imgInfoAction(elemid) {
             var f = parent.document.getElementById("imgArrayFrame");
 	    var img = document.getElementById(elemid);
-	    var objid = img.getAttribute('data-objid');
+	    var objid = getImageId(img);
 	    if (objid !== "null") {
                 var row = img.getAttribute('data-firstrow');
 
@@ -221,11 +240,10 @@
 	}
 
         function checkAction(checkboxElem, dburl, elemid) {
-            var f = parent.document.getElementById("imgArrayFrame");
-	    var img = document.getElementById(elemid);
-	    var objid = img.getAttribute('data-objid');
-	    if (objid !== "null") {
-		f.checkboxAction(checkboxElem, dburl, objid);
+	    var objid = getImageId(document.getElementById(elemid));
+	    if (objid) {
+                var f = parent.document.getElementById("imgArrayFrame");
+                f.checkboxAction(checkboxElem, dburl, objid);
 	    }
 	}
 
@@ -261,16 +279,26 @@
            ?>
        </span>
        <span>
-         <label for="tagInput" class="w3-small" style="font-weight:bold">Search tag: </label>
+         <span class="label-container">
+           <label for="tagInput" class="w3-small" style="font-weight:bold">Search tag:</label>
+         </span>
          <input id="tagInput" class="w3-small" type="text" size="12" placeholder="enter tag here">
 	 <button id="findImagesButton" class="w3-small" style="font-weight:bold">&gt;&gt;&gt;&gt;</button>
-         <input id="tagList" class="tagList w3-small tag-display" type="text" placeholder="tag filters collect here..." style="width:45%; border:none; background-color:#f8f8f8;" readonly>
+         <input id="tagList" class="tagList w3-small tag-display" type="text" placeholder="tag filters collect here..." style="width:55%; border:none; background-color:#f8f8f8;" readonly>
          <label class="check-container" style="float:right; margin-right: 20px;">
            <input type="checkbox" id="selectAllCheckbox" onclick="selectAllAction(this,'<?php echo $DbBase ?>')">
            <span class="checkmark"></span>
            <span style="font-size: 14px; margin-left: 5px;">Select All</span>
          </label>
          <button id="clearFindButton" class="w3-small" style="font-weight:bold">Clear</button>
+       </span>
+       <p></p>
+       <span>
+         <span class="label-container">
+           <label for="excludeTagInput" class="w3-small" style="font-weight:bold">Exclude tag:</label>
+         </span>
+         <input id="excludeTagInput" class="w3-small" type="text" size="12" placeholder="enter tag here">
+	 <button id="excludeImagesButton" class="w3-small" style="font-weight:bold">&gt;&gt;&gt;&gt;</button>
        </span>
        <p></p>
        <table id="myTable" style="width:100%; overflow:scroll">

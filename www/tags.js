@@ -25,7 +25,7 @@ function setDbUrl(dbUrl) {
 
 function calcNonUserIntersection(tset) {
     var inter = null;
-    
+
     Array.from(tset).forEach(objid => {
 	inter = inter === null ? allTags[objid] : inter.intersection(allTags[objid]);
     });
@@ -102,6 +102,8 @@ function collectTags(dburl, imageId, onCompletion) {
                 console.log("ERROR(collectTags): Fetch error: "+error);
 		onCompletion();
             });
+    } else {
+	onCompletion();
     }
 }
 
@@ -195,18 +197,28 @@ function updateAddTagButtonState() {
 }
 
 
+function getImageId(elem) {
+    const imageId = elem ? elem.getAttribute('data-objid') : null;
+    return imageId === "null" ? null : imageId;
+}
+
+
 function setAllCheckboxes(checkboxes, idx, dbUrl, onCompletion) {
     if (idx >= checkboxes.length) {
 	onCompletion();
     } else {
 	const checkbox = checkboxes[idx];
-	const img = checkbox.parentElement.nextElementSibling;
-	const imageId = img ? img.getAttribute('data-objid') : null;
-        checkbox.checked = true;
-        setCheckedSet(getCheckedSet().add(imageId));
-        collectTags(dbUrl, imageId, function onDbCompletion() {
-            setAllCheckboxes(checkboxes, idx+1, dbUrl, onCompletion);
-	});
+	const imageId = getImageId(checkbox.parentElement.nextElementSibling);
+	if (imageId) {
+            checkbox.checked = true;
+            var r = getCheckedSet().add(imageId);
+            setCheckedSet(r);
+            collectTags(dbUrl, imageId, function onDbCompletion() {
+                setAllCheckboxes(checkboxes, idx+1, dbUrl, onCompletion);
+            });
+	} else {
+	    onCompletion();
+	}
     }
 }
 
@@ -214,11 +226,12 @@ function setAllCheckboxes(checkboxes, idx, dbUrl, onCompletion) {
 function clearAllCheckboxes(checkboxes, onCompletion) {
     checkboxes.forEach(checkbox => {
         checkbox.checked = false;
-        const img = checkbox.parentElement.nextElementSibling;
-        const imageId = img ? img.getAttribute('data-objid') : null;
-	getCheckedSet().delete(imageId);
-        delete allTags[imageId];
-	delete allUserTags[imageId];
+	const imageId = getImageId(checkbox.parentElement.nextElementSibling);
+	if (imageId) {
+            getCheckedSet().delete(imageId);
+            delete allTags[imageId];
+            delete allUserTags[imageId];
+	}
     });
     onCompletion();
 }

@@ -64,6 +64,12 @@
 	overflow-y: auto;
     }
 
+    .profile-area {
+        position: fixed;
+        top: 10px;
+        left: 10px;
+        z-index: 1000;
+    }
   </style>
 
   <script src="tags.js"></script>
@@ -128,7 +134,9 @@
             $tagFilters = array_key_exists('tags', $_GET) ? $_GET['tags'] : '';
 	    $checkedImages = array_key_exists('checked', $_GET) ? $_GET['checked'] : '';
             echo 'onload="init('."'".$DbBase."','".$row."',".$confidence.",'".$tagFilters."','".$checkedImages."'".')">';
+            echo '<div class="profile-area">';
             echo renderProfileArea($_COOKIE['login_user']);
+            echo '</div>';
         } else {
             echo 'onload="forceLogin()">';
         }
@@ -149,7 +157,7 @@
                 </div>
 	    </div>
 
-            <div style="position:fixed; width:20%; bottom:0; height:70px; margin:10px; z-index:999;"
+            <div style="position:fixed; width:20%; bottom:5px; height:70px; margin:10px; z-index:999;"
                 class="w3-white w3-round-large">
 	      
                 <span class="w3-medium" style="font-weight:bold; margin-left:70px;">New tag:</span>
@@ -159,20 +167,17 @@
                         <button id="addNewTagButton" class="w3-small" style="font-weight:bold" onclick="handleAddTag()" disabled>Add</button>
                     </div>
                 </div>
-		
             </div>
-       
         </div>
 	
-        <div style="height:89.5%; width:77%; padding:10px; margin:10px"
+        <div style="position:fixed; height:95%; width:77%; top:5px; padding-right:10px; margin-right:10px;"
             class="w3-white w3-round-large w3-panel w3-display-bottomright">
 
             <iframe id="imgArrayFrame" src="" frameBorder="0"
                 height="100%" width="100%" style="float:right; z-index:999">
                 <p>Your browser does not support iframes.</p>
             </iframe>
-
-      </div>
+        </div>
       
     </div>
     
