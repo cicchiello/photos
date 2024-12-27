@@ -157,7 +157,7 @@
                 </div>
 	    </div>
 
-            <div style="position:fixed; width:20%; bottom:10px; height:70px; margin-left:10px; z-index:999;"
+            <div style="position:fixed; width:20%; bottom:20px; height:70px; margin-left:10px; z-index:999;"
                 class="w3-white w3-round-large">
 	      
                 <span class="w3-medium" style="font-weight:bold; margin-left:70px;">New tag:</span>
