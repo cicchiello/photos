@@ -493,4 +493,82 @@ describe('Cherry Pick Tests', () => {
     cy.url().should('include', 'image_info.php')
     cy.url().should('include', 'tags=produce%20NOT%20cherry')
   })
+
+    
+  it('make sure tag term ANDs are handled correctly', () => {
+    cy.visit('/index.php')
+    cy.wait(500)
+
+    // Wait for the iframe to load
+    cy.get('iframe[src*="imgArrayTbl.php"]')
+      .should('be.visible')
+      .its('0.contentDocument.body')
+      .should('not.be.empty')
+      .then(cy.wrap)
+      .within(() => {
+        // Type 'man' into the tag input and click search
+        cy.get('#tagInput')
+          .should('be.visible')
+          .type('man')
+        cy.wait(500)
+        
+        cy.get('#findImagesButton')
+          .should('be.visible')
+          .click()
+        cy.wait(500)
+
+        // Type 'face' into the tag input and click search
+        cy.get('#tagInput')
+          .should('be.visible')
+          .type('face')
+        cy.wait(500)
+        
+        cy.get('#findImagesButton')
+          .should('be.visible')
+          .click()
+        cy.wait(500)
+      })
+
+    // Check an expected image and the tagList
+    cy.get('iframe[src*="imgArrayTbl.php"]')
+      .should('be.visible')
+      .its('0.contentDocument.body')
+      .should('not.be.empty')
+      .then(cy.wrap)
+      .within(() => {
+        cy.get('#tagList')
+          .should('have.value', 'man AND face')
+          .should('have.attr', 'readonly')
+
+        cy.wait(500)
+
+        // check for frank, then click for image_info
+        cy.get('img[data-objid="fea684f1f114bff53a72d8545e336b7c"]')
+          .should('exist')
+          .click()
+        cy.wait(500)
+      })
+
+    cy.url().should('include', 'image_info.php')
+    cy.wait(500)
+
+    // Click the return button
+    cy.get('#return').click()
+    cy.wait(500)
+
+    // Check an expected image and the tagList
+    cy.get('iframe[src*="imgArrayTbl.php"]')
+      .should('be.visible')
+      .its('0.contentDocument.body')
+      .should('not.be.empty')
+      .then(cy.wrap)
+      .within(() => {
+        cy.get('#tagList')
+          .should('have.value', 'man AND face')
+          .should('have.attr', 'readonly')
+
+        cy.wait(500)
+      })
+  })
+    
 })

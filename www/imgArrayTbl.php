@@ -192,7 +192,8 @@
 		var nextIsExclusion = false;
 		tagList.split(' ').forEach((tag,i) => {
 		    if (tag) {
-			if (tag === "NOT") {
+			if (tag === "AND") {
+			} else if (tag === "NOT") {
 			    nextIsExclusion = true;
 			} else if (nextIsExclusion) {
 			    cleanedExcludeTagSet.add(tag);
