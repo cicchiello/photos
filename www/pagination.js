@@ -136,6 +136,11 @@ function setImages0(pageIdx, dburl, query, onCompletion) {
 }
 
 
+function basename(path) {
+   return path.split('/').reverse()[0];
+}
+
+
 function updateTableRendering(visibleSet, pageIdx, dburl) {
     const itemsPerPage = RowsPerPage*ColsPerRow;
     const firstrow = pageIdx*RowsPerPage;
@@ -148,6 +153,18 @@ function updateTableRendering(visibleSet, pageIdx, dburl) {
 	img.setAttribute("data-objid", r);
 	img.setAttribute("data-firstrow", firstrow);
 	img.style.visibility = "visible";
+	
+	// Fetch the document to get the key for the title
+	fetch(dburl+"/"+r)
+	    .then(res => {
+		if (res.ok) return res.json();
+	    })
+	    .then(data => {
+		img.title = basename(data.paths[0]);
+	    })
+	    .catch(error => {
+		console.log("ERROR(updateTableRendering): Failed to fetch document: "+error);
+	    });
 	
 	var check = document.getElementById("check"+imageCnt);
 	check.checked = false;
@@ -162,6 +179,7 @@ function updateTableRendering(visibleSet, pageIdx, dburl) {
 	img.src = "img/transparent.png";
 	img.setAttribute("data-objid", null);
 	img.style.visibility = "hidden";
+	img.title = ""; // Clear title when setting null objid
 	
 	var check = document.getElementById("check"+imageCnt);
 	check.checked = false;
