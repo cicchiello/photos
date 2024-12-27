@@ -188,8 +188,22 @@
 		
                 // Split and clean the tag list
 		var cleanedSearchTagSet = new Set();
-		tagList.split(' ').forEach((tag,i) => {if (tag) cleanedSearchTagSet.add(tag);});
+		var cleanedExcludeTagSet = new Set();
+		var nextIsExclusion = false;
+		tagList.split(' ').forEach((tag,i) => {
+		    if (tag) {
+			if (tag === "NOT") {
+			    nextIsExclusion = true;
+			} else if (nextIsExclusion) {
+			    cleanedExcludeTagSet.add(tag);
+			    nextIsExclusion = false;
+			} else {
+			    cleanedSearchTagSet.add(tag);
+			}
+		    }
+		});
 		setSearchTagList(Array.from(cleanedSearchTagSet));
+		setExcludeTagList(Array.from(cleanedExcludeTagSet));
 	    }
 	    
             const setCheckMarksFunc = async function setCheckMarks() {

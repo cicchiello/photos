@@ -6,5 +6,7 @@ module.exports = defineConfig({
     setupNodeEvents(on, config) {
       // implement node event listeners here
     },
+    watchForFileChanges: true,
+    specPattern: 'cypress/e2e/**/*.{js,jsx,ts,tsx}',
   },
 })
