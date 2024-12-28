@@ -177,7 +177,7 @@ if __name__ == "__main__":
                             verbose=_args.verbose).downloadDoc()
     
     _ext = os.path.basename(_exemplarDoc.getDoc()['paths'][0]).split(".")[-1]
-    _exemplarFilename = "/tmp/exemplar.%s" % (_ext)
+    _exemplarFilename = "/tmp/%s_exemplar.%s" % (_args.tag, _ext)
     _exemplarDoc.downloadWebImage(_exemplarFilename)
             
     _cnt = 0
@@ -235,7 +235,7 @@ if __name__ == "__main__":
                       (__name__, nowstr(), _id, _skip_reason))
 
             if not _skip_aws:
-                _filename = "/tmp/candidate%d.%s" % (_cnt, _ext)
+                _filename = "/tmp/%s_candidate%d.%s" % (_args.tag, _cnt, _ext)
                 if _args.verbose:
                     print("DEBUG(%s:%s): downloading webimage to: %s" %
                           (__name__, nowstr(), _filename))
