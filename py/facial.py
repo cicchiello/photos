@@ -177,7 +177,7 @@ if __name__ == "__main__":
                             verbose=_args.verbose).downloadDoc()
     
     _ext = os.path.basename(_exemplarDoc.getDoc()['paths'][0]).split(".")[-1]
-    _exemplarFilename = "/tmp/exemplar.%s" % (_ext)
+    _exemplarFilename = "/tmp/%s_exemplar.%s" % (_args.tag, _ext)
     _exemplarDoc.downloadWebImage(_exemplarFilename)
             
     _cnt = 0
@@ -185,7 +185,8 @@ if __name__ == "__main__":
     _stats = {
         'total_processed': 0,
         'skipped_already_tagged': 0,
-        'skipped_no_person': 0,
+        'skipped_no_face': 0,
+        'skipped_has_text': 0,
         'faces_found': 0
     }
 
@@ -209,24 +210,32 @@ if __name__ == "__main__":
                         _stats['skipped_already_tagged'] += 1
                         break
 
-            # Skip if no "person" tag exists
+            # Skip if no "face" tag exists or if "text" tag exists
             if not _skip_aws and 'tags' in _imageDoc.getDoc():
-                _has_person = False
+                _has_face = False
+                _has_text = False
                 for tag in _imageDoc.getDoc()['tags']:
-                    if tag.get('Name', '').lower() == 'person':
-                        _has_person = True
+                    if tag.get('Name', '').lower() == 'face':
+                        _has_face = True
+                    elif tag.get('Name', '').lower() == 'text':
+                        _has_text = True
                         break
-                if not _has_person:
+                
+                if _has_text:
                     _skip_aws = True
-                    _skip_reason = "no 'person' tag found"
-                    _stats['skipped_no_person'] += 1
+                    _skip_reason = "has 'text' tag"
+                    _stats['skipped_has_text'] += 1
+                elif not _has_face:
+                    _skip_aws = True
+                    _skip_reason = "no 'face' tag found"
+                    _stats['skipped_no_face'] += 1
 
             if _skip_aws and _args.verbose:
                 print("DEBUG(%s:%s): skipping AWS call for %s - %s" %
                       (__name__, nowstr(), _id, _skip_reason))
 
             if not _skip_aws:
-                _filename = "/tmp/candidate%d.%s" % (_cnt, _ext)
+                _filename = "/tmp/%s_candidate%d.%s" % (_args.tag, _cnt, _ext)
                 if _args.verbose:
                     print("DEBUG(%s:%s): downloading webimage to: %s" %
                           (__name__, nowstr(), _filename))
@@ -251,8 +260,9 @@ if __name__ == "__main__":
     print("STATS(%s:%s): ------------------" % (__name__, nowstr()))
     print("STATS(%s:%s): Total images processed: %d" % (__name__, nowstr(), _stats['total_processed']))
     print("STATS(%s:%s): Skipped (already tagged): %d" % (__name__, nowstr(), _stats['skipped_already_tagged']))
-    print("STATS(%s:%s): Skipped (no person tag): %d" % (__name__, nowstr(), _stats['skipped_no_person']))
+    print("STATS(%s:%s): Skipped (no face tag): %d" % (__name__, nowstr(), _stats['skipped_no_face']))
+    print("STATS(%s:%s): Skipped (has text tag): %d" % (__name__, nowstr(), _stats['skipped_has_text']))
     print("STATS(%s:%s): Total AWS calls made: %d" % (__name__, nowstr(), 
-          _stats['total_processed'] - _stats['skipped_already_tagged'] - _stats['skipped_no_person']))
+          _stats['total_processed'] - _stats['skipped_already_tagged'] - _stats['skipped_no_face'] - _stats['skipped_has_text']))
     print("STATS(%s:%s): Faces found: %d" % (__name__, nowstr(), _stats['faces_found']))
     print("")
