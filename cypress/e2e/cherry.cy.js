@@ -1,7 +1,7 @@
 describe('Cherry Pick Tests', () => {
   beforeEach(() => {
     // Set up intercept before navigation
-    cy.intercept('GET', '**/photos-staging/_design/photos/_view/photo_ids*').as('photoIds')
+    cy.intercept('GET', '**/_design/photos/_view/photo_ids*').as('photoIds')
     
     // Login first
     cy.visit('/login.php')
@@ -154,7 +154,7 @@ describe('Cherry Pick Tests', () => {
         cy.get('#tagInput')
           .should('be.visible')
           .type('fruit')
-        cy.wait(500)
+        cy.wait(1500)
         
         cy.get('#findImagesButton')
           .should('be.visible')
@@ -231,7 +231,7 @@ describe('Cherry Pick Tests', () => {
 
     // Click the return button
     cy.get('#return').click()
-    cy.wait(500)
+    cy.wait(1500)
 
     // Verify 'cherry' is NOT in the key-area
     cy.get('#key-area')
@@ -284,7 +284,7 @@ describe('Cherry Pick Tests', () => {
         cy.get('#findImagesButton')
           .should('be.visible')
           .click()
-        cy.wait(500)
+        cy.wait(1500)
       })
 
     // Check an image
@@ -349,7 +349,7 @@ describe('Cherry Pick Tests', () => {
         cy.get('#findImagesButton')
           .should('be.visible')
           .click()
-        cy.wait(500)
+        cy.wait(1500)
       })
 
     // Wait for the iframe to load, then check what's there, then exclude cherry
@@ -385,7 +385,7 @@ describe('Cherry Pick Tests', () => {
           cy.get('#excludeImagesButton')
           .should('be.visible')
           .click()
-        cy.wait(500)
+        cy.wait(1500)
       })
       
     // Wait for the iframe to load, then check what's there
@@ -437,7 +437,7 @@ describe('Cherry Pick Tests', () => {
         cy.get('#findImagesButton')
           .should('be.visible')
           .click()
-        cy.wait(500)
+        cy.wait(1500)
       })
 
     // Check expected images, then add exlusion
@@ -461,12 +461,12 @@ describe('Cherry Pick Tests', () => {
         cy.get('#excludeTagInput')
           .should('be.visible')
           .type('cherry')
-        cy.wait(1500)
+        cy.wait(500)
         
           cy.get('#excludeImagesButton')
           .should('be.visible')
           .click()
-        cy.wait(500)
+        cy.wait(1500)
       })
 
     // Click on the image to go to image_info
@@ -515,18 +515,29 @@ describe('Cherry Pick Tests', () => {
         cy.get('#findImagesButton')
           .should('be.visible')
           .click()
-        cy.wait(500)
+        cy.wait(1500)
 
         // Type 'face' into the tag input and click search
         cy.get('#tagInput')
           .should('be.visible')
-          .type('face')
+          .type('necktie')
         cy.wait(500)
         
         cy.get('#findImagesButton')
           .should('be.visible')
           .click()
+        cy.wait(1500)
+
+        // Type 'face' into the tag input and click search
+        cy.get('#tagInput')
+          .should('be.visible')
+          .type('glasses')
         cy.wait(500)
+        
+        cy.get('#findImagesButton')
+          .should('be.visible')
+          .click()
+        cy.wait(1500)
       })
 
     // Check an expected image and the tagList
@@ -537,7 +548,7 @@ describe('Cherry Pick Tests', () => {
       .then(cy.wrap)
       .within(() => {
         cy.get('#tagList')
-          .should('have.value', 'man AND face')
+          .should('have.value', 'man AND necktie AND glasses')
           .should('have.attr', 'readonly')
 
         cy.wait(500)
@@ -546,7 +557,7 @@ describe('Cherry Pick Tests', () => {
         cy.get('img[data-objid="fea684f1f114bff53a72d8545e336b7c"]')
           .should('exist')
           .click()
-        cy.wait(500)
+        cy.wait(1500)
       })
 
     cy.url().should('include', 'image_info.php')
@@ -554,7 +565,7 @@ describe('Cherry Pick Tests', () => {
 
     // Click the return button
     cy.get('#return').click()
-    cy.wait(500)
+    cy.wait(1500)
 
     // Check an expected image and the tagList
     cy.get('iframe[src*="imgArrayTbl.php"]')
@@ -564,7 +575,7 @@ describe('Cherry Pick Tests', () => {
       .then(cy.wrap)
       .within(() => {
         cy.get('#tagList')
-          .should('have.value', 'man AND face')
+          .should('have.value', 'man AND necktie AND glasses')
           .should('have.attr', 'readonly')
 
         cy.wait(500)

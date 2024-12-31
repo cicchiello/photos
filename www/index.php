@@ -149,10 +149,10 @@
         </div>
 	
         <div style="position: relative;">
-            <div style="position:fixed; width:20%; height:75%; margin-left:10px; background-color:white"
+            <div style="position:fixed; width:20%; margin-left:10px; background-color:white; top:110px; bottom:110px;"
                  class="w3-round-large">
                 <span class="w3-medium" style="font-weight:bold; margin-left:45px;">Common tags: </span>
-                <div id="key-area" class="key-area" style="font-family:monospace; padding:10px; overflow-y=scroll;">
+                <div id="key-area" class="key-area" style="font-family:monospace; padding:10px; overflow-y:auto; height:calc(100% - 30px);">
                     <span class="hint-text">...of selected images</span>
                 </div>
 	    </div>

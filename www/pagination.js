@@ -76,8 +76,8 @@ function createSearchPageLink(linkText, resultset, pageNumber) {
 function paginate(resultset, pageIdx, numItems, onCompletion) {
     currentPage = pageIdx+1; // not zero-based
 
-    if (!numItems) numItems = totalTableEntries.innerHTML;
-    totalPages = Math.trunc(numItems/RowsPerPage/ColsPerRow)+1;
+    if (numItems === null) numItems = totalTableEntries.innerHTML;
+    totalPages = numItems === 0 ? 0 : Math.trunc(numItems/RowsPerPage/ColsPerRow)+1;
     
     let table = document.getElementById("myTable");
     let rows = Array.from(table.rows).slice(1);
@@ -89,21 +89,23 @@ function paginate(resultset, pageIdx, numItems, onCompletion) {
     rows.slice(start,end).forEach(row=>row.style.display = "");
     
     pageNumbers.innerHTML = "";
-    createSearchPageLink("<<", resultset, 1);
-    createSearchPageLink("<", resultset, currentPage-1);
-    
-    let startPageNumber = currentPage < 5 ? 1 : (currentPage>totalPages-2?totalPages-4 : currentPage-2);
-    let endPageNumber =totalPages<5 ? totalPages : (currentPage<=totalPages -2 ? startPageNumber+4 : totalPages);
-    for (let i=startPageNumber;i<=endPageNumber;i++) {
-	createSearchPageLink(i, resultset, i);
+    if (numItems > 0) {
+        createSearchPageLink("<<", resultset, 1);
+        createSearchPageLink("<", resultset, currentPage-1);
+        
+        let startPageNumber = currentPage < 5 ? 1 : (currentPage>totalPages-2?totalPages-4 : currentPage-2);
+        let endPageNumber =totalPages<5 ? totalPages : (currentPage<=totalPages -2 ? startPageNumber+4 : totalPages);
+        for (let i=startPageNumber;i<=endPageNumber;i++) {
+            createSearchPageLink(i, resultset, i);
+        }
+        createSearchPageLink(">", resultset, currentPage+1);
+        createSearchPageLink(">>", resultset, totalPages);
+        
+        setActivePageNumber();
     }
-    createSearchPageLink(">", resultset, currentPage+1);
-    createSearchPageLink(">>", resultset, totalPages);
     
-    setActivePageNumber();
-    
-    from.innerHTML = (currentPage-1)*RowsPerPage*ColsPerRow+1;
-    to.innerHTML = currentPage === totalPages ? numItems : (currentPage)*RowsPerPage*ColsPerRow;
+    from.innerHTML = numItems === 0 ? 0 : (currentPage-1)*RowsPerPage*ColsPerRow+1;
+    to.innerHTML = numItems === 0 ? 0 : (currentPage === totalPages ? numItems : (currentPage)*RowsPerPage*ColsPerRow);
     totalTableEntries.innerHTML = numItems;
 
     if (onCompletion)
@@ -207,12 +209,11 @@ function getVisibleSubset(resultset, offset) {
 function changeSearchPage(e, resultset, pageNumber) {
     if (e !== null) 
 	e.preventDefault();
-    
+
     pageNumberInput.value = "";
 
     var numItems = totalTableEntries.innerHTML;
-    if (totalPages === null) 
-	totalPages = Math.trunc(numItems/RowsPerPage/ColsPerRow)+1;
+    totalPages = Math.trunc(numItems/RowsPerPage/ColsPerRow)+1;
     
     if((pageNumber <= 0)||(pageNumber>totalPages))
 	return;
@@ -222,7 +223,7 @@ function changeSearchPage(e, resultset, pageNumber) {
     const offset = pageIdx*perpage;
     
     const dburl = document.getElementById("dbUrl").innerHTML.trim();
-    
+
     if ((resultset === null) || (resultset.length === 0)) {
 	setImages0(pageIdx, dburl,
 		   "/_design/photos/_view/photo_ids?descending=false&limit="+perpage+"&skip="+offset,
@@ -370,7 +371,7 @@ clearFindButton.addEventListener("click",(e)=>{
     
     tagInput.value = null;
     tagList.value = null;
-    changeSearchPage(e, null, "1");
+    changeSearchPage(null, [], 1);
 });
 
 

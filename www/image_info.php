@@ -24,14 +24,14 @@
   <style>
       .pillButton {
           border: none;
-          padding: 5px 5px;
+          padding: 8px 12px;
           text-align: center;
           text-decoration: none;
           display: inline-block;
-          margin: 4px 2px;
+          margin: 5px 3px;
           cursor: pointer;
           border-radius: 16px;
-	  font-size: 70%;
+	  font-size: 100%;
       }
 
       .pillButton:hover {
@@ -40,10 +40,89 @@
 
       .image {
           border: 1px solid #555;
-	      height: 256px;
-	      width: auto;
-	      float: left;
-	      margin: 15px;
+          height: calc(70vh - 90px);  /* Increased reduction to make room for buttons */
+          width: auto;
+          max-width: 100%;
+          object-fit: contain;
+          margin: 0;
+      }
+
+      #detail {
+          width: 80% !important;
+          height: 80vh !important;
+          max-height: 80vh !important;
+          overflow: hidden;
+          transform: translate(-50%, -50%);
+          position: fixed;
+          top: 50%;
+          left: 50%;
+          display: flex;
+          flex-direction: column;
+      }
+
+      .detail-content {
+          display: flex;
+          flex: 1;
+          min-height: 0;
+      }
+
+      .detail-content fieldset {
+          width: 100%;
+          margin: 0;
+          padding: 20px;
+          display: flex;
+          gap: 20px;
+      }
+
+      .detail-content fieldset legend {
+          margin-left: 10px;
+          padding: 0 10px;
+          font-size: 120%;
+          font-weight: 500;
+      }
+
+      .image-section {
+          flex: 0 0 45%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+      }
+
+      .right-section {
+          flex: 0 0 50%;
+          display: flex;
+          flex-direction: column;
+      }
+
+      .tags-section {
+          margin-bottom: 20px;
+          font-size: 110%;
+      }
+
+      .details-section {
+          flex-grow: 1;
+          font-size: 110%;
+      }
+
+      .details-section table td {
+          padding: 8px 4px;
+      }
+
+      .details-section .detail-label {
+          font-weight: 500;
+      }
+
+      .details-section .detail-value {
+          color: blue;
+          word-break: break-all;
+      }
+
+      .popupBtn {
+          padding: 15px 20px;
+          border-top: 1px solid #eee;
+          text-align: center;
+          margin-top: 10px;
+          margin-bottom: 5px;
       }
       
   </style>
@@ -134,17 +213,18 @@
        ?>
 
     <div id="detail"
-	 class="w3-container w3-display-middle w3-panel w3-card w3-white w3-padding-16 w3-round-large">
-       <fieldset>
-          <legend>Image Detail:</legend>
-	  <?php 
-               $id = $_GET['id'];
-               $row = $_GET['row'];
-               echo renderImgInfo($id,$row); 
-           ?>
-       </fieldset>
+	 class="w3-container w3-display-middle w3-panel w3-card w3-white w3-round-large">
+       <div class="detail-content">
+           <fieldset style="width: 100%; margin: 0; display: flex; gap: 20px;">
+              <legend>Image Detail:</legend>
+	      <?php 
+                   $id = $_GET['id'];
+		   $row = isset($_GET['row']) ? $_GET['row'] : 0;
+                   echo renderImgInfo($id,$row); 
+               ?>
+           </fieldset>
+       </div>
 	
-	<br>
 	<div class="popupBtn">
 	    <?php
                 echo '<img id="return" onclick="reloadAction('."'".$id."','".$row."'".')" src="img/return.png" ';

@@ -179,8 +179,8 @@
 	    }
 
 	    const rowsPerPage = 5;
+	    
             // Restore tag filters from URL parameters if they exist
-            const urlParams = new URLSearchParams(window.location.search);
 	    setSearchTagList([]);
             if (tagFilters) {
                 const tagList = decodeURIComponent(tagFilters);
