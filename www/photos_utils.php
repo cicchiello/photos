@@ -306,7 +306,7 @@ function renderProfileArea($userName)
    $result .= '    <div style="display:flex; align-items:center; gap:5px; margin-bottom:8px;">';
    $result .= '      <span style="font-size:115%; font-weight:500;">Photos</span>';
    $result .= '      <span style="font-size:90%; color:#666;">v'.$version.'</span>';
-   if ($dbname != "photos-test") {
+   if ($dbname != "photos") {
        $result .= '      <span style="font-size:90%; color:#666; margin-left:auto;">['.$dbname.']</span>';
    }
    $result .= '    </div>';
