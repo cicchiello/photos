@@ -220,9 +220,17 @@ function renderImgInfo($id,$row)
    $size = $detail['size'];
    
    $result = '';
-   $result .= '	 <div>';
-   $result .= '       <img class="image" id="image" src="'.$imgUrl.'"';
-   $result .= '            align="center" title="Image"/>';
+   
+   // Image section
+   $result .= '<div class="image-section">';
+   $result .= '    <img class="image" id="image" src="'.$imgUrl.'" title="Image"/>';
+   $result .= '</div>';
+   
+   // Right section containing tags and details
+   $result .= '<div class="right-section">';
+   
+   // Tags section
+   $result .= '<div class="tags-section">';
    $cnt = 0;
 
    // Sort tags by confidence
@@ -259,23 +267,28 @@ function renderImgInfo($id,$row)
         $cnt += 1;
       }
    }
-   $result .= '	 </div>';
-   $result .= '<p>';
+   $result .= '</div>';
    
-   $result .= '<table>';
+   // Details section
+   $result .= '<div class="details-section">';
+   $result .= '<table class="w3-table">';
    $result .= '	 <tr>';
-   $result .= '	   <td>File:</td>';
-   $result .= '	   <td colspan="2" style="color:blue" class="w3-right">'.$path.'</td>';
+   $result .= '	   <td class="detail-label">File:</td>';
+   $result .= '	   <td class="detail-value w3-right">'.$path.'</td>';
    $result .= '	 </tr>';
    $result .= '	 <tr>';
-   $result .= '	   <td>File size:</td>';
-   $result .= '	   <td colspan="2" style="color:blue" class="w3-right">'.readableSize($size).'</td>';
+   $result .= '	   <td class="detail-label">File size:</td>';
+   $result .= '	   <td class="detail-value w3-right">'.readableSize($size).'</td>';
    $result .= '	 </tr>';
    $result .= '  <tr>';
-   $result .= '    <td>Db Id:</td>';
-   $result .= '	   <td colspan="2" style="color:blue; font-size:80%" class="w3-right">'.$id.'</td>';
+   $result .= '    <td class="detail-label">Db Id:</td>';
+   $result .= '	   <td class="detail-value w3-right" style="font-size:90%">'.$id.'</td>';
    $result .= '  </tr>';
    $result .= '</table>';
+   $result .= '</div>';
+   
+   // Close right section
+   $result .= '</div>';
    
    return $result;
 }
@@ -283,16 +296,36 @@ function renderImgInfo($id,$row)
 
 function renderProfileArea($userName)
 {
-   $result = '  <div id="profileArea" class="row box col-sm-4 w3-panel w3-card w3-white w3-round-large" style="position:fixed; top:5px; left:10px; z-index:1000; display:flex; align-items:center; gap:10px; padding:5px;">';
-   $result .= '    <span style="min-width:60px; max-width:100px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="Hi, '.$userName.'!">Hi, '.$userName.'!</span>';
-   $result .= '    <a href="profile.php" id="ProfileBtn" class="Btn" title="My Profile" style="display:flex; align-items:center; gap:5px;">';
-   $result .= '      <img class="profileIcon" src="img/profile_626.png">';
-   $result .= '      Profile';
-   $result .= '    </a>';
-   $result .= '    <a href="logout_action.php" id="LogoutBtn" class="Btn" title="Logout" style="display:flex; align-items:center; gap:5px;">';
-   $result .= '      <img class="profileIcon" src="img/logout_512.png">';
-   $result .= '      Logout';
-   $result .= '    </a>';
+   $ini = parse_ini_file("./config.ini");
+   $dbname = $ini['dbname'];
+   $version = $ini['version'];
+   
+   $result = '  <div id="profileArea" class="row box w3-panel w3-card w3-white w3-round-large" style="position:fixed; top:5px; left:10px; z-index:1000; padding:10px; width:20%;">';
+   
+   // App name and version row
+   $result .= '    <div style="display:flex; align-items:center; gap:5px; margin-bottom:8px;">';
+   $result .= '      <span style="font-size:115%; font-weight:500;">Photos</span>';
+   $result .= '      <span style="font-size:90%; color:#666;">v'.$version.'</span>';
+   if ($dbname != "photos-test") {
+       $result .= '      <span style="font-size:90%; color:#666; margin-left:auto;">['.$dbname.']</span>';
+   }
+   $result .= '    </div>';
+   
+   // User profile row
+   $result .= '    <div style="display:flex; align-items:center; gap:10px; justify-content:space-between;">';
+   $result .= '      <span style="min-width:60px; max-width:100px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="Hi, '.$userName.'!">Hi, '.$userName.'!</span>';
+   $result .= '      <div style="display:flex; gap:10px;">';
+   $result .= '        <a href="profile.php" id="ProfileBtn" class="Btn" title="My Profile" style="display:flex; align-items:center; gap:5px;">';
+   $result .= '          <img class="profileIcon" src="img/profile_626.png">';
+   $result .= '          Profile';
+   $result .= '        </a>';
+   $result .= '        <a href="logout_action.php" id="LogoutBtn" class="Btn" title="Logout" style="display:flex; align-items:center; gap:5px;">';
+   $result .= '          <img class="profileIcon" src="img/logout_512.png">';
+   $result .= '          Logout';
+   $result .= '        </a>';
+   $result .= '      </div>';
+   $result .= '    </div>';
+   
    $result .= ' </div>';
    
    return $result;
