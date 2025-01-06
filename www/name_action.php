@@ -44,6 +44,21 @@
           "lname":document.getElementById('lname').value
       });
     }
+
+    // Add return key handler for both fields
+    document.addEventListener('DOMContentLoaded', function() {
+      // Handler for both first name and last name fields
+      function handleEnter(e) {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          onCommit('<?php echo $id; ?>');
+        }
+      }
+
+      // Add handler to both fields
+      document.getElementById('fname').addEventListener('keypress', handleEnter);
+      document.getElementById('lname').addEventListener('keypress', handleEnter);
+    });
     
   </script>
     

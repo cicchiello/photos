@@ -42,6 +42,16 @@
           "email":document.getElementById('email').value
       });
     }
+
+    // Add return key handler
+    document.addEventListener('DOMContentLoaded', function() {
+      document.getElementById('email').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          onCommit('<?php echo $id; ?>');
+        }
+      });
+    });
     
   </script>
     

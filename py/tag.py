@@ -78,7 +78,7 @@ class Doc():
     def addTag(self, doc, user, tag):
         _foundTag = False
         for _tag in doc['tags']:
-            if _tag['Name'] == tag:
+            if (_tag['source'] != 'path-tokenize') and (_tag['Name'] == tag):
                 _foundTag = True
 
         if not _foundTag:

@@ -190,8 +190,8 @@ if __name__ == "__main__":
         'faces_found': 0
     }
 
-    print("INFO(%s:%s): found %s in %s (exemplar; score: 100%)" %
-          (__name__, nowstr(), _args.tag, _id)
+    print("INFO(%s:%s): found %s in %s (exemplar; score: 100%%)" %
+          (__name__, nowstr(), _args.tag, _args.exemplarId))
     
     for _id in _allIds:
         if _id != _args.exemplarId:

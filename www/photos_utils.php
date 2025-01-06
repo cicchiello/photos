@@ -299,6 +299,12 @@ function renderProfileArea($userName)
    $ini = parse_ini_file("./config.ini");
    $dbname = $ini['dbname'];
    $version = $ini['version'];
+   $DbBase = $ini['couchbase'].'/'.$dbname;
+   
+   // Fetch user's first name
+   $usersUrl = $DbBase.'/_design/photos/_view/users?key="user:'.$userName.'"';
+   $row = json_decode(file_get_contents($usersUrl), true)['rows'][0]['value'];
+   $fname = $row['fname'];
    
    $result = '  <div id="profileArea" class="row box w3-panel w3-card w3-white w3-round-large" style="position:fixed; top:5px; left:10px; z-index:1000; padding:10px; width:20%;">';
    
@@ -313,7 +319,7 @@ function renderProfileArea($userName)
    
    // User profile row
    $result .= '    <div style="display:flex; align-items:center; gap:10px; justify-content:space-between;">';
-   $result .= '      <span style="min-width:60px; max-width:100px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="Hi, '.$userName.'!">Hi, '.$userName.'!</span>';
+   $result .= '      <span style="min-width:60px; max-width:100px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="Hi, '.$fname.'!">Hi, '.$fname.'!</span>';
    $result .= '      <div style="display:flex; gap:10px;">';
    $result .= '        <a href="profile.php" id="ProfileBtn" class="Btn" title="My Profile" style="display:flex; align-items:center; gap:5px;">';
    $result .= '          <img class="profileIcon" src="img/profile_626.png">';
@@ -363,11 +369,11 @@ function writeEmail($id,$email) {
   }
   
   $WriteDbBase = $ini['couchbase'].'/'.$ini['dbname'];
-  $row = json_decode(file_get_contents($WriteDbBase.'/'.$id), true);
+  $docUrl = $WriteDbBase.'/'.$id;
+  $row = json_decode(file_get_contents($docUrl), true);
   $row['email'] = $email;
-  unset($row['_id']);
   
-  putDb($WriteDbBase.'/'.$id, $row);
+  return updateDoc($docUrl.'?rev='.$row['_rev'], $row);
 }
 
 function writePassword($id,$pswd) {
@@ -376,11 +382,11 @@ function writePassword($id,$pswd) {
   }
   
   $WriteDbBase = $ini['couchbase'].'/'.$ini['dbname'];
-  $row = json_decode(file_get_contents($WriteDbBase.'/'.$id), true);
+  $docUrl = $WriteDbBase.'/'.$id;
+  $row = json_decode(file_get_contents($docUrl), true);
   $row['password'] = hash('sha256', $pswd);
-  unset($row['_id']);
   
-  putDb($WriteDbBase.'/'.$id, $row);
+  return updateDoc($docUrl.'?rev='.$row['_rev'], $row);
 }
 
 function writeName($id,$fname,$lname) {
@@ -389,12 +395,12 @@ function writeName($id,$fname,$lname) {
   }
   
   $WriteDbBase = $ini['couchbase'].'/'.$ini['dbname'];
-  $row = json_decode(file_get_contents($WriteDbBase.'/'.$id), true);
+  $docUrl = $WriteDbBase.'/'.$id;
+  $row = json_decode(file_get_contents($docUrl), true);
   $row['fname'] = $fname;
   $row['lname'] = $lname;
-  unset($row['_id']);
   
-  putDb($WriteDbBase.'/'.$id, $row);
+  return updateDoc($docUrl.'?rev='.$row['_rev'], $row);
 }
 
 function writeUsername($id,$uname) {
