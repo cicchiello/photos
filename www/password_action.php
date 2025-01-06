@@ -42,6 +42,16 @@
           "pswd":document.getElementById('password').value,
       });
     }
+
+    // Add return key handler
+    document.addEventListener('DOMContentLoaded', function() {
+      document.getElementById('password').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          onCommit('<?php echo $id; ?>');
+        }
+      });
+    });
     
   </script>
     

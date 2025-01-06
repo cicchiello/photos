@@ -128,7 +128,11 @@ class Uploader():
         print("ERROR(%s:%s): getWithRetries; quitting after 5 tries" % (__name__, nowstr()))
         exit(-1)
             
-            
+
+    def getId(self):
+        return self._doc_id
+    
+    
     def recognize(self):
         _original_path = self._doc['paths'][0]
         _path = _original_path
@@ -244,8 +248,7 @@ class Uploader():
 
     
     def createEntry(self):
-        if self._verbose:
-            print("DEBUG(%s:%s): creating CouchDb document(%s)" % (__name__, nowstr(), self._doc_id))
+        print("INFO(%s:%s): creating CouchDb document(%s)" % (__name__, nowstr(), self._doc_id))
             
         _headers = {"Content-Type": "application/json"}
         self._doc['tags'] = self._tagset.get_tag_arr()
@@ -330,6 +333,7 @@ if __name__ == "__main__":
     _parser.add_argument('-db', nargs='?', required=True, help='path to CouchDb db')
     _parser.add_argument('-creds', nargs='?', required=True, help='CouchDb db credentials (user:pswd)')
     _parser.add_argument('-pic', nargs='?', required=True, help='path to image file')
+    _parser.add_argument('-no_updates', default=False, action='store_true', help='upload only if image not in db')
     _parser.add_argument('-verbose', default=False, action='store_true', help='provide extra debug output')
     
     _args = _parser.parse_args(args=sys.argv[1:])
@@ -341,11 +345,19 @@ if __name__ == "__main__":
     
     print("ECHO(%s:%s): db: %s" % (__name__, nowstr(), _args.db))
     print("ECHO(%s:%s): pic: %s" % (__name__, nowstr(), _args.pic))
+    print("ECHO(%s:%s): no_updates: %s" % (__name__, nowstr(), _args.no_updates))
     print("ECHO(%s:%s): verbose: %s" % (__name__, nowstr(), _args.verbose))
 
     _u = Uploader(_args.db, _args.pic, _args.creds.split(":"), verbose=_args.verbose)
     if _u.recognize():
-        _u.updateEntry() if _u.docExists() else _u.createEntry()
+        if _u.docExists():
+            if not _args.no_updates:
+                _u.updateEntry()
+            else:
+                print("INFO(%s:%s): skipping because the image is already in the db" % (__name__, nowstr()))
+                print("INFO(%s:%s): (doc id: %s)" % (__name__, nowstr(), _u.getId()))
+        else:
+            _u.createEntry()
     else:
         print("WARNING(%s:%s): skipping unrecognized (invalid) file: %s" %
               (__name__, nowstr(), _args.pic))

@@ -1,0 +1,26 @@
+#!/bin/bash
+
+DB="http://mediaserver:5984/photos-test"
+CREDS="foo:bar"
+VERBOSE="-verbose"
+
+
+./tagAlias.py ${VERBOSE} -db ${DB} -creds ${CREDS} -tag grandmomc -alias maria
+
+./tagAlias.py ${VERBOSE} -db ${DB} -creds ${CREDS} -tag grandpopc -alias frank
+./tagAlias.py ${VERBOSE} -db ${DB} -creds ${CREDS} -tag grandpopc -alias frank.sr
+./tagAlias.py ${VERBOSE} -db ${DB} -creds ${CREDS} -tag grandpopc -alias francesco
+
+./tagAlias.py ${VERBOSE} -db ${DB} -creds ${CREDS} -tag grandmomm -alias catherine
+./tagAlias.py ${VERBOSE} -db ${DB} -creds ${CREDS} -tag grandmomm -alias catherine.m
+
+./tagAlias.py ${VERBOSE} -db ${DB} -creds ${CREDS} -tag grandpopm -alias joe
+./tagAlias.py ${VERBOSE} -db ${DB} -creds ${CREDS} -tag grandpopm -alias joe.m
+
+./tagAlias.py ${VERBOSE} -db ${DB} -creds ${CREDS} -tag frank -alias granddad
+./tagAlias.py ${VERBOSE} -db ${DB} -creds ${CREDS} -tag frank -alias frank.jr
+./tagAlias.py ${VERBOSE} -db ${DB} -creds ${CREDS} -tag frank -alias dad
+
+./tagAlias.py ${VERBOSE} -db ${DB} -creds ${CREDS} -tag rosemary -alias grandmom
+./tagAlias.py ${VERBOSE} -db ${DB} -creds ${CREDS} -tag rosemary -alias mom
+

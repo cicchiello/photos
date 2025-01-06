@@ -9,7 +9,7 @@ import subprocess
 import boto3
 import urllib.request
 
-from os.path import exists
+from os.path import exists, isdir
 from requests.auth import HTTPBasicAuth
 
 
@@ -23,16 +23,17 @@ class AllDocsView():
     def __init__(self, db, creds, verbose=False):
         self._creds = creds
         self._baseurl = "%s/_all_docs" % db
+        self._verbose = verbose
         #like: "http://HOST:5984/photos/_all_docs?skip="+offset
 
     def getBatch(self, limit, offset):
         _headers = {"Content-Type": "application/json"}
         _url = "%s?limit=%d&skip=%d" % (self._baseurl, limit, offset)
-        print("TRACE(%s:getBatch): url: %s" % (__name__, _url))
         _r = requests.get(_url, headers=_headers)
         return json.loads(_r.content) if _r.status_code == 200 else None
 
     def getAllIds(self):
+        print("INFO(%s:%s): getting all ids" % (__name__, nowstr()))
         _allIds = []
         _offset = 0
         _done = False
@@ -42,7 +43,10 @@ class AllDocsView():
             _allIds.extend([_row['id'] for _row in _rows])
             _offset += len(_rows)
             _done = len(_rows) < _Limit
-            #print("DEBUG(%s:%s): got %d" % (__name__, nowstr(), len(_rows)))
+            if len(_allIds) % 1000 == 0:
+                print("INFO(%s:%s): got %d ids" % (__name__, nowstr(), len(_allIds)))
+            elif self._verbose:
+                print("DEBUG(%s:%s): got %d ids" % (__name__, nowstr(), len(_allIds)))
         
         return _allIds
 
@@ -106,7 +110,9 @@ if __name__ == "__main__":
     print("ECHO(%s:%s): dir: %s" % (__name__, nowstr(), _args.dir))
     print("ECHO(%s:%s): verbose: %s" % (__name__, nowstr(), _args.verbose))
 
+    print("INFO(%s:%s):" % (__name__, nowstr()))
     _allIds = AllDocsView(_args.db, _args.creds.split(":"), verbose=_args.verbose).getAllIds()
+    print("INFO(%s:%s):" % (__name__, nowstr()))
     print("INFO(%s:%s): Processing %d docs" % (__name__, nowstr(), len(_allIds)-1))
 
     _tenth = 1
@@ -121,6 +127,12 @@ if __name__ == "__main__":
     for _id in _allIds:
         _docObj = Doc(_args.db, _id, _args.creds.split(":"), verbose=_args.verbose).downloadDoc()
         _doc = _docObj.getDoc()
+
+        if "_design" in _id:
+            if os.path.isdir(_args.dir+"/_design"):
+                pass
+            else:
+                os.mkdir(_args.dir+"/_design")
 
         _filename = _args.dir+"/"+_id+".json"
         with open(_filename, 'w', encoding='utf-8') as f:
