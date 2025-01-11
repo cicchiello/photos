@@ -125,12 +125,12 @@ class ImageDoc():
     def docExists(self):
         return not self.downloadDoc(self._doc_url).getDoc() is None
 
-    def calcRegistrationTagset(self):
+    def calcRegistrationTagset(self, confidence):
         _registrationTags = []
 
         for _tag in self._doc['tags']:
             if _tag['source'] == 'rekognition':
-                if _tag['Confidence'] > 97.0:
+                if _tag['Confidence'] > confidence:
                     _registrationTags.append(_tag['Name'])
 
         _registrationTags.sort()
@@ -158,15 +158,21 @@ if __name__ == "__main__":
 
     _parser.add_argument('-db', nargs='?', required=True, help='path to CouchDb db')
     _parser.add_argument('-creds', nargs='?', required=True, help='CouchDb db credentials (user:pswd)')
+    _parser.add_argument('-conf', nargs='?', required=False, help='Acceptance confidence %% to use (default: 97)')
     _parser.add_argument('-verbose', default=False, action='store_true', help='provide extra debug output')
     _parser.add_argument('-exemplarId', nargs='?', required=True, help='id of the example face')
     _parser.add_argument('-tag', nargs='?', required=True, help='tag to check for matching faces')
     
     _args = _parser.parse_args(args=sys.argv[1:])
+    if _args.conf is None:
+        _args.conf = 97
+    else:
+        _args.conf = float(_args.conf)
 
     print("ECHO(%s:%s): db: %s" % (__name__, nowstr(), _args.db))
     print("ECHO(%s:%s): verbose: %s" % (__name__, nowstr(), _args.verbose))
     print("ECHO(%s:%s): exemplarId: %s" % (__name__, nowstr(), _args.exemplarId))
+    print("ECHO(%s:%s): conf: %s" % (__name__, nowstr(), _args.conf))
     print("ECHO(%s:%s): tag: %s" % (__name__, nowstr(), _args.tag))
 
     _allIds = AllDocsView(_args.db, _args.creds.split(":"), verbose=_args.verbose).getAllIds()
@@ -245,7 +251,7 @@ if __name__ == "__main__":
                 _imageDoc.downloadWebImage(_filename)
                 _similarity = compare_faces(_exemplarFilename, _filename)
                 os.remove(_filename)
-                if _similarity != None:
+                if (_similarity != None) and (float(_similarity) >= _args.conf):
                     _stats['faces_found'] += 1
                     print("INFO(%s:%s): found %s in %s (score: %3.1f%%)" %
                           (__name__, nowstr(), _args.tag, _id, float(_similarity)))

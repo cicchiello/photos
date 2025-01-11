@@ -46,7 +46,7 @@ def putBinWithRetries(url, data, headers, auth=None):
             time.sleep(_sleep)
             _sleep *= 2
                 
-    print("ERROR(%s:%s): putBinWithRetries; quitting after 5 tries" % (__name__, nowstr()))
+    print("ERROR(%s:%s): putBinWithRetries; quitting after 5 tries; url: %s" % (__name__, nowstr(), url))
     exit(-1)
         
             
@@ -66,7 +66,7 @@ def putJsonWithRetries(url, jdoc, auth=None):
             time.sleep(_sleep)
             _sleep *= 2
                 
-    print("ERROR(%s:%s): putJsonWithRetries; quitting after 5 tries" % (__name__, nowstr()))
+    print("ERROR(%s:%s): putJsonWithRetries; quitting after 5 tries; url" % (__name__, nowstr(), url))
     exit(-1)
 
         
@@ -138,7 +138,7 @@ class Doc():
                 _retry += 1
                 time.sleep(0.5)
 
-        print('ERROR(%s:%s): Exception trap: %s' % (__name__, nowstr()))
+        print('ERROR(%s:%s): Exception trap: %s' % (__name__, nowstr(), self._doc_url))
         exit(-1)
 
 
@@ -193,8 +193,10 @@ if __name__ == "__main__":
             
         _r = putJsonWithRetries(_docUrl, _doc, auth=_auth)
         if b'error' in _r.content:
-            print("ERROR(%s:%s): PUT error: %s" % (__name__, nowstr(), json.loads(_r.content)['reason']))
+            print("ERROR(%s:%s): PUT error; url: %s" % (__name__, nowstr(), _docUrl))
+            print("ERROR(%s:%s): (continued) content: %s" % (__name__, nowstr(), str(json.loads(_r.content))))
             _stats['failed_docs'] += 1
+            exit(-1)
             continue
 
         _rev = json.loads(_r.content)["rev"]
@@ -210,11 +212,13 @@ if __name__ == "__main__":
 
                 try:
                     _attHeaders = {"Content-Type": "%s" % (_obj['content_type'])}
-                    _r = putBinWithRetries(attUrl(_args.db, _doc['_id'], _attName, _rev),
+                    _url = attUrl(_args.db, _doc['_id'], _attName, _rev)
+                    _r = putBinWithRetries(_url,
                                            open(attFilename(_args.dir, _doc['_id'], _attName), 'rb').read(),
                                            _attHeaders, auth=_auth)
                     if b'error' in _r.content:
-                        print("ERROR(%s:%s): PUT error: %s" % (__name__, nowstr(), json.loads(_r.content)['reason']))
+                        print("ERROR(%s:%s): PUT error; url: %s" % (__name__, nowstr(), _url))
+                        print("ERROR(%s:%s): (continued) content: %s" % (__name__, nowstr(), str(json.loads(_r.content))))
                         _stats['failed_attachments'] += 1
                         continue
 

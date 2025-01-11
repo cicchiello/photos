@@ -158,12 +158,28 @@
         text-align: right;
         margin-right: 5px;
       }
+
+      .waiting {
+        cursor: wait !important;
+      }
       
     </style>
     
     <script>
         function sleep(ms) {
             return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        async function setWaitCursor(waiting) {
+            const tagList = document.getElementById('tagList');
+            const myTableParent = document.getElementById('myTableParent');
+            if (waiting) {
+                tagList.classList.add('waiting');
+                myTableParent.classList.add('waiting');
+            } else {
+                tagList.classList.remove('waiting');
+                myTableParent.classList.remove('waiting');
+            }
         }
 
         function getImageId(elem) {
@@ -224,10 +240,12 @@
 
 	    if (getSearchTagList().length > 0) {
 		const paginateFunc = async function adjustPagination() {
-		    await sleep(100);
-		    changeSearchPage(null, getSelectedList(), Math.trunc(row/rowsPerPage)+1);
-		    setCheckMarksFunc();
-		};
+		    await setWaitCursor(true);
+                    await sleep(100);
+                    changeSearchPage(null, getSelectedList(), Math.trunc(row/rowsPerPage)+1);
+                    setCheckMarksFunc();
+                    await setWaitCursor(false);
+                };
 		
                 onFindImagesButton(paginateFunc);
 	    } else {
@@ -236,7 +254,8 @@
 	    }
         }
       
-        function imgInfoAction(elemid) {
+        async function imgInfoAction(elemid) {
+            await setWaitCursor(true);
             var f = parent.document.getElementById("imgArrayFrame");
 	    var img = document.getElementById(elemid);
 	    var objid = getImageId(img);
@@ -252,22 +271,27 @@
 		    checkedParam = '&checked=' + encodeURIComponent(checkedImages.join(' '));
                 f.callback('./image_info.php?id='+objid+'&row='+row+tagParam+checkedParam);
 	    }
-	}
+            await setWaitCursor(false);
+        }
 
-        function checkAction(checkboxElem, dburl, elemid) {
-	    var objid = getImageId(document.getElementById(elemid));
-	    if (objid) {
+        async function checkAction(checkboxElem, dburl, elemid) {
+            await setWaitCursor(true);
+            var objid = getImageId(document.getElementById(elemid));
+            if (objid) {
                 var f = parent.document.getElementById("imgArrayFrame");
                 f.checkboxAction(checkboxElem, dburl, objid);
-	    }
-	}
+            }
+            await setWaitCursor(false);
+        }
 
-        function selectAllAction(selectAllCheckboxElem, dburl) {
-	    const checkboxes = Array.from(document.querySelectorAll('input[type="checkbox"]'))
-		  .filter(checkbox => checkbox !== selectAllCheckboxElem);
-	    
+        async function selectAllAction(selectAllCheckboxElem, dburl) {
+            await setWaitCursor(true);
+            const checkboxes = Array.from(document.querySelectorAll('input[type="checkbox"]'))
+                  .filter(checkbox => checkbox !== selectAllCheckboxElem);
+            
             var f = parent.document.getElementById("imgArrayFrame");
-	    f.selectAllAction(checkboxes, selectAllCheckboxElem.checked, dburl);
+            f.selectAllAction(checkboxes, selectAllCheckboxElem.checked, dburl);
+            await setWaitCursor(false);
         }
       
     </script>
@@ -293,27 +317,31 @@
 	      echo $DbBase;
            ?>
        </span>
-       <span>
+       <span style="display: flex; align-items: center; gap: 5px;">
          <span class="label-container">
            <label for="tagInput" class="w3-small" style="font-weight:bold">Search tag:</label>
          </span>
          <input id="tagInput" class="w3-small" type="text" size="12" placeholder="enter tag here">
 	 <button id="findImagesButton" class="w3-small" style="font-weight:bold">&gt;&gt;&gt;&gt;</button>
-         <input id="tagList" class="tagList w3-small tag-display" type="text" placeholder="tag filters collect here..." style="width:55%; border:none; background-color:#f8f8f8;" readonly>
-         <label class="check-container" style="float:right; margin-right: 20px;">
+         <input id="tagList" class="tagList w3-small tag-display" type="text" placeholder="tag filters collect here..." style="flex: 1; min-width: 100px; border:none; background-color:#f8f8f8;" readonly>
+         <div>
+           <button id="clearFindButton" class="w3-small" style="font-weight:bold;">Clear</button>
+         </div>
+       </span>
+       <p></p>
+       <span style="display: flex; align-items: center; justify-content: space-between;">
+         <div>
+           <span class="label-container">
+             <label for="excludeTagInput" class="w3-small" style="font-weight:bold">Exclude tag:</label>
+           </span>
+           <input id="excludeTagInput" class="w3-small" type="text" size="12" placeholder="enter tag here">
+           <button id="excludeImagesButton" class="w3-small" style="font-weight:bold">&gt;&gt;&gt;&gt;</button>
+         </div>
+         <label class="check-container" style="margin-right: 10px;">
            <input type="checkbox" id="selectAllCheckbox" onclick="selectAllAction(this,'<?php echo $DbBase ?>')">
            <span class="checkmark"></span>
            <span style="font-size: 14px; margin-left: 5px;">Select All</span>
          </label>
-         <button id="clearFindButton" class="w3-small" style="font-weight:bold">Clear</button>
-       </span>
-       <p></p>
-       <span>
-         <span class="label-container">
-           <label for="excludeTagInput" class="w3-small" style="font-weight:bold">Exclude tag:</label>
-         </span>
-         <input id="excludeTagInput" class="w3-small" type="text" size="12" placeholder="enter tag here">
-	 <button id="excludeImagesButton" class="w3-small" style="font-weight:bold">&gt;&gt;&gt;&gt;</button>
        </span>
        <p></p>
        <table id="myTable" style="width:100%; overflow:scroll">
