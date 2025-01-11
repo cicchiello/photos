@@ -69,15 +69,15 @@
       .detail-content fieldset {
           width: 100%;
           margin: 0;
-          padding: 20px;
+          padding: 18px;  
           display: flex;
-          gap: 20px;
+          gap: 18px;  
       }
 
       .detail-content fieldset legend {
-          margin-left: 10px;
-          padding: 0 10px;
-          font-size: 120%;
+          margin-left: 9px;  
+          padding: 0 9px;  
+          font-size: 108%;  
           font-weight: 500;
       }
 
@@ -95,17 +95,17 @@
       }
 
       .tags-section {
-          margin-bottom: 20px;
-          font-size: 110%;
+          margin-bottom: 18px;  
+          font-size: 90%;  
       }
 
       .details-section {
           flex-grow: 1;
-          font-size: 110%;
+          font-size: 90%;  
       }
 
       .details-section table td {
-          padding: 8px 4px;
+          padding: 7px 4px;  
       }
 
       .details-section .detail-label {
@@ -118,11 +118,11 @@
       }
 
       .popupBtn {
-          padding: 15px 20px;
+          padding: 13px 18px;  
           border-top: 1px solid #eee;
           text-align: center;
-          margin-top: 10px;
-          margin-bottom: 5px;
+          margin-top: 9px;  
+          margin-bottom: 4px;  
       }
       
   </style>
