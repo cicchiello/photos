@@ -105,10 +105,11 @@ class ImageDoc():
         return not self.downloadDoc().getDoc() is None
 
 
-    def getTag(self, doc, tag):
+    def getUserTag(self, doc, tag):
         for _tag in doc['tags']:
-            if _tag['Name'] == tag:
-                return _tag
+            if _tag['source'] == 'user':
+                if _tag['Name'] == tag:
+                    return _tag
         return None
 
 
@@ -130,7 +131,7 @@ class ImageDoc():
 
 
     def addAlias(self, doc, alias, username):
-        if not self.getTag(doc, alias):
+        if not self.getUserTag(doc, alias):
             if self._verbose:
                 print("INFO(%s:%s): adding alias tag %s to document %s" %
                       (__name__, nowstr(), alias, self._doc_id))
@@ -194,18 +195,24 @@ if __name__ == "__main__":
     _cnt = 0
     _tenth = 1
     _aliasAddedCount = 0
+    _skipCnt = 0
 
     for _id in _allIds:
         _imageDoc = ImageDoc(_args.db, _id, _args.creds.split(":"), verbose=_args.verbose).downloadDoc()
         _doc = _imageDoc.getDoc()
         
-        print("TRACE(%s:%s): got document" % (__name__, nowstr()))
         if _doc:
-            print("TRACE(%s:%s): about to add alias" % (__name__, nowstr()))
-            _rev = _imageDoc.addAlias(_doc, _args.alias, _imageDoc.getTag(_doc, _args.tag)['username'])
-            print("TRACE(%s:%s): added; _rev: %s" % (__name__, nowstr(), _rev))
-            if _rev:
-                _aliasAddedCount += 1
+            _tag = _imageDoc.getUserTag(_doc, _args.tag)
+            if _tag: 
+                _rev = _imageDoc.addAlias(_doc, _args.alias, _tag['username'])
+                if _rev != _doc['_rev']:
+                    _aliasAddedCount += 1
+                else:
+                    _skipCnt += 1
+            else:
+                _skipCnt += 1
+        else:
+            _skipCnt += 1
 
         _cnt += 1
         if ((_cnt-1 < _tenth*len(_allIds)/10) and (_cnt >= _tenth*len(_allIds)/10)):
@@ -213,3 +220,4 @@ if __name__ == "__main__":
             _tenth += 1
 
     print("INFO(%s:%s): Added alias tag '%s' to %d images" % (__name__, nowstr(), _args.alias, _aliasAddedCount))
+    print("INFO(%s:%s): Skipped tagging %d images" % (__name__, nowstr(), _skipCnt))
