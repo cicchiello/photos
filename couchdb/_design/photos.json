@@ -14,7 +14,7 @@
       "map": "function (doc) {\n  if (!('type' in doc) || !(typeof doc.type === 'string')) \n    emit(doc, null);\n  if (('type' in doc) && (typeof doc.type === 'string')) {\n    if ((doc.type !== 'login_event') && (doc.type !== 'user') && (doc.type !== 'photo'))\n      emit(doc, null);\n  }\n}"
     },
     "logins": {
-      "map": "function (doc) {\n  if (('type' in doc) && (typeof doc.type === 'string') && (doc.type === 'login_event'))\n    emit(doc, [doc.username, doc.timestamp]);\n}"
+      "map": "function (doc) {\n  if (('type' in doc) && (typeof doc.type === 'string') && (doc.type === 'login_event'))\n    var homeSubnet = \"10.0.0.\";\n    if (doc.ip.substring(0, homeSubnet.length) !== homeSubnet) {\n      emit(doc, [doc.username, doc.ip, doc.timestamp]);\n    }\n}"
     },
     "missing_attachments": {
       "map": "function (doc) {\n  if (doc.type && (typeof doc.type === 'string') && (doc.type === 'photo')) {\n    if (!doc._attachments)\n      emit(doc.paths[0], \"all missing\");\n    else if (!doc._attachments.thumbnail)\n      emit(doc.paths[0], \"thumbnail missing\");\n    else if (!doc._attachments.web_image)\n      emit(doc.paths[0], \"web_image missing\");\n    else if (!doc._attachments.image)\n      emit(doc.paths[0], \"image missing\");\n  }\n}"
@@ -24,4 +24,4 @@
     }
   },
   "language": "javascript"
-}
+} 
