@@ -1,0 +1,15 @@
+#!/bin/bash
+
+server=http://mediaserver:5984
+db=photos
+log=/home/joe/logs/photos-backup.log
+prog=/home/joe/workspace/photos/py/backup.py
+
+filedate=$(date +%Y%m%d)
+dir=/mnt/sdd/photos-backup/${filedate}_backup
+mkdir ${dir}
+
+timestamp=$(date)
+echo "INFO:(${timestamp}): invoking ${prog}"
+${prog} -db ${server}/${db} -creds foo:bar -dir -dir ${dir} 2>&1 >> ${log}
+echo "INFO:(${timestamp}): Done ${prog}"
