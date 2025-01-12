@@ -3,7 +3,7 @@
   "indexes": {
     "photos_by_tag": {
       "analyzer": "standard",
-      "index": "function(doc) {\n    if (doc.type && (doc.type === 'photo')) {\n        if (!doc.hidden) {\n          for (var tidx = 0; tidx < doc.tags.length; tidx++) {\n              if (doc.tags[tidx].source === 'user') {\n                  index(\"default\", doc.tags[tidx].Name);\n              }\n              if (doc.tags[tidx].source === 'rekognition') {\n                  if (doc.tags[tidx].Confidence > 70.0) {\n                      index(\"default\", doc.tags[tidx].Name);\n                  }\n              }\n          }\n        }\n        index(\"default\", doc._id);\n    }\n}\n"
+      "index": "function(doc) {\n    if (doc.type && (doc.type === 'photo')) {\n        if (!doc.hidden) {\n          for (var tidx = 0; tidx < doc.tags.length; tidx++) {\n              if (doc.tags[tidx].source === 'user') {\n                  index(\"default\", doc.tags[tidx].Name);\n              }\n              if (doc.tags[tidx].source === 'rekognition') {\n                  if (doc.tags[tidx].Confidence > 70.0) {\n                      index(\"default\", doc.tags[tidx].Name);\n                  }\n              }\n          }\n        }\n        for (var pidx = 0; pidx < doc.paths.length; pidx++) {\n          var path = doc.paths[pidx];\n          var tokens = path.split(\".\");\n          if (tokens.length > 1) {\n            var pieces = tokens[tokens.length-2].split(\"/\");\n            if (pieces.length > 0)\n              index(\"default\", pieces[pieces.length-1]);\n            }\n        }\n        index(\"default\", doc._id);\n    }\n}\n"
     }
   },
   "language": "javascript",
