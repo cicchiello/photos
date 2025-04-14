@@ -38,6 +38,58 @@ A comprehensive photo management system with features for uploading, indexing, a
 3. Install Python dependencies
 4. Start the web server
 
+## SSL Certificate Management
+
+### Initial Setup
+
+The system uses Let's Encrypt certificates with Cloudflare DNS authentication for:
+- media.jfcenterprises.com
+- db.jfcenterprises.com
+
+### Certificate Configuration
+
+1. Cloudflare credentials are required in two locations:
+   - `/home/couchdb/letsencrypt/cloudflare.ini` (for CouchDB)
+   - `/etc/letsencrypt/cloudflare.ini` (for Certbot)
+
+2. A synchronization script maintains these files:
+   - Location: `/home/pi/bin/sync-cloudflare-creds.sh`
+   - Runs daily at 4 AM via root's crontab
+   - Also runs as a pre-hook before certificate renewal
+
+### Automatic Renewal
+
+Certificates are automatically renewed by certbot.timer systemd service.
+
+### Monitoring and Maintenance
+
+1. Check synchronization script operation:
+   ```bash
+   # View file timestamps
+   ls -l /home/couchdb/letsencrypt/cloudflare.ini /etc/letsencrypt/cloudflare.ini
+   
+   # Check cron job logs
+   sudo grep sync-cloudflare-creds /var/log/syslog
+   ```
+
+2. Verify certificate renewal:
+   ```bash
+   # Test renewal process
+   sudo certbot renew --dry-run
+   
+   # Check certificate expiry
+   sudo openssl x509 -dates -noout -in /etc/letsencrypt/live/media.jfcenterprises.com/cert.pem
+   ```
+
+3. Monitor certbot timer:
+   ```bash
+   # View timer status
+   sudo systemctl list-timers | grep certbot
+   
+   # Check recent renewal attempts
+   sudo journalctl -u certbot.service
+   ```
+
 ## Branch Information
 
 The project uses the following branch structure:
