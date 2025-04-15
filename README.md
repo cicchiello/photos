@@ -53,7 +53,7 @@ The system uses Let's Encrypt certificates with Cloudflare DNS authentication fo
    - `/etc/letsencrypt/cloudflare.ini` (for Certbot)
 
 2. A synchronization script maintains these files:
-   - Location: `/home/pi/bin/sync-cloudflare-creds.sh`
+   - Location: `/home/pi/photos/bin/sync-cloudflare-creds.sh`
    - Runs daily at 4 AM via root's crontab
    - Also runs as a pre-hook before certificate renewal
 
@@ -74,8 +74,8 @@ Certificates are automatically renewed by certbot.timer systemd service.
 
 2. Verify certificate renewal:
    ```bash
-   # Test renewal process
-   sudo certbot renew --dry-run
+   # Test renewal process (with 60-second DNS propagation wait)
+   sudo certbot renew --dry-run --dns-cloudflare-propagation-seconds 60
    
    # Check certificate expiry
    sudo openssl x509 -dates -noout -in /etc/letsencrypt/live/media.jfcenterprises.com/cert.pem
