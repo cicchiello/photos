@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <?php
     // intentionally place this before the html tag
+    session_start();
 
     // Uncomment to see php errors
     //ini_set('display_errors', 1);
