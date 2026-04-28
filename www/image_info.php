@@ -190,7 +190,7 @@
 
             try {
 		const tagnameenc = encodeURIComponent(tagName);
-                const response = await fetch('deleteTag.php?imageid='+imageId+'&tagname='+tagnameenc);
+                const response = await fetch('deleteTag.php?imageid='+imageId+'&tagname='+tagnameenc+'&csrf='+encodeURIComponent(csrfToken));
                 if (!response.ok) {
                     throw new Error('Failed to delete tag');
                 }

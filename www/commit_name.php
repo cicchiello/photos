@@ -14,6 +14,10 @@
            header('Location: ./login.php');
            exit;
        }
+       if (!isset($_POST['csrf']) || !verifyCsrfToken($_POST['csrf'])) {
+           header('Location: ./index.php');
+           exit;
+       }
        $id = getUserId($_SESSION['login_user']);
 
        echo renderLookAndFeel();

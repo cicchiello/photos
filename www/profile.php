@@ -21,11 +21,11 @@
   
   <script>
     async function onEditEmail(id,email) {
-      post("./email_action.php", {"id":id,"email":email});
+      post("./email_action.php", {"id":id,"email":email,"csrf":csrfToken});
     }
 
     async function onEditPassword(id) {
-      post("./password_action.php", {"id":id});
+      post("./password_action.php", {"id":id,"csrf":csrfToken});
     }
 
     async function forceLogin() {
@@ -40,7 +40,8 @@
       post("./name_action.php", {
         "id":id,
         "fname":fname,
-        "lname":lname
+        "lname":lname,
+        "csrf":csrfToken
       });
     }
 

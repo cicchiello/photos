@@ -5,6 +5,18 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 
+function getCsrfToken() {
+    if (!isset($_SESSION['csrf_token'])) {
+        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+    }
+    return $_SESSION['csrf_token'];
+}
+
+function verifyCsrfToken($token) {
+    return isset($_SESSION['csrf_token']) && hash_equals($_SESSION['csrf_token'], $token);
+}
+
+
 function deltaTimeStr($deltaTime)
 {
    $deltaM = floor($deltaTime/60);
@@ -80,6 +92,7 @@ function renderLookAndFeel()
    $result .= '<link href="./w3.css" media="all" rel="stylesheet">';
    $result .= '<link href="./style.css" media="all" rel="stylesheet">';
    $result .= '<link href="./menu.css" media="all" rel="stylesheet">';
+   $result .= '<script>var csrfToken="'.getCsrfToken().'";</script>';
    return $result;
 }
 

@@ -9,6 +9,11 @@
     
        include('photos_utils.php');
 
+       if (!isset($_POST['csrf']) || !verifyCsrfToken($_POST['csrf'])) {
+           header('Location: ./index.php');
+           exit;
+       }
+
        echo renderLookAndFeel();
 
        $id = $_POST['id'];
@@ -39,7 +44,8 @@
     async function onCommit(id) {
       post("./commit_email.php", {
           "id": id,
-          "email":document.getElementById('email').value
+          "email":document.getElementById('email').value,
+          "csrf":csrfToken
       });
     }
 

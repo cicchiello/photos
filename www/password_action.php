@@ -9,6 +9,11 @@
     
        include('photos_utils.php');
 
+       if (!isset($_POST['csrf']) || !verifyCsrfToken($_POST['csrf'])) {
+           header('Location: ./index.php');
+           exit;
+       }
+
        echo renderLookAndFeel();
 
        $id = $_POST['id'];
@@ -40,6 +45,7 @@
       post("./commit_password.php", {
           "id": id,
           "pswd":document.getElementById('password').value,
+          "csrf":csrfToken
       });
     }
 

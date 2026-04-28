@@ -8,7 +8,7 @@ $tagName = $_GET['tagname'] ?? null;
 $username = $_SESSION['login_user'] ?? null;
 
 // Validate parameters
-if (!$imageId || !$tagName || !$username) {
+if (!$imageId || !$tagName || !$username || !isset($_GET['csrf']) || !verifyCsrfToken($_GET['csrf'])) {
     http_response_code(400);
     echo json_encode(['error' => 'Missing required parameters']);
     exit;
