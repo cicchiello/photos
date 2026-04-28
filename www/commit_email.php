@@ -4,11 +4,21 @@
   <head>
     <?php
        // Uncomment to see php errors
-       ini_set('display_errors', 1);
-       ini_set('display_startup_errors', 1);
-       error_reporting(E_ALL);
+       //ini_set('display_errors', 1);
+       //ini_set('display_startup_errors', 1);
+       //error_reporting(E_ALL);
        
        include('photos_utils.php');
+
+       if (!isset($_SESSION['login_user'])) {
+           header('Location: ./login.php');
+           exit;
+       }
+       if (!isset($_POST['csrf']) || !verifyCsrfToken($_POST['csrf'])) {
+           header('Location: ./index.php');
+           exit;
+       }
+       $id = getUserId($_SESSION['login_user']);
 
        echo renderLookAndFeel();
        ?>
@@ -33,7 +43,7 @@
   </head>
   
       <?php
-	 writeEmail($_POST['id'], $_POST['email']);
+	 writeEmail($id, $_POST['email']);
        ?>
 	  
   <body class="bg" onload="init()">

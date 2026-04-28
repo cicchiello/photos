@@ -1,5 +1,22 @@
 <?php
 
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+
+function getCsrfToken() {
+    if (!isset($_SESSION['csrf_token'])) {
+        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+    }
+    return $_SESSION['csrf_token'];
+}
+
+function verifyCsrfToken($token) {
+    return isset($_SESSION['csrf_token']) && hash_equals($_SESSION['csrf_token'], $token);
+}
+
+
 function deltaTimeStr($deltaTime)
 {
    $deltaM = floor($deltaTime/60);
@@ -19,7 +36,7 @@ function deltaTimeStr($deltaTime)
 
 function realFileSize($path)
 {
-    $size = trim(`stat -L -c%s '$path'`);
+    $size = trim(`stat -L -c%s ` . escapeshellarg($path));
     return $size;
 }
 
@@ -75,6 +92,7 @@ function renderLookAndFeel()
    $result .= '<link href="./w3.css" media="all" rel="stylesheet">';
    $result .= '<link href="./style.css" media="all" rel="stylesheet">';
    $result .= '<link href="./menu.css" media="all" rel="stylesheet">';
+   $result .= '<script>var csrfToken="'.getCsrfToken().'";</script>';
    return $result;
 }
 
@@ -363,10 +381,17 @@ function downloadFile($url,$dstpath) {
 }
 
 
-function writeEmail($id,$email) {
-  if (!isset($ini)) {
+function getUserId($username) {
     $ini = parse_ini_file("./config.ini");
-  }
+    $DbBase = $ini['couchbase'].'/'.$ini['dbname'];
+    $usersUrl = $DbBase.'/_design/photos/_view/users?key="user:'.$username.'"';
+    $rows = json_decode(file_get_contents($usersUrl), true)['rows'];
+    return count($rows) > 0 ? $rows[0]['value']['_id'] : null;
+}
+
+
+function writeEmail($id,$email) {
+  $ini = parse_ini_file("./config.ini");
   
   $WriteDbBase = $ini['couchbase'].'/'.$ini['dbname'];
   $docUrl = $WriteDbBase.'/'.$id;
@@ -377,22 +402,18 @@ function writeEmail($id,$email) {
 }
 
 function writePassword($id,$pswd) {
-  if (!isset($ini)) {
-    $ini = parse_ini_file("./config.ini");
-  }
+  $ini = parse_ini_file("./config.ini");
   
   $WriteDbBase = $ini['couchbase'].'/'.$ini['dbname'];
   $docUrl = $WriteDbBase.'/'.$id;
   $row = json_decode(file_get_contents($docUrl), true);
-  $row['password'] = hash('sha256', $pswd);
+  $row['password'] = password_hash($pswd, PASSWORD_DEFAULT);
   
   return updateDoc($docUrl.'?rev='.$row['_rev'], $row);
 }
 
 function writeName($id,$fname,$lname) {
-  if (!isset($ini)) {
-    $ini = parse_ini_file("./config.ini");
-  }
+  $ini = parse_ini_file("./config.ini");
   
   $WriteDbBase = $ini['couchbase'].'/'.$ini['dbname'];
   $docUrl = $WriteDbBase.'/'.$id;
@@ -404,9 +425,7 @@ function writeName($id,$fname,$lname) {
 }
 
 function writeUsername($id,$uname) {
-  if (!isset($ini)) {
-    $ini = parse_ini_file("./config.ini");
-  }
+  $ini = parse_ini_file("./config.ini");
   
   $WriteDbBase = $ini['couchbase'].'/'.$ini['dbname'];
   $row = json_decode(file_get_contents($WriteDbBase.'/'.$id), true);

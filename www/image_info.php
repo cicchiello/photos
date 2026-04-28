@@ -4,9 +4,9 @@
     // intentionally place this before the html tag
 
     // Uncomment to see php errors
-    ini_set('display_errors', 1);
-    ini_set('display_startup_errors', 1);
-    error_reporting(E_ALL);
+    //ini_set('display_errors', 1);
+    //ini_set('display_startup_errors', 1);
+    //error_reporting(E_ALL);
 
   ?>
 
@@ -16,7 +16,12 @@
     
     <?php
        include ('photos_utils.php');
-       
+
+       if (!isset($_SESSION['login_user'])) {
+           header('Location: ./login.php');
+           exit;
+       }
+
        echo renderLookAndFeel();
        ?>
 
@@ -185,7 +190,7 @@
 
             try {
 		const tagnameenc = encodeURIComponent(tagName);
-                const response = await fetch('deleteTag.php?imageid='+imageId+'&tagname='+tagnameenc);
+                const response = await fetch('deleteTag.php?imageid='+imageId+'&tagname='+tagnameenc+'&csrf='+encodeURIComponent(csrfToken));
                 if (!response.ok) {
                     throw new Error('Failed to delete tag');
                 }
@@ -204,13 +209,6 @@
   
   <body class="bg" onload="init()">
 
-    <?php
-        if (isset($_COOKIE['login_user'])) {
-        } else {
-            echo 'onload="forceLogin()">';
-        }
-       
-       ?>
 
     <div id="detail"
 	 class="w3-container w3-display-middle w3-panel w3-card w3-white w3-round-large">

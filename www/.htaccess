@@ -1,0 +1,9 @@
+<Files "config.ini">
+    Require all denied
+</Files>
+
+<IfModule mod_authz_core.c>
+    <DirectoryMatch "tmp">
+        Require all denied
+    </DirectoryMatch>
+</IfModule>

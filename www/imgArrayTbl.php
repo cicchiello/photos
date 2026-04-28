@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <?php
     // intentionally place this before the html tag
+    session_start();
 
     // Uncomment to see php errors
-    ini_set('display_errors', 1);
-    ini_set('display_startup_errors', 1);
-    error_reporting(E_ALL);
+    //ini_set('display_errors', 1);
+    //ini_set('display_startup_errors', 1);
+    //error_reporting(E_ALL);
   ?>
 
 <html>
@@ -301,7 +302,12 @@
   <body class="bg"
 	<?php
 	    include('photos_utils.php');
-	      
+
+            if (!isset($_SESSION['login_user'])) {
+                header('Location: ./login.php');
+                exit;
+            }
+
             $row = array_key_exists('row', $_GET) ? $_GET['row'] : 0;
             $tagFilters = array_key_exists('tags', $_GET) ? $_GET['tags'] : '';
             $checkedImages = array_key_exists('checked', $_GET) ? $_GET['checked'] : '';
