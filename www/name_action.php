@@ -65,7 +65,7 @@
   <body class="bg" 
 
     <?php       
-       if (isset($_COOKIE['login_user'])) {
+       if (isset($_SESSION['login_user'])) {
          echo 'onload="document.getElementById('."'id01'".').style.display='."'block'".'">';
        } else {
          echo 'onload="onCancel()">';

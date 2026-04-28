@@ -10,6 +10,12 @@
        
        include('photos_utils.php');
 
+       if (!isset($_SESSION['login_user'])) {
+           header('Location: ./login.php');
+           exit;
+       }
+       $id = getUserId($_SESSION['login_user']);
+
        echo renderLookAndFeel();
        ?>
 
@@ -33,7 +39,7 @@
   </head>
   
       <?php
-	 writeEmail($_POST['id'], $_POST['email']);
+	 writeEmail($id, $_POST['email']);
        ?>
 	  
   <body class="bg" onload="init()">

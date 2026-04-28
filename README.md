@@ -90,6 +90,35 @@ Certificates are automatically renewed by certbot.timer systemd service.
    sudo journalctl -u certbot.service
    ```
 
+## Deployment
+
+The server (`mediaserver`) has two repo checkouts, each symlinked into Apache:
+
+| Checkout | Symlink | URL |
+|----------|---------|-----|
+| `/home/pi/photos` | `/var/www/html/photos` | `http://mediaserver/photos` |
+| `/home/pi/photos-staging` | `/var/www/html/photos-staging` | `http://mediaserver/photos-staging` |
+
+### Deploy to staging
+
+```bash
+# on mediaserver
+cd /home/pi/photos-staging && git pull
+```
+
+Then test from a LAN browser at `http://mediaserver/photos-staging`.
+
+### Deploy to production
+
+Once staging looks good:
+
+```bash
+# on mediaserver
+cd /home/pi/photos && git pull
+```
+
+Verify at `http://mediaserver/photos`.
+
 ## Branch Information
 
 The project uses the following branch structure:

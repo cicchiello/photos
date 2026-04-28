@@ -16,7 +16,12 @@
     
     <?php
        include ('photos_utils.php');
-       
+
+       if (!isset($_SESSION['login_user'])) {
+           header('Location: ./login.php');
+           exit;
+       }
+
        echo renderLookAndFeel();
        ?>
        

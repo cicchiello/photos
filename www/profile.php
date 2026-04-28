@@ -49,14 +49,14 @@
   <body class="bg" 
 
     <?php
-       if (isset($_COOKIE['login_user'])) {
+       if (isset($_SESSION['login_user'])) {
          echo '> ';
     
          $ini = parse_ini_file("./config.ini");
          $DbBase = $ini['couchbase'];
          $Db = $ini['dbname'];
 
-	 $usersUrl = $DbBase.'/'.$Db.'/_design/photos/_view/users?key="user:'.$_COOKIE['login_user'].'"';
+	 $usersUrl = $DbBase.'/'.$Db.'/_design/photos/_view/users?key="user:'.$_SESSION['login_user'].'"';
          $row = json_decode(file_get_contents($usersUrl), true)['rows'][0]['value'];
          $id = $row['_id'];
 	 $fname = $row['fname'];

@@ -126,7 +126,7 @@
         $ini = parse_ini_file("./config.ini");
         $confidence = $ini['rekognizeConfidence'];
 
-        if (isset($_COOKIE['login_user'])) {
+        if (isset($_SESSION['login_user'])) {
             $Db = $ini['dbname'];
             $DbBase = $ini['couchbase'].'/'.$Db;
 	    
@@ -135,12 +135,12 @@
 	    $checkedImages = array_key_exists('checked', $_GET) ? $_GET['checked'] : '';
             echo 'onload="init('."'".$DbBase."','".$row."',".$confidence.",'".$tagFilters."','".$checkedImages."'".')">';
             echo '<div class="profile-area">';
-            echo renderProfileArea($_COOKIE['login_user']);
+            echo renderProfileArea($_SESSION['login_user']);
             echo '</div>';
         } else {
             echo 'onload="forceLogin()">';
         }
-        #echo var_dump(isset($_COOKIE['login_user']));
+        #echo var_dump(isset($_SESSION['login_user']));
     ?>
 
     <div style="height:90%; width:90%;">

@@ -35,8 +35,7 @@
             $uid = $row['_id'];
             unset($row['_id']);
 
-            // init cookie with timeout
-            setcookie("login_user", $_POST['uname'], time()+$sessionTimeout_s, '/');
+            $_SESSION['login_user'] = $_POST['uname'];
 
             // Record login event in CouchDB
             $loginEvent = array(

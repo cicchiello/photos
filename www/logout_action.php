@@ -1,6 +1,8 @@
 <?php
     // intentionally place this before the html tag
-
+    include('photos_utils.php');
+    session_destroy();
+    $_SESSION = [];
     setcookie('login_user', "unknown", time()-3600, '/');
   ?>
 
@@ -13,8 +15,6 @@
        //ini_set('display_errors', 1);
        //ini_set('display_startup_errors', 1);
        //error_reporting(E_ALL);
-
-       include('photos_utils.php');
 
        echo renderLookAndFeel();
        ?>

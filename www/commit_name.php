@@ -10,6 +10,12 @@
        
        include('photos_utils.php');
 
+       if (!isset($_SESSION['login_user'])) {
+           header('Location: ./login.php');
+           exit;
+       }
+       $id = getUserId($_SESSION['login_user']);
+
        echo renderLookAndFeel();
        ?>
 
@@ -33,7 +39,7 @@
   </head>
   
       <?php
-	 writeName($_POST['id'], $_POST['fname'], $_POST['lname']);
+	 writeName($id, $_POST['fname'], $_POST['lname']);
        ?>
 	  
   <body class="bg" onload="init()">

@@ -10,6 +10,12 @@
        
        include('photos_utils.php');
 
+       if (!isset($_SESSION['login_user'])) {
+           header('Location: ./login.php');
+           exit;
+       }
+       $id = getUserId($_SESSION['login_user']);
+
        echo renderLookAndFeel();
        
        ?>
@@ -34,7 +40,7 @@
   </head>
   
       <?php
-	 writePassword($_POST['id'], $_POST['pswd']);
+	 writePassword($id, $_POST['pswd']);
        ?>
 	  
   <body class="bg" onload="init()">

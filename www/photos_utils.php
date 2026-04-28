@@ -1,5 +1,10 @@
 <?php
 
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+
 function deltaTimeStr($deltaTime)
 {
    $deltaM = floor($deltaTime/60);
@@ -360,6 +365,15 @@ function downloadFile($url,$dstpath) {
   // clean up
   curl_close($ch);
   fclose($file);
+}
+
+
+function getUserId($username) {
+    $ini = parse_ini_file("./config.ini");
+    $DbBase = $ini['couchbase'].'/'.$ini['dbname'];
+    $usersUrl = $DbBase.'/_design/photos/_view/users?key="user:'.$username.'"';
+    $rows = json_decode(file_get_contents($usersUrl), true)['rows'];
+    return count($rows) > 0 ? $rows[0]['value']['_id'] : null;
 }
 
 
