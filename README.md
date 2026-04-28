@@ -99,6 +99,22 @@ The server (`mediaserver`) has two repo checkouts, each symlinked into Apache:
 | `/home/pi/photos` | `/var/www/html/photos` | `http://mediaserver/photos` |
 | `/home/pi/photos-staging` | `/var/www/html/photos-staging` | `http://mediaserver/photos-staging` |
 
+### Server configuration
+
+`www/config.ini` is environment-specific and not managed by git. On each server, after the first pull:
+
+```bash
+cp www/config.ini.example www/config.ini
+# edit dbname and couchbase for this environment
+```
+
+Git will not track or touch this file since it is listed in `.gitignore`.
+
+| Environment | `dbname` | `couchbase` |
+|-------------|----------|-------------|
+| production  | `photos` | `https://db.jfcenterprises.com:6984` |
+| staging     | `photos-staging` | `https://db.jfcenterprises.com:6984` |
+
 ### Deploy to staging
 
 ```bash
