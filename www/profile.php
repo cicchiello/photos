@@ -21,11 +21,11 @@
   
   <script>
     async function onEditEmail(id,email) {
-      post("./email_action.php", {"id":id,"email":email});
+      post("./email_action.php", {"id":id,"email":email,"csrf":csrfToken});
     }
 
     async function onEditPassword(id) {
-      post("./password_action.php", {"id":id});
+      post("./password_action.php", {"id":id,"csrf":csrfToken});
     }
 
     async function forceLogin() {
@@ -40,7 +40,8 @@
       post("./name_action.php", {
         "id":id,
         "fname":fname,
-        "lname":lname
+        "lname":lname,
+        "csrf":csrfToken
       });
     }
 
@@ -49,14 +50,14 @@
   <body class="bg" 
 
     <?php
-       if (isset($_COOKIE['login_user'])) {
+       if (isset($_SESSION['login_user'])) {
          echo '> ';
     
          $ini = parse_ini_file("./config.ini");
          $DbBase = $ini['couchbase'];
          $Db = $ini['dbname'];
 
-	 $usersUrl = $DbBase.'/'.$Db.'/_design/photos/_view/users?key="user:'.$_COOKIE['login_user'].'"';
+	 $usersUrl = $DbBase.'/'.$Db.'/_design/photos/_view/users?key="user:'.$_SESSION['login_user'].'"';
          $row = json_decode(file_get_contents($usersUrl), true)['rows'][0]['value'];
          $id = $row['_id'];
 	 $fname = $row['fname'];

@@ -78,7 +78,7 @@ Certificates are automatically renewed by certbot.timer systemd service.
    sudo certbot renew --dry-run --dns-cloudflare-propagation-seconds 60
    
    # Check certificate expiry
-   sudo openssl x509 -dates -noout -in /etc/letsencrypt/live/media.jfcenterprises.com/cert.pem
+   sudo openssl x509 -dates -noout -in /home/couchdb/letsencrypt/live/media.jfcenterprises.com/cert.pem
    ```
 
 3. Monitor certbot timer:
@@ -89,6 +89,50 @@ Certificates are automatically renewed by certbot.timer systemd service.
    # Check recent renewal attempts
    sudo journalctl -u certbot.service
    ```
+
+## Deployment
+
+The server (`mediaserver`) has two repo checkouts, each symlinked into Apache:
+
+| Checkout | Symlink | URL |
+|----------|---------|-----|
+| `/home/pi/photos` | `/var/www/html/photos` | `http://mediaserver/photos` |
+| `/home/pi/photos-staging` | `/var/www/html/photos-staging` | `http://mediaserver/photos-staging` |
+
+### Server configuration
+
+`www/config.ini` is not tracked in git — each server maintains its own copy.
+On a fresh checkout, copy the example and set the environment-specific values:
+
+```bash
+cp www/config.ini.example www/config.ini
+# then edit dbname and couchbase as appropriate for this environment
+```
+
+| Environment | `dbname` | `couchbase` |
+|-------------|----------|-------------|
+| production  | `photos` | `https://db.jfcenterprises.com:6984` |
+| staging     | `photos-staging` | `https://db.jfcenterprises.com:6984` |
+
+### Deploy to staging
+
+```bash
+# on mediaserver
+cd /home/pi/photos-staging && git pull
+```
+
+Then test from a LAN browser at `http://mediaserver/photos-staging`.
+
+### Deploy to production
+
+Once staging looks good:
+
+```bash
+# on mediaserver
+cd /home/pi/photos && git pull
+```
+
+Verify at `http://mediaserver/photos`.
 
 ## Branch Information
 

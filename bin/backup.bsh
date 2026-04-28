@@ -13,5 +13,5 @@ timestamp=$(date)
 echo "INFO:(${timestamp}): invoking ${prog}" >> ${log}
 echo "INFO:(${timestamp}): to backup: ${server}/${db}" >> ${log}
 echo "INFO:(${timestamp}): to dir: ${dir}" >> ${log}
-${prog} -db ${server}/${db} -creds foo:bar -dir -dir ${dir} 2>&1 >> ${log}
+${prog} -db ${server}/${db} -dir -dir ${dir} 2>&1 >> ${log}
 echo "INFO:(${timestamp}): Done ${prog}"

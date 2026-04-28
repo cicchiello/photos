@@ -52,7 +52,7 @@ function renderTagset(fullTagset, userTagset) {
         str = '<span class="hint-text">...of selected images</span>';
     } else {
         userTagset.forEach(tag => {
-	    str += '<span class="pillButton" style="background-color:${userTagColor};color:black">';
+	    str += `<span class="pillButton" style="background-color:${userTagColor};color:black">`;
 	    str += tag;
 	    str += '</span><br>';
 	});
@@ -129,7 +129,7 @@ function checkboxAction(checkboxElem, dburl, imageId) {
 async function persistTagToImage(imageId, newTag, onCompletion) {
     try {
         const tagenc = encodeURIComponent(newTag);
-	const url = 'addTag.php?imageid='+imageId+'&tag='+tagenc;
+	const url = 'addTag.php?imageid='+imageId+'&tag='+tagenc+'&csrf='+encodeURIComponent(csrfToken);
         const response = await fetch(url);
         if (!response.ok) {
             throw new Error('Failed to update tag');
