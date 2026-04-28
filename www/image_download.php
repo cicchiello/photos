@@ -4,9 +4,9 @@
     // intentionally place this before the html tag
 
     // Uncomment to see php errors
-    ini_set('display_errors', 1);
-    ini_set('display_startup_errors', 1);
-    error_reporting(E_ALL);
+    //ini_set('display_errors', 1);
+    //ini_set('display_startup_errors', 1);
+    //error_reporting(E_ALL);
 
   ?>
 
@@ -92,7 +92,7 @@
 
     <?php
        $doc = json_decode(file_get_contents($docUrl), true);
-       $downloadName = basename($doc['paths'][0])
+       $downloadName = basename($doc['paths'][0]);
     ?>
 	  
   </body>

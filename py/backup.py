@@ -100,7 +100,7 @@ if __name__ == "__main__":
                                       epilog=_epilog, formatter_class=RawTextHelpFormatter)
 
     _parser.add_argument('-db', nargs='?', required=True, help='path to CouchDb db')
-    _parser.add_argument('-creds', nargs='?', required=True, help='CouchDb db credentials (user:pswd)')
+    _parser.add_argument('-creds', nargs='?', required=False, help='CouchDb db credentials (user:pswd)')
     _parser.add_argument('-dir', nargs='?', required=True, help='directory to place the db content')
     _parser.add_argument('-verbose', default=False, action='store_true', help='provide extra debug output')
     

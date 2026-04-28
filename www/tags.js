@@ -52,7 +52,7 @@ function renderTagset(fullTagset, userTagset) {
         str = '<span class="hint-text">...of selected images</span>';
     } else {
         userTagset.forEach(tag => {
-	    str += '<span class="pillButton" style="background-color:${userTagColor};color:black">';
+	    str += `<span class="pillButton" style="background-color:${userTagColor};color:black">`;
 	    str += tag;
 	    str += '</span><br>';
 	});

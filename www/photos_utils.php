@@ -19,7 +19,7 @@ function deltaTimeStr($deltaTime)
 
 function realFileSize($path)
 {
-    $size = trim(`stat -L -c%s '$path'`);
+    $size = trim(`stat -L -c%s ` . escapeshellarg($path));
     return $size;
 }
 
@@ -364,9 +364,7 @@ function downloadFile($url,$dstpath) {
 
 
 function writeEmail($id,$email) {
-  if (!isset($ini)) {
-    $ini = parse_ini_file("./config.ini");
-  }
+  $ini = parse_ini_file("./config.ini");
   
   $WriteDbBase = $ini['couchbase'].'/'.$ini['dbname'];
   $docUrl = $WriteDbBase.'/'.$id;
@@ -377,9 +375,7 @@ function writeEmail($id,$email) {
 }
 
 function writePassword($id,$pswd) {
-  if (!isset($ini)) {
-    $ini = parse_ini_file("./config.ini");
-  }
+  $ini = parse_ini_file("./config.ini");
   
   $WriteDbBase = $ini['couchbase'].'/'.$ini['dbname'];
   $docUrl = $WriteDbBase.'/'.$id;
@@ -390,9 +386,7 @@ function writePassword($id,$pswd) {
 }
 
 function writeName($id,$fname,$lname) {
-  if (!isset($ini)) {
-    $ini = parse_ini_file("./config.ini");
-  }
+  $ini = parse_ini_file("./config.ini");
   
   $WriteDbBase = $ini['couchbase'].'/'.$ini['dbname'];
   $docUrl = $WriteDbBase.'/'.$id;
@@ -404,9 +398,7 @@ function writeName($id,$fname,$lname) {
 }
 
 function writeUsername($id,$uname) {
-  if (!isset($ini)) {
-    $ini = parse_ini_file("./config.ini");
-  }
+  $ini = parse_ini_file("./config.ini");
   
   $WriteDbBase = $ini['couchbase'].'/'.$ini['dbname'];
   $row = json_decode(file_get_contents($WriteDbBase.'/'.$id), true);
