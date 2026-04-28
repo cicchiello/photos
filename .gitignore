@@ -1,4 +1,5 @@
 www/config.ini
+www/tmp/*
 *~
 *#
 .apache-installed
