@@ -23,7 +23,7 @@
       $Db = $ini["dbname"];
       $DbViewBase = $DbBase.'/'.$Db.'/_design/photos/_view';
 
-      $usersUrl = $DbViewBase.'/users?key="user:'.$_POST['uname'].'"';
+      $usersUrl = $DbViewBase.'/users?key='.urlencode(json_encode('user:'.$_POST['uname']));
       $user_detail = json_decode(file_get_contents($usersUrl), true);
       $success = 0;
       if (count($user_detail['rows']) > 0)
