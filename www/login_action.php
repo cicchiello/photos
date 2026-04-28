@@ -29,10 +29,18 @@
       if (count($user_detail['rows']) > 0)
       {
          $row = $user_detail['rows'][0]['value'];
-         $pswd = hash('sha256', $_POST['pswd']);
-         $pswd2 = $row['password'];
-         if ($pswd2 == $pswd) {
-            $uid = $row['_id'];
+         $uid = $row['_id'];
+         $storedHash = $row['password'];
+
+         $authenticated = false;
+         if (password_verify($_POST['pswd'], $storedHash)) {
+            $authenticated = true;
+         } elseif (hash('sha256', $_POST['pswd']) === $storedHash) {
+            $authenticated = true;
+            writePassword($uid, $_POST['pswd']);  // silently upgrade to bcrypt
+         }
+
+         if ($authenticated) {
             unset($row['_id']);
 
             $_SESSION['login_user'] = $_POST['uname'];

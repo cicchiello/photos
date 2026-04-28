@@ -394,7 +394,7 @@ function writePassword($id,$pswd) {
   $WriteDbBase = $ini['couchbase'].'/'.$ini['dbname'];
   $docUrl = $WriteDbBase.'/'.$id;
   $row = json_decode(file_get_contents($docUrl), true);
-  $row['password'] = hash('sha256', $pswd);
+  $row['password'] = password_hash($pswd, PASSWORD_DEFAULT);
   
   return updateDoc($docUrl.'?rev='.$row['_rev'], $row);
 }
