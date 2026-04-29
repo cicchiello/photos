@@ -31,6 +31,7 @@ class Doc():
         self._doc_id = id
         self._doc_url = "%s/%s" % (db, self._doc_id)
         self._creds = creds
+        self._auth = HTTPBasicAuth(creds[0], creds[1])
 
 
     def getDocurl(self):
@@ -46,7 +47,7 @@ class Doc():
         _sleep = 0.5
         while _tries < 5:
             try:
-                return requests.put(url, json=jdoc, headers=headers)
+                return requests.put(url, json=jdoc, headers=headers, auth=self._auth)
             except Exception as e:
                 print("WARNING(%s:%s): putJsonWithRetries; caught exception: %s" %
                       (__name__, nowstr(), str(e)))

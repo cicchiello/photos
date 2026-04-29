@@ -53,10 +53,11 @@
               'ip' => $_SERVER['REMOTE_ADDR']
             );
             
+            $auth = base64_encode($ini['couchdbuser'].':'.$ini['couchdbpswd']);
             $opts = array('http' =>
                 array(
                     'method'  => 'POST',
-                    'header'  => 'Content-Type: application/json',
+                    'header'  => "Content-Type: application/json\r\nAuthorization: Basic ".$auth."\r\n",
                     'content' => json_encode($loginEvent)
                 )
             );

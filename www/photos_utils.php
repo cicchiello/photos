@@ -436,17 +436,18 @@ function writeUsername($id,$uname) {
 }
 
 function updateDoc($objUrl, $doc) {
-    // Update the document in CouchDB
+    $ini = parse_ini_file("./config.ini");
+    $auth = base64_encode($ini['couchdbuser'].':'.$ini['couchdbpswd']);
     $options = array(
         'http' => array(
-            'header'  => "Content-type: application/json\r\n",
+            'header'  => "Content-type: application/json\r\nAuthorization: Basic ".$auth."\r\n",
             'method'  => 'PUT',
             'content' => json_encode($doc)
         )
     );
     $context = stream_context_create($options);
     $result = file_get_contents($objUrl, false, $context);
-        
+
     return ($result !== FALSE);
 }
 

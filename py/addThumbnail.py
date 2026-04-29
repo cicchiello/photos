@@ -31,6 +31,7 @@ class ThumbnailAttacher():
         self._doc_id = md5(path)
         self._doc_url = "%s/%s" % (db, self._doc_id)
         self._creds = creds
+        self._auth = HTTPBasicAuth(creds[0], creds[1])
         self._path = path
 
 
@@ -59,7 +60,7 @@ class ThumbnailAttacher():
             print("DEBUG(%s:%s): attaching thumbnail to document(%s)" % (__name__, nowstr(), self._doc_id))
         _thumbnail_attachmentData = open(_thumbnail_path, 'rb').read()
         _r = requests.put(_thumbnail_attachmentUrl, data=_thumbnail_attachmentData,
-                          headers=_thumbnail_attachmentHeaders)
+                          headers=_thumbnail_attachmentHeaders, auth=self._auth)
         time.sleep(0.5)
         return json.loads(_r.content)["rev"]
 

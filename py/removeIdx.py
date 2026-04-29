@@ -30,6 +30,7 @@ class ImageDoc():
         self._doc_id = md5(path)
         self._doc_url = "%s/%s" % (db, self._doc_id)
         self._creds = creds
+        self._auth = HTTPBasicAuth(creds[0], creds[1])
         self._path = path
 
 
@@ -51,7 +52,7 @@ class ImageDoc():
         
         _updateUrl = "%s?rev=%s" % (self._doc_url, doc['_rev'])
         _headers = {"Content-Type": "application/json"}
-        _r = requests.put(_updateUrl, json=doc, headers=_headers)
+        _r = requests.put(_updateUrl, json=doc, headers=_headers, auth=self._auth)
         
         time.sleep(0.5)
         return json.loads(_r.content)["rev"]
