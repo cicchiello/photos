@@ -2,6 +2,8 @@
 ; Copy this to config.ini and set values for the local environment.
 version = 1.0
 couchbase = https://db.jfcenterprises.com:6984
+couchdbuser = photos
+couchdbpswd = <the real password>
 sessionTimeout_s = 3600
 dbname = photos
 imgAttachName = image
