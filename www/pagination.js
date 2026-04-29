@@ -125,9 +125,11 @@ function setImages0(pageIdx, dburl, query, onCompletion) {
 	.then(data => {
 	    var visibleSet = [];
 	    const itemsPerPage = RowsPerPage*ColsPerRow;
-	    for (var i = 0; (i < data.rows.length) && (i < itemsPerPage); i++) 
-		visibleSet.push(data.rows[i].id);
-	    
+	    for (var i = 0; (i < data.rows.length) && (i < itemsPerPage); i++) {
+		var row = data.rows[i];
+		visibleSet.push({id: row.id, hidden: !!(row.value && row.value.hidden)});
+	    }
+
 	    updateTableRendering(visibleSet, pageIdx, dburl);
 
 	    onCompletion(data.total_rows);
@@ -150,14 +152,17 @@ function updateTableRendering(visibleSet, pageIdx, dburl) {
     var selectAllCheckbox = document.getElementById("selectAllCheckbox");
     selectAllCheckbox.checked = false;
     visibleSet.forEach(r => {
+	var id = (r && typeof r === 'object') ? r.id : r;
+	var isHidden = (r && typeof r === 'object') ? r.hidden : false;
         var img = document.getElementById("image"+imageCnt);
-	img.src = dburl+"/"+r+"/thumbnail";
-	img.setAttribute("data-objid", r);
+	img.src = dburl+"/"+id+"/thumbnail";
+	img.setAttribute("data-objid", id);
 	img.setAttribute("data-firstrow", firstrow);
+	img.style.opacity = isHidden ? "0.4" : "";
 	img.style.visibility = "visible";
 	
 	// Fetch the document to get the key for the title
-	fetch(dburl+"/"+r)
+	fetch(dburl+"/"+id)
 	    .then(res => {
 		if (res.ok) return res.json();
 	    })
@@ -170,10 +175,10 @@ function updateTableRendering(visibleSet, pageIdx, dburl) {
 	
 	var check = document.getElementById("check"+imageCnt);
 	check.checked = false;
-	
+
 	var label = document.getElementById("label"+imageCnt);
 	label.style.visibility = "visible";
-	
+
 	imageCnt += 1;
     });
     while (imageCnt < itemsPerPage) {
@@ -225,8 +230,9 @@ function changeSearchPage(e, resultset, pageNumber) {
     const dburl = document.getElementById("dbUrl").innerHTML.trim();
 
     if ((resultset === null) || (resultset.length === 0)) {
+	var viewName = (typeof isAdmin !== 'undefined' && isAdmin) ? 'all_photo_ids' : 'photo_ids';
 	setImages0(pageIdx, dburl,
-		   "/_design/photos/_view/photo_ids?descending=false&limit="+perpage+"&skip="+offset,
+		   "/_design/photos/_view/"+viewName+"?descending=false&limit="+perpage+"&skip="+offset,
 		   function onCompletion(newNumItems) {paginate(null, pageIdx, newNumItems);});
     } else {
 	updateTableRendering(getVisibleSubset(resultset, offset), pageIdx, dburl);
