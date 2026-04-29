@@ -11,7 +11,12 @@
 
 <html>
   <head>
-  
+
+    <?php
+      $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin'];
+      echo '<script>var isAdmin=' . ($isAdmin ? 'true' : 'false') . ';</script>';
+    ?>
+
     <link href="./thumbs.css" media="all" rel="stylesheet" />
     <link rel="stylesheet" href="pagination.css">
     
