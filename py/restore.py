@@ -18,6 +18,15 @@ def nowstr():
     return datetime.datetime.today().strftime('%Y-%b-%d %H:%M:%S')
 
 
+def _checkWriteResponse(r):
+    _resp = json.loads(r.content)
+    if 'error' in _resp:
+        print("ERROR(%s:%s): CouchDB write rejected (HTTP %d): %s - %s" % (
+            __name__, nowstr(), r.status_code, _resp['error'], _resp.get('reason', '')))
+        exit(-1)
+    return _resp['rev']
+
+
 
 def listAllJsonFiles(dir):
     _r = []
@@ -199,7 +208,7 @@ if __name__ == "__main__":
             exit(-1)
             continue
 
-        _rev = json.loads(_r.content)["rev"]
+        _rev = _checkWriteResponse(_r)
         _stats['uploaded_docs'] += 1
         
         if _attachments is not None:
@@ -222,7 +231,7 @@ if __name__ == "__main__":
                         _stats['failed_attachments'] += 1
                         continue
 
-                    _rev = json.loads(_r.content)["rev"]
+                    _rev = _checkWriteResponse(_r)
                     _stats['uploaded_attachments'] += 1
                 except Exception as e:
                     print("ERROR(%s:%s): Failed to upload attachment: %s" % (__name__, nowstr(), str(e)))

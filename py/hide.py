@@ -16,6 +16,15 @@ def nowstr():
     return datetime.datetime.today().strftime('%Y-%b-%d %H:%M:%S')
 
 
+def _checkWriteResponse(r):
+    _resp = json.loads(r.content)
+    if 'error' in _resp:
+        print("ERROR(%s:%s): CouchDB write rejected (HTTP %d): %s - %s" % (
+            __name__, nowstr(), r.status_code, _resp['error'], _resp.get('reason', '')))
+        exit(-1)
+    return _resp['rev']
+
+
 def md5(fname):
     hash_md5 = hashlib.md5()
     with open(fname, "rb") as f:
@@ -30,6 +39,7 @@ class Doc():
         self._doc_id = id
         self._doc_url = "%s/%s" % (db, self._doc_id)
         self._creds = creds
+        self._auth = HTTPBasicAuth(creds[0], creds[1])
 
 
     def getDocurl(self):
@@ -45,7 +55,7 @@ class Doc():
         _sleep = 0.5
         while _tries < 5:
             try:
-                return requests.put(url, json=jdoc, headers=headers)
+                return requests.put(url, json=jdoc, headers=headers, auth=self._auth)
             except Exception as e:
                 print("WARNING(%s:%s): putJsonWithRetries; caught exception: %s" %
                       (__name__, nowstr(), str(e)))
@@ -85,7 +95,7 @@ class Doc():
         _updateUrl = "%s?rev=%s" % (self._doc_url, doc['_rev'])
         _headers = {"Content-Type": "application/json"}
         _r = self.putJsonWithRetries(_updateUrl, doc, _headers)
-        return json.loads(_r.content)["rev"]
+        return _checkWriteResponse(_r)
 
     
     def downloadDoc(self, url):

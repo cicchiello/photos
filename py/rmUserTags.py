@@ -16,6 +16,15 @@ def nowstr():
     return datetime.datetime.today().strftime('%Y-%b-%d %H:%M:%S')
 
 
+def _checkWriteResponse(r):
+    _resp = json.loads(r.content)
+    if 'error' in _resp:
+        print("ERROR(%s:%s): CouchDB write rejected (HTTP %d): %s - %s" % (
+            __name__, nowstr(), r.status_code, _resp['error'], _resp.get('reason', '')))
+        exit(-1)
+    return _resp['rev']
+
+
 def getWithRetries(url, headers, auth=None):
     _tries = 0
     _sleep = 0.5
@@ -114,7 +123,7 @@ class ImageDoc():
         _sleep = 0.5
         while _tries < 5:
             try:
-                return requests.put(url, json=jdoc, headers=headers)
+                return requests.put(url, json=jdoc, headers=headers, auth=self._auth)
             except Exception as e:
                 print("WARNING(%s:%s): putJsonWithRetries; caught exception: %s" %
                       (__name__, nowstr(), str(e)))
@@ -142,7 +151,7 @@ class ImageDoc():
                 print("ERROR(%s:%s): failed to update document %s: %s" % 
                       (__name__, nowstr(), self._doc_id, _r.content))
                 return None
-            return json.loads(_r.content)["rev"]
+            return _checkWriteResponse(_r)
         else:
             if self._verbose:
                 print("INFO(%s:%s): document %s has no user tags" %

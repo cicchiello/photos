@@ -17,6 +17,15 @@ def nowstr():
     return datetime.datetime.today().strftime('%Y-%b-%d %H:%M:%S')
 
 
+def _checkWriteResponse(r):
+    _resp = json.loads(r.content)
+    if 'error' in _resp:
+        print("ERROR(%s:%s): CouchDB write rejected (HTTP %d): %s - %s" % (
+            __name__, nowstr(), r.status_code, _resp['error'], _resp.get('reason', '')))
+        exit(-1)
+    return _resp['rev']
+
+
 def md5(fname):
     hash_md5 = hashlib.md5()
     with open(fname, "rb") as f:
@@ -31,6 +40,7 @@ class ThumbnailAttacher():
         self._doc_id = md5(path)
         self._doc_url = "%s/%s" % (db, self._doc_id)
         self._creds = creds
+        self._auth = HTTPBasicAuth(creds[0], creds[1])
         self._path = path
 
 
@@ -59,9 +69,9 @@ class ThumbnailAttacher():
             print("DEBUG(%s:%s): attaching thumbnail to document(%s)" % (__name__, nowstr(), self._doc_id))
         _thumbnail_attachmentData = open(_thumbnail_path, 'rb').read()
         _r = requests.put(_thumbnail_attachmentUrl, data=_thumbnail_attachmentData,
-                          headers=_thumbnail_attachmentHeaders)
+                          headers=_thumbnail_attachmentHeaders, auth=self._auth)
         time.sleep(0.5)
-        return json.loads(_r.content)["rev"]
+        return _checkWriteResponse(_r)
 
     
     def downloadDoc(self, url):

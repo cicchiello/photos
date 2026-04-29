@@ -20,6 +20,15 @@ def nowstr():
     return datetime.datetime.today().strftime('%Y-%b-%d %H:%M:%S')
 
 
+def _checkWriteResponse(r):
+    _resp = json.loads(r.content)
+    if 'error' in _resp:
+        print("ERROR(%s:%s): CouchDB write rejected (HTTP %d): %s - %s" % (
+            __name__, nowstr(), r.status_code, _resp['error'], _resp.get('reason', '')))
+        exit(-1)
+    return _resp['rev']
+
+
 def md5(fname):
     hash_md5 = hashlib.md5()
     with open(fname, "rb") as f:
@@ -34,6 +43,7 @@ class Uploader():
         self._doc_id = md5(path)
         self._doc_url = "%s/%s" % (db, self._doc_id)
         self._creds = creds
+        self._auth = HTTPBasicAuth(creds[0], creds[1])
         self._tagset = Tagset(verbose=self._verbose)
         self._tagset.append_metadata_tags(path)
         self._path = path
@@ -49,7 +59,7 @@ class Uploader():
         _sleep = 0.5
         while _tries < 5:
             try:
-                return requests.put(url, json=jdoc, headers=headers)
+                return requests.put(url, json=jdoc, headers=headers, auth=self._auth)
             except Exception as e:
                 print("WARNING(%s:%s): putJsonWithRetries; caught exception: %s" %
                       (__name__, nowstr(), str(e)))
@@ -66,7 +76,7 @@ class Uploader():
         _sleep = 0.5
         while _tries < 5:
             try:
-                return requests.put(url, data=data, headers=headers)
+                return requests.put(url, data=data, headers=headers, auth=self._auth)
             except Exception as e:
                 print("WARNING(%s:%s): putBinWithRetries; caught exception: %s" %
                       (__name__, nowstr(), str(e)))
@@ -100,7 +110,7 @@ class Uploader():
         _sleep = 0.5
         while _tries < 5:
             try:
-                return requests.delete(url)
+                return requests.delete(url, auth=self._auth)
             except Exception as e:
                 print("WARNING(%s:%s): deleteWithRetries; caught exception: %s" %
                       (__name__, nowstr(), str(e)))
@@ -190,7 +200,7 @@ class Uploader():
             print("DEBUG(%s:%s): attaching image to document(%s)" % (__name__, nowstr(), self._doc_id))
 
         _r = self.putBinWithRetries(self.imageUrl(revision), _imageData, _imageHeaders)
-        return json.loads(_r.content)["rev"]
+        return _checkWriteResponse(_r)
 
 
     def webSuitableUrl(self, revision):
@@ -218,7 +228,7 @@ class Uploader():
                                     _web_suitable_attachmentHeaders)
 
         os.remove(_web_suitable_path)
-        return json.loads(_r.content)["rev"]
+        return _checkWriteResponse(_r)
 
     
     def thumbnailUrl(self, revision):
@@ -244,7 +254,7 @@ class Uploader():
 
         os.remove(_thumbnail_path)
 
-        return json.loads(_r.content)["rev"]
+        return _checkWriteResponse(_r)
 
     
     def createEntry(self):
@@ -261,7 +271,7 @@ class Uploader():
             print("ERROR(%s:%s): conflict" % (__name__, nowstr()))
             exit(-2)
 
-        _rev = json.loads(_r.content)["rev"]
+        _rev = _checkWriteResponse(_r)
         _rev = self.attachImage(_rev)
         _rev = self.attachWebSuitable(_rev)
         _rev = self.attachThumbnail(_rev)
@@ -275,7 +285,7 @@ class Uploader():
         _missing = _r.status_code == 404
         if not _missing:
             _r = self.deleteWithRetries(url)
-            _rev = json.loads(_r.content)['rev']
+            _rev = _checkWriteResponse(_r)
             return _rev
         else:
             return revision

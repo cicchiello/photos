@@ -16,6 +16,15 @@ def nowstr():
     return datetime.datetime.today().strftime('%Y-%b-%d %H:%M:%S')
 
 
+def _checkWriteResponse(r):
+    _resp = json.loads(r.content)
+    if 'error' in _resp:
+        print("ERROR(%s:%s): CouchDB write rejected (HTTP %d): %s - %s" % (
+            __name__, nowstr(), r.status_code, _resp['error'], _resp.get('reason', '')))
+        exit(-1)
+    return _resp['rev']
+
+
 def md5(fname):
     hash_md5 = hashlib.md5()
     with open(fname, "rb") as f:
@@ -30,6 +39,7 @@ class ImageDoc():
         self._doc_id = md5(path)
         self._doc_url = "%s/%s" % (db, self._doc_id)
         self._creds = creds
+        self._auth = HTTPBasicAuth(creds[0], creds[1])
         self._path = path
 
 
@@ -51,10 +61,10 @@ class ImageDoc():
         
         _updateUrl = "%s?rev=%s" % (self._doc_url, doc['_rev'])
         _headers = {"Content-Type": "application/json"}
-        _r = requests.put(_updateUrl, json=doc, headers=_headers)
+        _r = requests.put(_updateUrl, json=doc, headers=_headers, auth=self._auth)
         
         time.sleep(0.5)
-        return json.loads(_r.content)["rev"]
+        return _checkWriteResponse(_r)
 
     
     def downloadDoc(self, url):
