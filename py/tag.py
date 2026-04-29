@@ -146,7 +146,7 @@ if __name__ == "__main__":
 
     _parser.add_argument('-db', nargs='?', required=True, help='path to CouchDb db')
     _parser.add_argument('-creds', nargs='?', required=True, help='CouchDb db credentials (user:pswd)')
-    _parser.add_argument('-id', nargs='?', required=True, help='id of the image to tag')
+    _parser.add_argument('-id', nargs='+', required=True, help='id(s) of the image(s) to tag')
     _parser.add_argument('-user', nargs='?', required=True, help='username to associate with the tag');
     _parser.add_argument('-tag', nargs='?', required=True, help='tag name to associate with the image');
     _parser.add_argument('-verbose', default=False, action='store_true', help='provide extra debug output')
@@ -154,16 +154,17 @@ if __name__ == "__main__":
     _args = _parser.parse_args(args=sys.argv[1:])
 
     print("ECHO(%s:%s): db: %s" % (__name__, nowstr(), _args.db))
-    print("ECHO(%s:%s): id: %s" % (__name__, nowstr(), _args.id))
+    print("ECHO(%s:%s): ids: %s" % (__name__, nowstr(), _args.id))
     print("ECHO(%s:%s): user: %s" % (__name__, nowstr(), _args.user))
     print("ECHO(%s:%s): tag: %s" % (__name__, nowstr(), _args.tag))
     print("ECHO(%s:%s): verbose: %s" % (__name__, nowstr(), _args.verbose))
 
-    _u = Doc(_args.db, _args.id, _args.creds.split(":"), verbose=_args.verbose)
-    if _u.docExists():
-        _rev = _u.addTag(_u.downloadDoc(_u.getDocurl()), _args.user, _args.tag)
-        if _args.verbose:
-            print("INFO(%s:%s): new revision: %s" % (__name__, nowstr(), _rev))
-    else:
-        print("ERROR(%s:%s): document doesn't exist: %s" % (__name__, nowstr(), _u.getDocid()))
+    for _id in _args.id:
+        _u = Doc(_args.db, _id, _args.creds.split(":"), verbose=_args.verbose)
+        if _u.docExists():
+            _rev = _u.addTag(_u.downloadDoc(_u.getDocurl()), _args.user, _args.tag)
+            if _args.verbose:
+                print("INFO(%s:%s): new revision: %s" % (__name__, nowstr(), _rev))
+        else:
+            print("ERROR(%s:%s): document doesn't exist: %s" % (__name__, nowstr(), _u.getDocid()))
     

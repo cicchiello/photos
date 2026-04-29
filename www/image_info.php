@@ -162,25 +162,7 @@
         }
     
         async function downloadAction(id, row) {
-            //console.log("TRACE(image_info.php:downloadAction): id: "+id);
-            const urlParams = new URLSearchParams(window.location.search);
-            var url = './image_download.php?id='+id+'&row='+row;
-
-            // Add tag filters and checked images if present
-            const tagFilters = urlParams.get('tags');
-            if (tagFilters) 
-                url += "&tags=" + tagFilters;
-
-            const checkedImages = urlParams.get('checked');
-            if (checkedImages) 
-                url += "&checked=" + checkedImages;
-
-            var f = document.getElementById("detail");
-            if ("callback" in f) {
-                f.callback(url);
-            } else {
-                console.log("ERROR(image_info.php:downloadAction): f doesn't have a callback member");
-            }
+            window.location.href = './image_download.php?id=' + id;
         }
 
         async function deleteTag(tagName, imageId) {

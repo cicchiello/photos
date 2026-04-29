@@ -1,6 +1,6 @@
 ; This is the photos web service ini file
 ; Copy this to config.ini and set values for the local environment.
-version = 1.0
+version = 1.1
 couchbase = https://db.jfcenterprises.com:6984
 couchdbuser = photos
 couchdbpswd = <the real password>
