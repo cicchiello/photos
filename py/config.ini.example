@@ -1,8 +1,7 @@
 [prod]
 DbKey = photos
-DbPswd =
+DbPswd = <real password>
 DbBase = http://mediaserver:5984
 Db = photos
 
 [dev]
-
