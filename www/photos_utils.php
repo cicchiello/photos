@@ -137,7 +137,7 @@ function renderImgArrayTable($firstrow, $DbBase, $items, $onImgAction, $onCheckA
 	    $checkId = 'check'.$cnt;
 	    $checkStr = $onCheckAction.'(this,'.$q.$DbBase.$q.','.$q.$imgId.$q.')';
             $imgUrl = $DbBase.'/'.$id.'/thumbnail';
-            $isHidden = !empty($item['value']['hidden']);
+            $isHidden = !empty($item['value']) && !empty($item['value']['hidden']);
             $imgStyle = 'vertical-align:horizontal-align;margin:2px 2px 2px 2px' . ($isHidden ? ';opacity:0.4' : '');
 
             $result .= '  <td style="text-align:left">';
