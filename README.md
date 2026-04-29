@@ -4,17 +4,9 @@ A comprehensive photo management system with features for uploading, indexing, a
 
 ## Project Structure
 
-- `/py` - Python backend scripts
-  - `uploader.py` - Handles photo upload functionality
-  - `addIdx.py` - Adds indexing to photos
-  - `addThumbnail.py` - Generates thumbnails for uploaded photos
-  - `findDups.py` - Identifies duplicate photos
-  - `lucenize.py` - Lucene integration for search functionality
-  - `removeIdx.py` - Removes indexing from photos
-  - `tagset.py` - Manages photo tagging system
-
+- `/py` - Python ETL scripts for managing the photo library — see [py/README.md](py/README.md)
 - `/www` - Web frontend files
-- `/couchdb` - CouchDB related configurations and scripts
+- `/couchdb` - CouchDB design documents
 
 ## Features
 

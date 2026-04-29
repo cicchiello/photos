@@ -1,17 +1,56 @@
 #!/bin/bash
 
+if [ $# -lt 2 ]; then
+    echo "Usage: $0 <base-path> <backup-root>"
+    exit 1
+fi
+base=$1
+root=$2
 server=http://mediaserver:5984
 db=photos
-log=/home/joe/logs/photos-backup.log
-prog=/home/joe/photos/py/backup.py
+log=${base}/logs/photos-backup.log
+prog=${base}/photos/py/backup.py
 
 filedate=$(date +%Y%m%d)
-dir=/mnt/sdd/photos-backup/${filedate}_backup
-mkdir -p ${dir}
+dirname="${filedate}_backup"
+dirpath="${root}/${dirname}"
+mkdir -p ${dirpath}
 
 timestamp=$(date)
 echo "INFO:(${timestamp}): invoking ${prog}" >> ${log}
 echo "INFO:(${timestamp}): to backup: ${server}/${db}" >> ${log}
-echo "INFO:(${timestamp}): to dir: ${dir}" >> ${log}
-${prog} -db ${server}/${db} -dir -dir ${dir} 2>&1 >> ${log}
-echo "INFO:(${timestamp}): Done ${prog}"
+echo "INFO:(${timestamp}): to dir: ${dirpath}" >> ${log}
+nice ${prog} -db ${server}/${db} -dir ${dirpath} 2>&1 >> ${log}
+stat=$?
+timestamp=$(date)
+echo "INFO:(${timestamp}): stat: ${stat}" >> ${log}
+echo "INFO:(${timestamp}): Done ${prog}" >> ${log}
+if [ ${stat} -eq 0 ]; then
+    echo "INFO:(${timestamp}): Command succeeded; zipping it up" >> ${log}
+    cd "${root}"
+    nice tar cfz "${dirname}.tar.gz" ${dirname} && rm -rf ${dirname}
+    stat=$?
+    if [ ${stat} -eq 0 ]; then
+	timestamp=$(date)
+        echo "INFO:(${timestamp}): Done zipping" >> ${log}
+
+	oldest=$(ls *.tar.gz | sort | awk '{if (NR==1) {print $1}}')
+	stat=$?
+	if [ ${stat} -eq 0 ]; then
+	    timestamp=$(date)
+            echo "INFO:(${timestamp}): Deleting oldest: ${oldest}" >> ${log}
+	    rm -rf ${oldest}
+	    timestamp=$(date)
+            echo "INFO:(${timestamp}): Done deleting oldest" >> ${log}
+	else
+	    timestamp=$(date)
+            echo "INFO:(${timestamp}): Deletion of oldest failed" >> ${log}
+	fi
+    else
+	timestamp=$(date)
+        echo "INFO:(${timestamp}): Zipping failed" >> ${log}
+    fi
+else
+    timestamp=$(date)
+    echo "INFO:(${timestamp}): Command failed" >> ${log}
+fi

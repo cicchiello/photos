@@ -5,12 +5,7 @@ import time
 import datetime
 import json
 import requests
-import subprocess
-import boto3
 import urllib.request
-
-from os.path import exists, isdir
-from requests.auth import HTTPBasicAuth
 
 
 
@@ -20,8 +15,7 @@ def nowstr():
 
 
 class AllDocsView():
-    def __init__(self, db, creds, verbose=False):
-        self._creds = creds
+    def __init__(self, db, verbose=False):
         self._baseurl = "%s/_all_docs" % db
         self._verbose = verbose
         #like: "http://HOST:5984/photos/_all_docs?skip="+offset
@@ -47,22 +41,21 @@ class AllDocsView():
                 print("INFO(%s:%s): got %d ids" % (__name__, nowstr(), len(_allIds)))
             elif self._verbose:
                 print("DEBUG(%s:%s): got %d ids" % (__name__, nowstr(), len(_allIds)))
-        
+
         return _allIds
 
 
-    
+
 class Doc():
-    def __init__(self, db, id, creds, verbose=False):
+    def __init__(self, db, id, verbose=False):
         self._verbose = verbose
         self._doc_id = id
         self._doc_url = "%s/%s" % (db, self._doc_id)
-        self._creds = creds
         self._doc = None
 
     def getDocurl(self):
         return self._doc_url
-    
+
     def getDocid(self):
         return self._doc_id
 
@@ -74,7 +67,7 @@ class Doc():
 
         _retry = 0
         while _retry < 3:
-            try: 
+            try:
                 _r = requests.get(self._doc_url, headers=_headers)
                 self._doc = json.loads(_r.content) if _r.status_code == 200 else None
                 return self
@@ -87,23 +80,24 @@ class Doc():
         exit(-1)
 
 
-    
+
 if __name__ == "__main__":
     import sys
     import argparse
-    
+
     from argparse import RawTextHelpFormatter
-    
+
+    print("INFO(%s:%s): backup.py starting..." % (__name__, nowstr()))
+
     _description = 'backup.py dumps the entire contents of a CouchDb db the filesystem'
     _epilog = '\n\nIt retrieves all docs and attachments from the db and writes them to the specified directory\n'
     _parser = argparse.ArgumentParser(prog=sys.argv[0], description=_description, \
                                       epilog=_epilog, formatter_class=RawTextHelpFormatter)
 
     _parser.add_argument('-db', nargs='?', required=True, help='path to CouchDb db')
-    _parser.add_argument('-creds', nargs='?', required=False, help='CouchDb db credentials (user:pswd)')
     _parser.add_argument('-dir', nargs='?', required=True, help='directory to place the db content')
     _parser.add_argument('-verbose', default=False, action='store_true', help='provide extra debug output')
-    
+
     _args = _parser.parse_args(args=sys.argv[1:])
 
     print("ECHO(%s:%s): db: %s" % (__name__, nowstr(), _args.db))
@@ -111,7 +105,7 @@ if __name__ == "__main__":
     print("ECHO(%s:%s): verbose: %s" % (__name__, nowstr(), _args.verbose))
 
     print("INFO(%s:%s):" % (__name__, nowstr()))
-    _allIds = AllDocsView(_args.db, _args.creds.split(":"), verbose=_args.verbose).getAllIds()
+    _allIds = AllDocsView(_args.db, verbose=_args.verbose).getAllIds()
     print("INFO(%s:%s):" % (__name__, nowstr()))
     print("INFO(%s:%s): Processing %d docs" % (__name__, nowstr(), len(_allIds)-1))
 
@@ -125,7 +119,7 @@ if __name__ == "__main__":
     }
 
     for _id in _allIds:
-        _docObj = Doc(_args.db, _id, _args.creds.split(":"), verbose=_args.verbose).downloadDoc()
+        _docObj = Doc(_args.db, _id, verbose=_args.verbose).downloadDoc()
         _doc = _docObj.getDoc()
 
         if "_design" in _id:
@@ -137,7 +131,7 @@ if __name__ == "__main__":
         _filename = _args.dir+"/"+_id+".json"
         with open(_filename, 'w', encoding='utf-8') as f:
             json.dump(_doc, f, ensure_ascii=False, indent=4)
-            
+
         _stats['downloaded_docs'] += 1
 
         if '_attachments' in _doc:
@@ -148,10 +142,11 @@ if __name__ == "__main__":
                 _stats['downloaded_attachments'] += 1
 
         # report progress
-        if (_stats['total_processed'] <= _tenth*len(_allIds)/10.0) and (_stats['total_processed']+1 > _tenth*len(_allIds)/10.0):
+        if (_stats['total_processed'] <= _tenth*len(_allIds)/10.0) and \
+           (_stats['total_processed']+1 > _tenth*len(_allIds)/10.0):
             print("INFO(%s:%s): %d%% complete..." % (__name__, nowstr(), _tenth*10))
             _tenth += 1
-                
+
         _stats['total_processed'] += 1
 
     # Print statistics at the end
@@ -162,3 +157,4 @@ if __name__ == "__main__":
     print("STATS(%s:%s): Total docs saved: %d" % (__name__, nowstr(), _stats['downloaded_docs']))
     print("STATS(%s:%s): Total attachments saved: %d" % (__name__, nowstr(), _stats['downloaded_attachments']))
     print("")
+    exit(0)
