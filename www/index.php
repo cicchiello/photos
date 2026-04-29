@@ -73,6 +73,7 @@
   </style>
 
   <script src="tags.js"></script>
+  <script src="admin.js"></script>
   
   <script>
     
@@ -152,9 +153,15 @@
             <div style="position:fixed; width:20%; margin-left:10px; background-color:white; top:110px; bottom:110px;"
                  class="w3-round-large">
                 <span class="w3-medium" style="font-weight:bold; margin-left:45px;">Common tags: </span>
-                <div id="key-area" class="key-area" style="font-family:monospace; padding:10px; overflow-y:auto; height:calc(100% - 30px);">
+                <div id="key-area" class="key-area" style="font-family:monospace; padding:10px; overflow-y:auto; height:calc(100% - <?php echo (isset($_SESSION['is_admin']) && $_SESSION['is_admin']) ? '55px' : '30px'; ?>);">
                     <span class="hint-text">...of selected images</span>
                 </div>
+                <?php if (isset($_SESSION['is_admin']) && $_SESSION['is_admin']): ?>
+                <div style="text-align:center; padding:3px;">
+                    <button id="hideImagesButton" class="w3-small" style="font-weight:bold; background-color:#ff9999;" onclick="handleHideImages()" disabled>Hide</button>
+                    <button id="unhideImagesButton" class="w3-small" style="font-weight:bold; background-color:#99cc99;" onclick="handleUnhideImages()" disabled>Unhide</button>
+                </div>
+                <?php endif; ?>
 	    </div>
 
             <div style="position:fixed; width:20%; bottom:20px; height:70px; margin-left:10px; z-index:999;"

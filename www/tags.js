@@ -115,6 +115,7 @@ function checkboxAction(checkboxElem, dburl, imageId) {
 	    collectTags(dburl, imageId, function onCompletion() {
 		renderTagset(calcNonUserIntersection(getCheckedSet()), calcUserIntersection(getCheckedSet()));
 		updateAddTagButtonState();
+		updateHideButtonState();
 	    });
         } else {
 	    getCheckedSet().delete(imageId); // deletes from set in-place
@@ -122,6 +123,8 @@ function checkboxAction(checkboxElem, dburl, imageId) {
 	    delete allUserTags[imageId];
 	    renderTagset(calcNonUserIntersection(getCheckedSet()), calcUserIntersection(getCheckedSet()));
 	    updateAddTagButtonState();
+	    updateHideButtonState();
+	    updateUnhideButtonState();
         }
     }
 }
@@ -197,6 +200,7 @@ function updateAddTagButtonState() {
 }
 
 
+
 function getImageId(elem) {
     const imageId = elem ? elem.getAttribute('data-objid') : null;
     return imageId === "null" ? null : imageId;
@@ -241,6 +245,8 @@ function selectAllAction(checkboxes, checked, dbUrl) {
     const renderOnCompletion = function r() {
         renderTagset(calcNonUserIntersection(getCheckedSet()), calcUserIntersection(getCheckedSet()));
         updateAddTagButtonState();
+        updateHideButtonState();
+        updateUnhideButtonState();
     };
     
     if (checked) {
