@@ -352,7 +352,9 @@
        <p></p>
        <table id="myTable" style="width:100%; overflow:scroll">
            <?php
-              $viewUrl = $DbBase.'/_design/photos/_view/photo_ids?descending=false';
+              $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin'];
+              $viewName = $isAdmin ? 'all_photo_ids' : 'photo_ids';
+              $viewUrl = $DbBase.'/_design/photos/_view/'.$viewName.'?descending=false';
               $view0 = json_decode(file_get_contents($viewUrl),true);
               $numitems = $view0['total_rows'];
 

@@ -44,6 +44,7 @@
             unset($row['_id']);
 
             $_SESSION['login_user'] = $_POST['uname'];
+            $_SESSION['is_admin'] = !empty($row['is_admin']) && $row['is_admin'] === true;
 
             // Record login event in CouchDB
             $loginEvent = array(

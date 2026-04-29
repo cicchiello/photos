@@ -92,7 +92,8 @@ function renderLookAndFeel()
    $result .= '<link href="./w3.css" media="all" rel="stylesheet">';
    $result .= '<link href="./style.css" media="all" rel="stylesheet">';
    $result .= '<link href="./menu.css" media="all" rel="stylesheet">';
-   $result .= '<script>var csrfToken="'.getCsrfToken().'";</script>';
+   $isAdmin = isset($_SESSION['is_admin']) && $_SESSION['is_admin'] ? 'true' : 'false';
+   $result .= '<script>var csrfToken="'.getCsrfToken().'"; var isAdmin='.$isAdmin.';</script>';
    return $result;
 }
 
@@ -136,7 +137,9 @@ function renderImgArrayTable($firstrow, $DbBase, $items, $onImgAction, $onCheckA
 	    $checkId = 'check'.$cnt;
 	    $checkStr = $onCheckAction.'(this,'.$q.$DbBase.$q.','.$q.$imgId.$q.')';
             $imgUrl = $DbBase.'/'.$id.'/thumbnail';
-      
+            $isHidden = !empty($item['value']['hidden']);
+            $imgStyle = 'vertical-align:horizontal-align;margin:2px 2px 2px 2px' . ($isHidden ? ';opacity:0.4' : '');
+
             $result .= '  <td style="text-align:left">';
 	    $result .= '     <div id="'.$entryId.'">';
 	    $result .= '        <label id="'.$labelId.'" class="check-container">';
@@ -149,7 +152,7 @@ function renderImgArrayTable($firstrow, $DbBase, $items, $onImgAction, $onCheckA
             $result .= '             data-firstrow="'.$firstrow.'"';
             $result .= '             class="album-img album-container center Btn"';
             $result .= '             onclick="'.$onImgAction.'('.$q.$imgId.$q.')"';
-            $result .= '             style="vertical-align:horizontal-align;margin:2px 2px 2px 2px"';
+            $result .= '             style="'.$imgStyle.'"';
             $result .= '             title="'.basename($item['key']).'"/>';
 	    $result .= '     </div>';
             $result .= '  </td>';
@@ -302,6 +305,13 @@ function renderImgInfo($id,$row)
    $result .= '    <td class="detail-label">Db Id:</td>';
    $result .= '	   <td class="detail-value w3-right" style="font-size:90%">'.$id.'</td>';
    $result .= '  </tr>';
+   if (isset($_SESSION['is_admin']) && $_SESSION['is_admin']) {
+      $isHidden = !empty($detail['hidden']) ? 'true' : 'false';
+      $result .= '  <tr>';
+      $result .= '    <td class="detail-label">Is Hidden:</td>';
+      $result .= '    <td class="detail-value w3-right">'.$isHidden.'</td>';
+      $result .= '  </tr>';
+   }
    $result .= '</table>';
    $result .= '</div>';
    
