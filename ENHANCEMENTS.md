@@ -1,7 +1,9 @@
 # Enhancements
 
 ## User roles
-Add a distinction between regular users and admin users, stored on the user record in CouchDB. Admin status gates several features below.
+Add an `is_admin` flag to app user records (stored in the `photos` database, `type: "user"`) to distinguish regular users from admin users. Admin status gates several features below.
+
+Note: CouchDB `_users` database already has a `photos` service account with `photos-writer` role for write authentication. This enhancement is about app-level admin privileges within the UI, stored separately on the app user records.
 
 ## Show hidden photos
 Add a toggle in the UI to include hidden photos in the grid and search results. Defaults to off (current behavior). Hidden photos would be visually distinguished when shown.

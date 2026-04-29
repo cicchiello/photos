@@ -114,6 +114,13 @@ cp www/config.ini.example www/config.ini
 | production  | `photos` | `https://db.jfcenterprises.com:6984` |
 | staging     | `photos-staging` | `https://db.jfcenterprises.com:6984` |
 
+Also set the CouchDB write credentials (never committed to the repo). These are the credentials for the `photos` service account in the CouchDB `_users` database — not the app user records stored in the `photos` database itself:
+
+```ini
+couchdbuser = photos
+couchdbpswd = <the CouchDB photos user password>
+```
+
 ### Deploy to staging
 
 ```bash

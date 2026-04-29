@@ -1,0 +1,5 @@
+{
+  "_id": "_design/world-readonly",
+  "language": "javascript",
+  "validate_doc_update": "function(newDoc, oldDoc, userCtx) {\n   if ((userCtx.roles.indexOf('_admin') !== -1) || (userCtx.roles.indexOf('photos-writer') !== -1)) {\n      return;\n   } else { \n      throw ({ forbidden: 'Only users with roles in {_admin,photos-writer} may edit this database.' }); \n   }\n}\n"
+}
