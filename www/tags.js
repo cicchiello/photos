@@ -116,6 +116,7 @@ function checkboxAction(checkboxElem, dburl, imageId) {
 		renderTagset(calcNonUserIntersection(getCheckedSet()), calcUserIntersection(getCheckedSet()));
 		updateAddTagButtonState();
 		updateHideButtonState();
+		updateUnhideButtonState();
 	    });
         } else {
 	    getCheckedSet().delete(imageId); // deletes from set in-place

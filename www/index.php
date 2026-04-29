@@ -159,7 +159,7 @@
                 <?php if (isset($_SESSION['is_admin']) && $_SESSION['is_admin']): ?>
                 <div style="text-align:center; padding:3px;">
                     <button id="hideImagesButton" class="w3-small" style="font-weight:bold; background-color:#ff9999;" onclick="handleHideImages()" disabled>Hide</button>
-                    <button id="unhideImagesButton" class="w3-small" style="font-weight:bold; background-color:#99cc99;" onclick="handleUnhideImages()" disabled>Unhide</button>
+                    <button id="unhideImagesButton" class="w3-small" style="font-weight:bold; background-color:#99cc99;" onclick="handleUnhideImages()" disabled>Show</button>
                 </div>
                 <?php endif; ?>
 	    </div>
