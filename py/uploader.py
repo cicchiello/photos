@@ -20,6 +20,15 @@ def nowstr():
     return datetime.datetime.today().strftime('%Y-%b-%d %H:%M:%S')
 
 
+def _checkWriteResponse(r):
+    _resp = json.loads(r.content)
+    if 'error' in _resp:
+        print("ERROR(%s:%s): CouchDB write rejected (HTTP %d): %s - %s" % (
+            __name__, nowstr(), r.status_code, _resp['error'], _resp.get('reason', '')))
+        exit(-1)
+    return _resp['rev']
+
+
 def md5(fname):
     hash_md5 = hashlib.md5()
     with open(fname, "rb") as f:
@@ -191,7 +200,7 @@ class Uploader():
             print("DEBUG(%s:%s): attaching image to document(%s)" % (__name__, nowstr(), self._doc_id))
 
         _r = self.putBinWithRetries(self.imageUrl(revision), _imageData, _imageHeaders)
-        return json.loads(_r.content)["rev"]
+        return _checkWriteResponse(_r)
 
 
     def webSuitableUrl(self, revision):
@@ -219,7 +228,7 @@ class Uploader():
                                     _web_suitable_attachmentHeaders)
 
         os.remove(_web_suitable_path)
-        return json.loads(_r.content)["rev"]
+        return _checkWriteResponse(_r)
 
     
     def thumbnailUrl(self, revision):
@@ -245,7 +254,7 @@ class Uploader():
 
         os.remove(_thumbnail_path)
 
-        return json.loads(_r.content)["rev"]
+        return _checkWriteResponse(_r)
 
     
     def createEntry(self):
@@ -262,7 +271,7 @@ class Uploader():
             print("ERROR(%s:%s): conflict" % (__name__, nowstr()))
             exit(-2)
 
-        _rev = json.loads(_r.content)["rev"]
+        _rev = _checkWriteResponse(_r)
         _rev = self.attachImage(_rev)
         _rev = self.attachWebSuitable(_rev)
         _rev = self.attachThumbnail(_rev)
@@ -276,7 +285,7 @@ class Uploader():
         _missing = _r.status_code == 404
         if not _missing:
             _r = self.deleteWithRetries(url)
-            _rev = json.loads(_r.content)['rev']
+            _rev = _checkWriteResponse(_r)
             return _rev
         else:
             return revision
