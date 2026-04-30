@@ -174,10 +174,15 @@
 		const tagnameenc = encodeURIComponent(tagName);
                 const response = await fetch('deleteTag.php?imageid='+imageId+'&tagname='+tagnameenc+'&csrf='+encodeURIComponent(csrfToken));
                 if (!response.ok) {
-                    throw new Error('Failed to delete tag');
+                    const data = await response.json();
+                    if (data.creator) {
+                        alert(`Cannot delete "${tagName}" — it was added by ${data.creator}.`);
+                    } else {
+                        alert('Failed to delete tag.');
+                    }
+                    return;
                 }
-                
-                // Refresh the page to show updated tags
+
                 location.reload();
             } catch (error) {
                 console.error('Error:', error);

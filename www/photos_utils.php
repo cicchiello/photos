@@ -536,22 +536,32 @@ function deleteTagFromImage($imageId, $tagName, $username) {
 
     // Find and remove the tag if it belongs to this user
     $found = false;
-    $doc['tags'] = array_filter($doc['tags'], function($tag) use ($tagName, $username, &$found) {
-        if (strcasecmp($tag['Name'], $tagName) === 0 && 
-            strcasecmp($tag['source'], 'user') === 0 && 
-            isset($tag['username']) && 
-            $tag['username'] === $username) {
-            $found = true;
-            return false;
+    $creator = null;
+    $newTags = [];
+    foreach ($doc['tags'] as $tag) {
+        $isTarget = strcasecmp($tag['Name'], $tagName) === 0 &&
+                    strcasecmp($tag['source'], 'user') === 0;
+        if ($isTarget) {
+            if (isset($tag['username']) && $tag['username'] === $username) {
+                $found = true; // belongs to this user — drop it
+            } else {
+                $creator = isset($tag['username']) ? $tag['username'] : 'unknown';
+                $newTags[] = $tag;
+            }
+        } else {
+            $newTags[] = $tag;
         }
-        return true;
-    });
+    }
+
+    if ($creator !== null) {
+        return $creator; // tag exists but belongs to someone else
+    }
 
     if (!$found) {
         return false;
     }
 
-    // Update the document in CouchDB 
+    $doc['tags'] = $newTags;
     return updateDoc($objUrl, $doc);
 }
 

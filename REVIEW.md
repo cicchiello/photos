@@ -35,10 +35,8 @@ All critical and high issues from the original review have been fixed. Two items
 
 ## Open Items
 
-### Scratch path under webroot (partial)
-**File:** `www/config.ini` — `scratchPath = ./tmp`
-
-Blocked via `.htaccess` on production (which has `AllowOverride All`). On staging the block doesn't apply since the Apache config lacks `AllowOverride`. Full fix is to move `scratchPath` to a location outside the webroot entirely and update `config.ini` on both servers.
+### Scratch path under webroot (resolved)
+`www/tmp` is no longer used by the web app — `image_download.php` was rewritten to stream images directly from CouchDB to the browser without writing to disk. The `.htaccess` block on `tmp/` is now dead code but harmless. `scratchPath` in `config.ini` is still referenced but unused by the web layer.
 
 ### CouchDB URL in browser HTML
 **File:** `www/imgArrayTbl.php`
