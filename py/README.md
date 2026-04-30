@@ -40,10 +40,10 @@ Scans all images that have a `face` Rekognition tag and compares each against th
 
 ```bash
 py/tag.py -db http://mediaserver:5984/photos -creds photos:PASSWORD \
-  -id <matched-image-id> -user joe -tag "person-name"
+  -id <id1> <id2> ... -user joe -tag "person-name"
 ```
 
-Adds a user tag to the specified image.
+Adds a user tag to one or more specified images (`-id` accepts a list).
 
 ---
 
@@ -75,3 +75,18 @@ Adds a user tag to the specified image.
 | `hideAllDups.bsh` | Runs `hide.py` on all detected duplicates |
 | `unhideMany.bsh` | Runs `unhide.py` on a list of images |
 | `updatePhotos.bsh` | Bulk re-processes existing photos |
+
+## Backup
+
+`bin/backup.bsh` runs daily backups of the CouchDB database to the filesystem, compresses them, and prunes old archives. It must be run as user `joe` (not root).
+
+```bash
+bin/backup.bsh <base-path> <backup-root>
+# e.g.
+bin/backup.bsh /home/joe /mnt/pi-nas/photos-backup
+```
+
+- `<base-path>` — root of the photos repo checkout (e.g. `/home/joe`); used to locate `photos/py/backup.py` and the log file
+- `<backup-root>` — directory where compressed backup archives are stored
+
+Archives are named `YYYYMMDD_backup.tar.gz`. On each successful run, archives older than the first of last month are deleted (e.g. in April, anything before March 1 is removed).
