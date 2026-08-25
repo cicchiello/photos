@@ -6,6 +6,7 @@ if [ $# -lt 2 ]; then
 fi
 base=$1
 root=$2
+rmtroot=$3
 server=http://mediaserver:5984
 db=photos
 log=${base}/logs/photos-backup.log
@@ -16,6 +17,9 @@ dirname="${filedate}_backup"
 dirpath="${root}/${dirname}"
 mkdir -p ${dirpath}
 
+# force python to treat stdout/stderr as line-buffered outputs
+export PYTHONUNBUFFERED=1
+
 timestamp=$(date)
 echo "INFO:(${timestamp}): invoking ${prog}" >> ${log}
 echo "INFO:(${timestamp}): to backup: ${server}/${db}" >> ${log}
@@ -23,13 +27,25 @@ echo "INFO:(${timestamp}): to dir: ${dirpath}" >> ${log}
 nice ${prog} -db ${server}/${db} -dir ${dirpath} 2>&1 >> ${log}
 stat=$?
 timestamp=$(date)
-echo "INFO:(${timestamp}): stat: ${stat}" >> ${log}
-echo "INFO:(${timestamp}): Done ${prog}" >> ${log}
+echo "INFO:(${timestamp}): Done ${prog} extraction" >> ${log}
 if [ ${stat} -eq 0 ]; then
     echo "INFO:(${timestamp}): Command succeeded; zipping it up" >> ${log}
     cd "${root}"
-    nice tar cfz "${dirname}.tar.gz" ${dirname} && rm -rf ${dirname}
+
+    # Here's the effective command to issue to create tarball and cleanup:
+    #   > tar cfz "${dirname}.tar.gz" ${dirname} && rm -rf ${dirname}
+    # But, that's surprisingly slow and there's a **way** faster way (by hours!)
+    # ... doing both operations natively/locally on the NAS server
+    cdcmd="cd ${rmtroot}"
+    tarcmd="tar cfz ${dirname}.tar.gz ${dirname}"
+    cleancmd="find ${dirname} -type f -delete && rm -rf ${dirname}"
+    rcmd="${cdcmd} && ${tarcmd} && ${cleancmd}"
+    echo "INFO:(${timestamp}): issuing remote pi-nas cmd: ${rcmd}" >> ${log}
+    ssh joe@pi-nas "${rcmd}"
     stat=$?
+    
+    timestamp=$(date)
+
     if [ ${stat} -eq 0 ]; then
 	timestamp=$(date)
         echo "INFO:(${timestamp}): Done zipping" >> ${log}
