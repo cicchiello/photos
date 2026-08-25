@@ -223,7 +223,7 @@ function renderImgArrayTable($firstrow, $DbBase, $items, $onImgAction, $onCheckA
 }
 
 
-function renderImgInfo($id,$row)
+function renderImgInfo($id,$row,$isLoggedIn=false)
 {
    $q = "'";
    $userTagColor = '#B3CCFF';  // Medium blue - between bright and subtle
@@ -281,9 +281,14 @@ function renderImgInfo($id,$row)
       } else if (strcasecmp($tag['source'], 'user') === 0) {
         // User tags are always shown with full confidence
         $username = isset($tag['username']) ? $tag['username'] : 'unknown';
-        $result .= '    <button class="pillButton" style="background-color:'.$userTagColor.';color:black;cursor:pointer" ';
-        $result .= 'title="Added by '.$username.'" ';
-        $result .= 'onclick="deleteTag('.$q.$tag['Name'].$q.','.$q.$id.$q.');">';
+        if ($isLoggedIn) {
+          $result .= '    <button class="pillButton" style="background-color:'.$userTagColor.';color:black;cursor:pointer" ';
+          $result .= 'title="Added by '.$username.'" ';
+          $result .= 'onclick="deleteTag('.$q.$tag['Name'].$q.','.$q.$id.$q.');">';
+        } else {
+          $result .= '    <button class="pillButton" style="background-color:'.$userTagColor.';color:black;cursor:default" ';
+          $result .= 'title="Added by '.$username.'">';
+        }
         $result .= $tag['Name'].'</button>';
         $cnt += 1;
       }

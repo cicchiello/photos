@@ -1,11 +1,6 @@
 <?php
 include('photos_utils.php');
 
-if (!isset($_SESSION['login_user'])) {
-    header('Location: ./login.php');
-    exit;
-}
-
 $id  = $_GET['id'];
 $ini = parse_ini_file("./config.ini");
 $DbBase        = $ini['couchbase'];

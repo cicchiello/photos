@@ -17,10 +17,7 @@
     <?php
        include ('photos_utils.php');
 
-       if (!isset($_SESSION['login_user'])) {
-           header('Location: ./login.php');
-           exit;
-       }
+       $isLoggedIn = isset($_SESSION['login_user']);
 
        echo renderLookAndFeel();
        ?>
@@ -205,15 +202,17 @@
 	      <?php 
                    $id = $_GET['id'];
 		   $row = isset($_GET['row']) ? $_GET['row'] : 0;
-                   echo renderImgInfo($id,$row); 
+                   echo renderImgInfo($id,$row,$isLoggedIn); 
                ?>
            </fieldset>
        </div>
 	
 	<div class="popupBtn">
 	    <?php
-                echo '<img id="return" onclick="reloadAction('."'".$id."','".$row."'".')" src="img/return.png" ';
-                echo '     width="48" height = "48" title="Return" align="left">';
+                if ($isLoggedIn) {
+                    echo '<img id="return" onclick="reloadAction('."'".$id."','".$row."'".')" src="img/return.png" ';
+                    echo '     width="48" height = "48" title="Return" align="left">';
+                }
 
                 echo '<img onclick="downloadAction('."'".$id."',".$row.')" src="img/download.png" ';
                 echo '    class="Btn" title="Download" width="48" height="48" align="right">';
