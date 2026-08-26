@@ -1,0 +1,33 @@
+#!/bin/bash
+
+HOST="mediaserver"
+prog="${HOME}/photos/py/uploader.py"
+server="http://${HOST}:5984/photos"
+
+src="/mnt/pi-nas/tmp/Gallery_additions"
+up="/mnt/pi-nas/tmp/uploaded"
+
+for f in $(find "${src}" -name "*.JPG" -type f)
+do
+    echo "Working on image file: ${f}"
+    ${prog} -verbose -db ${server} -creds joe:lemon -pic ${f}
+    if [ $? -ne 0 ]; then
+        echo "Command failed while working on $f"
+	exit -1
+    fi    
+    #sleep 2
+    mv ${f} "${up}"
+done
+
+for f in $(find "${src}" -name "*.jpg" -type f)
+do
+    echo "Working on image file: ${f}"
+    ${prog} -verbose -db ${server} -creds joe:lemon -pic ${f}
+    if [ $? -ne 0 ]; then
+        echo "Command failed while working on $f"
+	exit -1
+    fi    
+    #sleep 2
+    mv ${f} "${up}"
+done
+

@@ -1,0 +1,230 @@
+#!/bin/bash
+
+DB="http://mediaserver:5984/photos"
+CREDS="joe:lemon"
+#VERBOSE="-verbose"
+VERBOSE=""
+
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user facial -tag emma -id 791c72a67d867c5d9c448223ae24ad5b
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user facial -tag emma -id 4bfe40159205fba350686087f265e558
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user facial -tag emma -id 92fe2a3806bc7828c75364f5e23dc061
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user facial -tag emma -id 63f9ed4dcf8b0dab0e26af69588ddb74
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user facial -tag emma -id cc250e663c110d9fcdfec89d14a3bb1c
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user facial -tag emma -id 505038f43a17199b16826c981472c0bf
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user facial -tag emma -id 67b9a0b1a60e1083eb6d118081ce7bf6
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user facial -tag emma -id a10019593d074aa1aa62acfb712c90c0
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user facial -tag emma -id 598b0fcc26ecce81065c41ee9e21ee74
+
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user facial -tag rosemary -id 5873e26cddce6c6d684e2bdfe75e85da
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user facial -tag rosemary -id 94b437875beebc0abd3fb54499646129
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user facial -tag rosemary -id d7dc5bd2564b950d6813a6ae1e20bc94
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user facial -tag rosemary -id 84a5af16e3df2c80d90050beb6d858f6
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user facial -tag rosemary -id 341202f6f80ca27f233a060ab94384d3
+
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user facial -tag margaret -id b93d28b30eb0b338b9e7e71139297815
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user facial -tag margaret -id 0d82842bc634a50a13ad01194f8bb19c
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user facial -tag margaret -id bb8fc9477a313027037a0ddaf8536892
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user facial -tag margaret -id dceb03bac65781b34b7ade04d1a7e63c
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user facial -tag margaret -id 7119387328794d5ec5f6115e58cd0171
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user facial -tag margaret -id 55773b67996a3a01ca2d41ecc5155324
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user facial -tag margaret -id f2fa1ff31b6075c1e9832c2b5c106233
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user facial -tag margaret -id 0f9ea3a202fdfb0a499898f1978611e3
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user facial -tag margaret -id 754e4a9873584a21d046e6b6e6906e18
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user facial -tag margaret -id 16510ac022133cde164ca1044abc4f48
+
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user facial -tag jim -id b93d28b30eb0b338b9e7e71139297815
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user facial -tag jim -id 94b437875beebc0abd3fb54499646129
+
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user facial -tag mary -id 7119387328794d5ec5f6115e58cd0171
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user facial -tag mary -id 0f9ea3a202fdfb0a499898f1978611e3
+
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user facial -tag genevieve -id 7119387328794d5ec5f6115e58cd0171
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user facial -tag genevieve -id 0f9ea3a202fdfb0a499898f1978611e3
+
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user facial -tag frank.jr -id 6c293ed429c19f4fff4c323c6d064b16
+
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user facial -tag john -id e5acbe311821c6988b20ff3f6ceb7cbc
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user facial -tag john -id 3405549d1f69f47b74448cd203338be5
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user facial -tag john -id eed2aa75aee388eed52a4f8b508232fc
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user facial -tag john -id 0d6f9a4ef028d3d0a2b80042a05eee29
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user facial -tag john -id 1503916cad386c92a3aba7a0434578f1
+
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user facial -tag d -id e5acbe311821c6988b20ff3f6ceb7cbc
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user facial -tag d -id 0d6f9a4ef028d3d0a2b80042a05eee29
+
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user facial -tag donna -id e5acbe311821c6988b20ff3f6ceb7cbc
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user facial -tag donna -id 0d6f9a4ef028d3d0a2b80042a05eee29
+
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user facial -tag sean -id e5acbe311821c6988b20ff3f6ceb7cbc
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user facial -tag sean -id eed2aa75aee388eed52a4f8b508232fc
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user facial -tag sean -id 0d6f9a4ef028d3d0a2b80042a05eee29
+
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user facial -tag john -id 3405549d1f69f47b74448cd203338be5
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user facial -tag john -id 0d6f9a4ef028d3d0a2b80042a05eee29
+
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user facial -tag joe -id eed2aa75aee388eed52a4f8b508232fc
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user facial -tag joe -id 0d6f9a4ef028d3d0a2b80042a05eee29
+
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user facial -tag emma -id eed2aa75aee388eed52a4f8b508232fc
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user facial -tag emma -id 0d6f9a4ef028d3d0a2b80042a05eee29
+
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user facial -tag ryan -id eed2aa75aee388eed52a4f8b508232fc
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user facial -tag ryan -id 0d6f9a4ef028d3d0a2b80042a05eee29
+
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user facial -tag debbie -id eed2aa75aee388eed52a4f8b508232fc
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user facial -tag debbie -id 0d6f9a4ef028d3d0a2b80042a05eee29
+
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user facial -tag frank.jr -id 0d6f9a4ef028d3d0a2b80042a05eee29
+
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id e5acbe311821c6988b20ff3f6ceb7cbc
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 3405549d1f69f47b74448cd203338be5
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id eed2aa75aee388eed52a4f8b508232fc
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 6c293ed429c19f4fff4c323c6d064b16
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 0d6f9a4ef028d3d0a2b80042a05eee29
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 1503916cad386c92a3aba7a0434578f1
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 791c72a67d867c5d9c448223ae24ad5b
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id c2c95b3a1bd1598f9767d106d5a22fb8
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id b93d28b30eb0b338b9e7e71139297815
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id e8456ffe9daa71c0643515fc0e509056
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 42e89b5acf3b88a9b6c7498bb3cd73eb
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id e38a9e4fc5efe994039485905b2f5b32
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 4bfe40159205fba350686087f265e558
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id e5acbe311821c6988b20ff3f6ceb7cbc
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 24ee94b3f2edc499df8da9db238d0b46
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 54dfc87fc3af478382f973c44e849e2f
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 7c5bee276ee2182e17ef9d9a0311189a
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 0440b5dafa247c5d8f2d2764dbd684df
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id c0d26fce49e311b72cdd74b8a7e387ae
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 062bd85c8dad8b0065e79d89620d891b
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 51563d10ac1847ad5e00360cd6f8c189
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 3405549d1f69f47b74448cd203338be5
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id eed2aa75aee388eed52a4f8b508232fc
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 0d82842bc634a50a13ad01194f8bb19c
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 0fe17e5cafe2fd6b9cc2d82170e9fde5
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 0c378b21d534bbbff49126f048332a83
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id bb8fc9477a313027037a0ddaf8536892
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 478bb11dd4dcddbf7cf00478e6f1dccb
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id dceb03bac65781b34b7ade04d1a7e63c
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 058df3e70836630f8902732697369c19
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 5873e26cddce6c6d684e2bdfe75e85da
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id d4c8de50e932c6f547d01bf58ac05476
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 3c4c1f00e8da89cd93ee6620b83757a7
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 682649e7796b0037382087d66676eeea
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 4fbdbc6e1719faab096ea748818c31d9
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 7119387328794d5ec5f6115e58cd0171
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id f00ba18623733a17965bcb2a0c2d5bea
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id a133096e431ad009721835b66de53bd3
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id a2708d55379f922d925591797c0d436c
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 14abc174be15d530c42f80d923efa924
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 34e5f3f95862cb9b0929da2833be309e
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 92fe2a3806bc7828c75364f5e23dc061
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 63f9ed4dcf8b0dab0e26af69588ddb74
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 354639615639979dbbcbfb3018d1ba90
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 9e050256c87ee74dc5aa3a61bc4d155d
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 10180aec161eef289026cf831d1afd76
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 574cb0046404bcab79e9c813aac786c4
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 504232218fe09d709c948d0b95c36d10
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 4157c7719ce2ac12f1828ecf0d5e452f
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 55773b67996a3a01ca2d41ecc5155324
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 94b437875beebc0abd3fb54499646129
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id eacc745a03faf36e6687b596da658a96
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 7353a51d122a15f3521d929f041934ce
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id d5c3a78c6d247761133feb9c24643347
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 1f1bc6e16da7bc3fa20159a354e31274
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id ff439c121b409e02c4be0becd5dec9b7
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 6c293ed429c19f4fff4c323c6d064b16
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id f2fa1ff31b6075c1e9832c2b5c106233
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 13e75e8de590f7aef38d7eabfa87f845
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id a5898787fc862d58aacbef56e468dd2a
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 0f9ea3a202fdfb0a499898f1978611e3
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 89341f032f95ebc877b8911557568a4f
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id af63130d9bc3702edfe55c86d2c551a1
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 30b50dca7cbef38ccf09b22f1e1a0da7
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 5f169a66fc5fa2432dde3edc41416180
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id d7dc5bd2564b950d6813a6ae1e20bc94
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 3b511123203f956e79594433e27ab120
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id dd43f47493c27324c041500d967294fd
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 84a5af16e3df2c80d90050beb6d858f6
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 0d6f9a4ef028d3d0a2b80042a05eee29
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 99a548df0caf5fbe472f88701e463861
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 756deb3712a8752142c6498cca965794
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id cc250e663c110d9fcdfec89d14a3bb1c
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 505038f43a17199b16826c981472c0bf
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id ed33d75c89c68a87321efb1fc162d9f5
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id b180713e39c531af13b9240c20065cad
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id cd6e299be2549c1cd33bcda81fba6423
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 754e4a9873584a21d046e6b6e6906e18
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id b1ae775fef2c545a6fe29553525638ad
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 341202f6f80ca27f233a060ab94384d3
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 67b9a0b1a60e1083eb6d118081ce7bf6
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 219547e6b8bcb97cb19e6fd700d2399c
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id d29b42581f322bd28b6dcf68ef0630de
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id a10019593d074aa1aa62acfb712c90c0
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 1503916cad386c92a3aba7a0434578f1
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 13a110bc6cd2591239e4c4c96bc68a69
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id b05d5492d8ef339b290b58121203eb47
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 598b0fcc26ecce81065c41ee9e21ee74
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 159877ee8ae9a23e2855b222eac5e60a
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 55c56f66f8929136eb44354ff9d9b94c
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id adef6faef3e78aec57c1b5f17212480a
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 16510ac022133cde164ca1044abc4f48
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 791c72a67d867c5d9c448223ae24ad5b
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 4bfe40159205fba350686087f265e558
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 92fe2a3806bc7828c75364f5e23dc061
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 63f9ed4dcf8b0dab0e26af69588ddb74
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id cc250e663c110d9fcdfec89d14a3bb1c
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 505038f43a17199b16826c981472c0bf
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 67b9a0b1a60e1083eb6d118081ce7bf6
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id a10019593d074aa1aa62acfb712c90c0
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 598b0fcc26ecce81065c41ee9e21ee74
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 5873e26cddce6c6d684e2bdfe75e85da
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 94b437875beebc0abd3fb54499646129
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id d7dc5bd2564b950d6813a6ae1e20bc94
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 84a5af16e3df2c80d90050beb6d858f6
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 341202f6f80ca27f233a060ab94384d3
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id b93d28b30eb0b338b9e7e71139297815
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 0d82842bc634a50a13ad01194f8bb19c
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id bb8fc9477a313027037a0ddaf8536892
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id dceb03bac65781b34b7ade04d1a7e63c
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 7119387328794d5ec5f6115e58cd0171
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 55773b67996a3a01ca2d41ecc5155324
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id f2fa1ff31b6075c1e9832c2b5c106233
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 0f9ea3a202fdfb0a499898f1978611e3
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 754e4a9873584a21d046e6b6e6906e18
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 16510ac022133cde164ca1044abc4f48
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id b93d28b30eb0b338b9e7e71139297815
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 94b437875beebc0abd3fb54499646129
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 7119387328794d5ec5f6115e58cd0171
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 0f9ea3a202fdfb0a499898f1978611e3
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 7119387328794d5ec5f6115e58cd0171
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 0f9ea3a202fdfb0a499898f1978611e3
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 6c293ed429c19f4fff4c323c6d064b16
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id e5acbe311821c6988b20ff3f6ceb7cbc
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 3405549d1f69f47b74448cd203338be5
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id eed2aa75aee388eed52a4f8b508232fc
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 0d6f9a4ef028d3d0a2b80042a05eee29
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 1503916cad386c92a3aba7a0434578f1
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id e5acbe311821c6988b20ff3f6ceb7cbc
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 0d6f9a4ef028d3d0a2b80042a05eee29
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id e5acbe311821c6988b20ff3f6ceb7cbc
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 0d6f9a4ef028d3d0a2b80042a05eee29
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id e5acbe311821c6988b20ff3f6ceb7cbc
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id eed2aa75aee388eed52a4f8b508232fc
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 0d6f9a4ef028d3d0a2b80042a05eee29
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 3405549d1f69f47b74448cd203338be5
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 0d6f9a4ef028d3d0a2b80042a05eee29
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id eed2aa75aee388eed52a4f8b508232fc
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 0d6f9a4ef028d3d0a2b80042a05eee29
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id eed2aa75aee388eed52a4f8b508232fc
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 0d6f9a4ef028d3d0a2b80042a05eee29
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id eed2aa75aee388eed52a4f8b508232fc
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 0d6f9a4ef028d3d0a2b80042a05eee29
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id eed2aa75aee388eed52a4f8b508232fc
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 0d6f9a4ef028d3d0a2b80042a05eee29
+./tag.py ${VERBOSE} -db ${DB} -creds ${CREDS} -user joe -tag aug2026 -id 0d6f9a4ef028d3d0a2b80042a05eee29
+
+
+
+./tagAlias.py ${VERBOSE} -db ${DB} -creds ${CREDS} -tag frank.jr -alias frank
+./tagAlias.py ${VERBOSE} -db ${DB} -creds ${CREDS} -tag frank.jr -alias granddad
+./tagAlias.py ${VERBOSE} -db ${DB} -creds ${CREDS} -tag rosemary -alias grandmom
