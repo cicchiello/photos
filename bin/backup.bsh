@@ -27,9 +27,8 @@ echo "INFO:(${timestamp}): to dir: ${dirpath}" >> ${log}
 nice ${prog} -db ${server}/${db} -dir ${dirpath} 2>&1 >> ${log}
 stat=$?
 timestamp=$(date)
-echo "INFO:(${timestamp}): Done ${prog} extraction" >> ${log}
 if [ ${stat} -eq 0 ]; then
-    echo "INFO:(${timestamp}): Command succeeded; zipping it up" >> ${log}
+    echo "INFO:(${timestamp}): Command ${prog} succeeded; zipping it up" >> ${log}
     cd "${root}"
 
     # Here's the effective command to issue to create tarball and cleanup:
@@ -68,5 +67,5 @@ if [ ${stat} -eq 0 ]; then
     fi
 else
     timestamp=$(date)
-    echo "INFO:(${timestamp}): Command failed" >> ${log}
+    echo "INFO:(${timestamp}): Command ${prog} failed" >> ${log}
 fi

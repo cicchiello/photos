@@ -32,18 +32,22 @@ class AllDocsView():
         _offset = 0
         _done = False
         _Limit = 100
-        while not _done:
-            _rows = self.getBatch(_Limit, _offset)['rows']
-            _allIds.extend([_row['id'] for _row in _rows])
-            _offset += len(_rows)
-            _done = len(_rows) < _Limit
-            if len(_allIds) % 1000 == 0:
-                print("INFO(%s:%s): got %d ids" % (__name__, nowstr(), len(_allIds)))
-            elif self._verbose:
-                print("DEBUG(%s:%s): got %d ids" % (__name__, nowstr(), len(_allIds)))
+        try:
+            while not _done:
+                _rows = self.getBatch(_Limit, _offset)['rows']
+                _allIds.extend([_row['id'] for _row in _rows])
+                _offset += len(_rows)
+                _done = len(_rows) < _Limit
+                if len(_allIds) % 1000 == 0:
+                    print("INFO(%s:%s): got %d ids" % (__name__, nowstr(), len(_allIds)))
+                elif self._verbose:
+                    print("DEBUG(%s:%s): got %d ids" % (__name__, nowstr(), len(_allIds)))
 
-        return _allIds
-
+            print("INFO(%s:%s): got %d ids" % (__name__, nowstr(), len(_allIds)))
+            return _allIds
+        except Exception as e:
+            print("ERROR(%s:%s): Exception trap: %s" % (__name__, nowstr(), str(e)))
+            return None
 
 
 class Doc():
@@ -106,6 +110,10 @@ if __name__ == "__main__":
 
     print("INFO(%s:%s):" % (__name__, nowstr()))
     _allIds = AllDocsView(_args.db, verbose=_args.verbose).getAllIds()
+    if _allIds is None:
+        print("WARNING(%s:%s): No ids returned; exiting" % (__name__, nowstr()))
+        exit(0)
+    
     print("INFO(%s:%s):" % (__name__, nowstr()))
     print("INFO(%s:%s): Processing %d docs" % (__name__, nowstr(), len(_allIds)-1))
 
