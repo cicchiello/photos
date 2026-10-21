@@ -99,7 +99,8 @@ done
 
 
 
-# Restart CouchDB to pick up new certificates
+# Restart Apache2 and CouchDB to pick up new certificates
 sudo systemctl restart couchdb
+sudo systemctl reload apache2
 
 echo "Certificates synchronized to /home/pi/photos/letsencrypt directory at $(date)"
